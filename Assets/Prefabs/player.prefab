@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8885195299384238326}
   - component: {fileID: 8885195299384241933}
   - component: {fileID: 8885195299384241932}
+  - component: {fileID: 1799113281108462892}
   - component: {fileID: 8885195299384238322}
   - component: {fileID: 8885195299384241935}
   - component: {fileID: 8885195299384241934}
@@ -92,6 +93,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 116
   m_CollisionDetection: 1
+--- !u!114 &1799113281108462892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8885195299384238327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dc740074acb6b744a1e5255d10a43a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &8885195299384238322
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -119,8 +132,8 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8885195299384241933}
-        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+      - m_Target: {fileID: 1799113281108462892}
+        m_TargetAssemblyTypeName: PlayerInputs, Assembly-CSharp
         m_MethodName: OnMove
         m_Mode: 0
         m_Arguments:
@@ -135,8 +148,8 @@ MonoBehaviour:
     m_ActionName: player/moove[/Keyboard/z,/Keyboard/s,/Keyboard/q,/Keyboard/d]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8885195299384241935}
-        m_TargetAssemblyTypeName: PlayerCombat, Assembly-CSharp
+      - m_Target: {fileID: 1799113281108462892}
+        m_TargetAssemblyTypeName: PlayerInputs, Assembly-CSharp
         m_MethodName: OnBaseAttack
         m_Mode: 0
         m_Arguments:
@@ -167,7 +180,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bulletRange: 1000000
-  muzzleFlash: {fileID: 8885195299745894211}
+  baseHitDamage: 0
+  baseHitParticles: {fileID: 0}
   EnemyTag: Enemy
 --- !u!114 &8885195299384241934
 MonoBehaviour:
@@ -5180,6 +5194,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f272d19b606eccf4c8cad7e6afd58515, type: 3}
+--- !u!1 &8615359549254478477 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: f272d19b606eccf4c8cad7e6afd58515, type: 3}
+  m_PrefabInstance: {fileID: 8885195300488615900}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3732297382281381117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8615359549254478477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a8627c26a15ded488e228e4d178c312, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &8990371717614759991 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: f272d19b606eccf4c8cad7e6afd58515, type: 3}

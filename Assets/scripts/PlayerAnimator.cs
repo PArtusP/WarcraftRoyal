@@ -22,4 +22,9 @@ public class PlayerAnimator : MonoBehaviour
     {
         animator.SetFloat("Speed", movement.magnitude);
     }
+
+    internal void BaseAttackAnimation()
+    {
+        animator.SetTrigger("BaseAttack");
+    }
 }

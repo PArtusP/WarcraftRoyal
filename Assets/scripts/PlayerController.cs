@@ -5,35 +5,47 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    // Start is called before the first frame update
     public float speed;
     private Vector2 move;
-    private Rigidbody body;
     private PlayerAnimator animator;
+    [SerializeField] private Camera camera;
 
-    public void OnMove(InputAction.CallbackContext context)
-    {
-        move = context.ReadValue<Vector2>();
-        
-    }
+    public bool CanMove { get; internal set; }
+
     void Start()
     {
-        body = GetComponent<Rigidbody>();
         animator = GetComponent<PlayerAnimator>();
     }
-
-    // Update is called once per frame
-    void Update()
+    public void SetMove(Vector2 move)
     {
-        movePlayer();
+        this.move = move;
+        
     }
 
-    public void movePlayer()
+    void Update()
     {
-        Vector3 movement = new Vector3(move.x, 0F , move.y);
-        if (movement != Vector3.zero) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(movement), 0.15f);
+        MovePlayer();
+    }
 
-        transform.Translate(movement * speed * Time.deltaTime, Space.World);
+    public void MovePlayer()
+    {
+        if (!CanMove) return;
+
+        Vector3 movement = new Vector3(move.x, 0F , move.y);
+
+        var forward = camera.transform.forward;
+        forward.y = 0;
+        forward.Normalize();
+        var right = camera.transform.right;
+        right.y = 0;
+        right.Normalize();
+
+
+        //if (movement != Vector3.zero) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(movement.x * right + movement.z * forward), 0.55f);
+        if (movement != Vector3.zero) transform.rotation = Quaternion.LookRotation(movement.x * right + movement.z * forward);
+        transform.Translate((movement.x  * right + movement.z * forward) * Time.deltaTime * speed, Space.World);
+
+        //transform.Translate(movement * speed * Time.deltaTime, Space.World);
         animator.SetSpeed(movement);
     }
 }

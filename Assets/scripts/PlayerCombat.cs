@@ -5,37 +5,48 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Tilemaps;
 
-public class PlayerCombat : MonoBehaviour
+public class PlayerCombat : MonoBehaviour, IPlayerCombat
 {
-    // Start is called before the first frame update
-    private RaycastHit rayHit;
+    [Header("Base attack")]
     [SerializeField] private float bulletRange;
-    [SerializeField] private ParticleSystem muzzleFlash;
+    [SerializeField] private float baseHitDamage;
+    [SerializeField] private ParticleSystem baseHitParticles;
+    private PlayerAnimator animator;
+
+    [Header("Settings")]
     [SerializeField] private string EnemyTag;
-    private int mouseCheck=0;
-    void Start()
+
+    private void Awake()
     {
-        
+        animator = GetComponent<PlayerAnimator>();
     }
-    public void OnBaseAttack(InputAction.CallbackContext context)
+    public void BaseAttack(bool performed, bool cancel)
     {
-        mouseCheck = context.performed.GetHashCode();
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        if (mouseCheck == 1) {
-            shoot();
-            mouseCheck = 0;
-        }
+        if (performed)
+            animator.BaseAttackAnimation();
     }
 
-    private void shoot()
+    public void Shoot()
     {
-        if(Physics.Raycast(transform.position, transform.forward, out rayHit, bulletRange) && rayHit.collider.gameObject.tag == EnemyTag)
+        if(Physics.Raycast(transform.position, transform.forward, out var rayHit, bulletRange) && rayHit.collider.gameObject.tag == EnemyTag)
         {
-            //ENEMY TAKING DAMAGE
+            rayHit.collider.GetComponent<Player>().GetHit(baseHitDamage);
         }
-        muzzleFlash.Play();
+        baseHitParticles.Play();
+    }
+
+    public void StrongAttack(bool performed, bool cancel)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UltAttack(bool performed, bool cancel)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void MoveAction(bool performed, bool cancel)
+    {
+        throw new NotImplementedException();
     }
 }

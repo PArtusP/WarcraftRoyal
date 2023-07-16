@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 401e2e1ec32a65f4d9e8d188c1b5bfe5
+guid: 72116c8c676205848bf61079e7504142
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable:
@@ -40,14 +40,14 @@ ModelImporter:
       takeName: mixamo.com
       internalID: 0
       firstFrame: 0
-      lastFrame: 69
+      lastFrame: 21
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 1
       loopBlendPositionY: 0
@@ -59,14 +59,7 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events:
-      - time: 0.393896
-        functionName: OnShoot
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: 1a8627c26a15ded488e228e4d178c312, type: 3}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
+      events: []
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
