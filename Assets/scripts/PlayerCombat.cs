@@ -12,13 +12,15 @@ public class PlayerCombat : MonoBehaviour, IPlayerCombat
     [SerializeField] private float baseHitDamage;
     [SerializeField] private ParticleSystem baseHitParticles;
     private PlayerAnimator animator;
+    private Player player;
 
     [Header("Settings")]
-    [SerializeField] private string EnemyTag;
+    [SerializeField] private LayerMask hitableLayer;
 
     private void Awake()
     {
         animator = GetComponent<PlayerAnimator>();
+        player = GetComponent<Player>();
     }
     public void BaseAttack(bool performed, bool cancel)
     {
@@ -28,9 +30,9 @@ public class PlayerCombat : MonoBehaviour, IPlayerCombat
 
     public void Shoot()
     {
-        if(Physics.Raycast(transform.position, transform.forward, out var rayHit, bulletRange) && rayHit.collider.gameObject.tag == EnemyTag)
+        if(Physics.Raycast(transform.position, transform.forward, out var rayHit, bulletRange, hitableLayer))
         {
-            rayHit.collider.GetComponent<Player>().GetHit(baseHitDamage);
+            rayHit.collider.GetComponent<Hitable>().GetHit(baseHitDamage, player);
         }
         baseHitParticles.Play();
     }
