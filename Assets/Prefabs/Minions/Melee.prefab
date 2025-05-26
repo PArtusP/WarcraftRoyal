@@ -61,8 +61,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6464291239341278365}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0.75, y: 0, z: 18}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -84,9 +84,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b678657e86662ec44a25e29780690b2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cost: 2
   health: 180
+  baseStats:
+    damage: 10
+    cooldown: 1.3
+    sightRadius: 10
+    hitRadius: 1.5
+  powerUp:
+    damage: 0
+    cooldown: 0
+    sightRadius: 0
+    hitRadius: 0
   sightRadius: 20
-  hitRadius: 2
   hitableLayer:
     serializedVersion: 2
     m_Bits: 8
@@ -102,9 +112,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1a62e381b7ef5842aa6af5640c82bde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 15
-  cooldown: 1.2
-  hitRadius: 2
   attackFx:
     effects: []
     gameObjects: []

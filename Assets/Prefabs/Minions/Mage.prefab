@@ -61,8 +61,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6464291239341278365}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 19.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -84,9 +84,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b678657e86662ec44a25e29780690b2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 50
+  cost: 3
+  health: 60
+  baseStats:
+    damage: 10
+    cooldown: 1.5
+    sightRadius: 14
+    hitRadius: 5
+  powerUp:
+    damage: 0
+    cooldown: 0
+    sightRadius: 0
+    hitRadius: 0
   sightRadius: 16
-  hitRadius: 8
   hitableLayer:
     serializedVersion: 2
     m_Bits: 8
@@ -102,9 +112,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a78a1d91a447154e942b7909e6906bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 15
-  cooldown: 2.2
-  hitRadius: 8
   attackFx:
     effects: []
     gameObjects: []
@@ -113,7 +120,7 @@ MonoBehaviour:
     animations: []
     sounds: []
   hitPoint: {fileID: 5938653573581385588}
-  bonusMultiplier: 3
+  bonusMultiplier: 4
 --- !u!114 &114836369411734941
 MonoBehaviour:
   m_ObjectHideFlags: 0

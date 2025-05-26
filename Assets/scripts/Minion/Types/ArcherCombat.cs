@@ -9,9 +9,9 @@ public class ArcherCombat : MinionCombat
     {
         if (minion.Target == null) return;
 
-        if ((hitPoint.position - minion.Target.transform.position).magnitude > hitRadius) return;
+        if ((hitPoint.position - minion.Target.transform.position).magnitude > Owner.Stats.hitRadius) return;
 
-        var finalDamage = damage;
+        var finalDamage = Owner.Stats.damage;
         if (minion.Target.GetComponent<MageCombat>() != null)
             finalDamage *= bonusMultiplier;
 

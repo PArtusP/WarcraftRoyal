@@ -1,24 +1,30 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.VersionControl;
 using UnityEngine;
+using UnityEngine.AI;
 
 enum MinionState
 {
     Walk,
     Follow,
-    Combat
+    Combat,
+    Stop
 }
 public class Minion : Hitable
 {
     MinionController controller;
     MinionCombat combat;
-    [SerializeField] float sightRadius;
-    [SerializeField] float hitRadius;
+    [SerializeField] private MinionCombatStats baseStats;
+    [SerializeField] private MinionCombatStats powerUp; 
+    [SerializeField] float sightRadius; 
     MinionState state;
 
     [SerializeField] private LayerMask hitableLayer;
     private Hitable target;
+    private bool isAsset = true;
 
     public LayerMask HitableLayer { get => hitableLayer; set => hitableLayer = value; }
     public Hitable Target { get => target; set
@@ -32,17 +38,23 @@ public class Minion : Hitable
         }
     }
 
-    private void Start()
+    public bool IsAsset => isAsset;
+
+    public MinionCombatStats Stats => baseStats + powerUp;
+
+    public MinionCombatStats PowerUp { get => powerUp; set => powerUp = value; }
+    public Minion SourcePrefab { get; internal set; } = null;
+
+    override protected void AwakeInternal()
     {
+        isAsset = false;
         controller = GetComponent<MinionController>();
         combat = GetComponent<MinionCombat>();
-        Target = null;
+        combat.Init(this);
     }
 
     private void Update()
-    {
-        if(target)
-            Debug.Log("Follow : " + (transform.position - controller.Destination).magnitude);
+    { 
         switch (state)
         {
             case MinionState.Walk:
@@ -51,19 +63,19 @@ public class Minion : Hitable
             case MinionState.Follow:
                 if ((transform.position - controller.Destination).magnitude > sightRadius || target == null) 
                     Target = null;   
-                else if ((transform.position - controller.Destination).magnitude > hitRadius)
+                else if ((transform.position - controller.Destination).magnitude > Stats.hitRadius)
                     controller.SetDestination(target.transform.position);
-                else if ((transform.position - controller.Destination).magnitude < hitRadius)
+                else if ((transform.position - controller.Destination).magnitude < Stats.hitRadius)
                 {
                     state = MinionState.Combat;
                     controller.SetDestination(target.transform.position);
-                    controller.Stop();
+                    controller.Stop(true);
                 }
                 break;
             case MinionState.Combat:
                 if(target == null) 
                     Target = null; 
-                if ((transform.position - controller.Destination).magnitude > hitRadius)
+                if ((transform.position - controller.Destination).magnitude > Stats.hitRadius)
                     state = MinionState.Follow;
                 else
                 {
@@ -104,17 +116,35 @@ public class Minion : Hitable
         {
             case MinionState.Walk:
                 Gizmos.color = Color.green;
-                Gizmos.DrawWireSphere(transform.position, sightRadius);
+                Gizmos.DrawWireSphere(transform.position, Stats.sightRadius);
                 break;
             case MinionState.Follow:
                 Gizmos.color = Color.yellow;
-                Gizmos.DrawWireSphere(transform.position, hitRadius);
+                Gizmos.DrawWireSphere(transform.position, Stats.hitRadius);
                 break;
             case MinionState.Combat:
                 Gizmos.color = Color.red;
-                Gizmos.DrawWireSphere(transform.position, hitRadius);
+                Gizmos.DrawWireSphere(transform.position, Stats.hitRadius);
                 break;
             default:
+                break;
+        }
+    }
+
+    internal void SetState(MinionState state)
+    {
+        switch(this.state)
+        {
+        }
+        this.state = state; 
+        switch (this.state)
+        {
+            case MinionState.Stop:
+                controller.Stop(true);
+                break;
+
+            case MinionState.Walk: 
+                controller.Stop(false);
                 break;
         }
     }

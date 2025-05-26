@@ -16,8 +16,7 @@ public class MinionController : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
     }
     private void Update()
-    {
-        Debug.Log("Speed = " + agent.velocity);
+    { 
         animator.SetSpeed(agent.velocity);
     }
     public void SetDestination(Vector3 destination)
@@ -29,10 +28,10 @@ public class MinionController : MonoBehaviour
             agent.SetDestination(transform.position);
         }
     }
-    public void Stop()
+    public void Stop(bool v)
     {
         if (!agent.isOnNavMesh) return;
-        agent.isStopped = true;
+        agent.isStopped = v; 
     }
 
     private void OnDrawGizmos()

@@ -4,11 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 abstract public class MinionCombat : MonoBehaviour
-{
-    [Header("Stats")]
-    [SerializeField] protected float damage = 10f;
-    [SerializeField] protected float cooldown = 1.5f;
-    [SerializeField] protected float hitRadius = .4f;
+{ 
     protected float nextAttack = 0f;
 
     [Header("Components")]
@@ -16,6 +12,8 @@ abstract public class MinionCombat : MonoBehaviour
     [SerializeField] protected Transform hitPoint;
     protected MinionAnimator animator;
     protected Minion minion;
+
+    public Minion Owner { get; private set; }
 
     private void Awake()
     {
@@ -28,7 +26,7 @@ abstract public class MinionCombat : MonoBehaviour
     {
         if (nextAttack <= Time.time)
         {
-            nextAttack = Time.time + cooldown;
+            nextAttack = Time.time + Owner.Stats.cooldown;
             animator.Attack();
         }
     }
@@ -39,5 +37,7 @@ abstract public class MinionCombat : MonoBehaviour
         AttackInternal();
     }
     abstract protected void AttackInternal();
+
+    internal void Init(Minion owner) => Owner = owner;
 }
 
