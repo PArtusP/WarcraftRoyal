@@ -9,8 +9,5 @@ public class MinionAnimatorEvent : MonoBehaviour
     {
         combat = GetComponentInParent<MinionCombat>();
     }
-    public void OnAttack()
-    {
-        combat.Attack();
-    }
+    public void OnAttack() => combat.Attack(); 
 }

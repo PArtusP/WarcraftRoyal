@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 enum MinionState
@@ -35,7 +36,7 @@ public class Minion : Hitable
     {
         controller = GetComponent<MinionController>();
         combat = GetComponent<MinionCombat>();
-        controller.SetDestination(new Vector3(home.transform.position.x, home.transform.position.y, -home.transform.position.z));
+        Target = null;
     }
 
     private void Update()
@@ -48,12 +49,8 @@ public class Minion : Hitable
                 CheckForTarget();
                 break;
             case MinionState.Follow:
-                if ((transform.position - controller.Destination).magnitude > sightRadius || target == null)
-                {
-                    target = null;
-                    state = MinionState.Walk; 
-                    controller.SetDestination(new Vector3(home.transform.position.x, home.transform.position.y, -home.transform.position.z));
-                }
+                if ((transform.position - controller.Destination).magnitude > sightRadius || target == null) 
+                    Target = null;   
                 else if ((transform.position - controller.Destination).magnitude > hitRadius)
                     controller.SetDestination(target.transform.position);
                 else if ((transform.position - controller.Destination).magnitude < hitRadius)
@@ -64,12 +61,8 @@ public class Minion : Hitable
                 }
                 break;
             case MinionState.Combat:
-                if(target == null)
-                {
-                    target = null;
-                    state = MinionState.Walk;
-                    controller.SetDestination(new Vector3(home.transform.position.x, home.transform.position.y, -home.transform.position.z));
-                }
+                if(target == null) 
+                    Target = null; 
                 if ((transform.position - controller.Destination).magnitude > hitRadius)
                     state = MinionState.Follow;
                 else
@@ -86,16 +79,21 @@ public class Minion : Hitable
     private void CheckForTarget()
     {
         var cols = Physics.OverlapSphere(transform.position, sightRadius, hitableLayer);
+        List<Hitable> targets = new List<Hitable>();
         if (cols.Length > 0)
         {
             foreach (var col in cols)
             {
-                if (col.GetComponent<Hitable>() && col.GetComponent<Hitable>() != this && col.GetComponent<Hitable>().Home != this.Home)
-                {
-                    target = col.GetComponent<Hitable>();
-                    controller.SetDestination(target.transform.position);
-                    state = MinionState.Follow;
-                }
+                if (col.GetComponent<Hitable>() && col.GetComponent<Hitable>() != this && col.GetComponent<Hitable>().Home != this.Home) 
+                    targets.Add(col.GetComponent<Hitable>()); 
+            }
+            if (targets.Any())
+            {
+                targets = targets.OrderBy(t => (transform.position - t.transform.position).magnitude).ToList();
+
+                Target = targets.First();
+                controller.SetDestination(target.transform.position);
+                state = MinionState.Follow;
             }
         }
     }

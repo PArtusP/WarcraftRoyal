@@ -370,8 +370,8 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
-  orthographic size: 8
+  orthographic: 1
+  orthographic size: 12.5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -394,14 +394,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.35355338, y: -0.35355338, z: 0.1464466, w: 0.8535535}
-  m_LocalPosition: {x: 15, y: 20, z: -15}
+  m_LocalRotation: {x: 0.27059805, y: -0.6532815, z: 0.27059805, w: 0.6532815}
+  m_LocalPosition: {x: 21.43, y: 22.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1850612024}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 45, y: -45, z: 0}
+  m_LocalEulerAnglesHint: {x: 45, y: -90, z: 0}
 --- !u!1001 &1071122716
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -412,6 +412,14 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: a9533d5394e0716459ef96b519ce4728, type: 3}
       propertyPath: m_RootOrder
       value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a9533d5394e0716459ef96b519ce4728, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a9533d5394e0716459ef96b519ce4728, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.53
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a9533d5394e0716459ef96b519ce4728, type: 3}
       propertyPath: m_LocalPosition.x
@@ -512,7 +520,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2897805550903216673, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 37.5
+      value: 19.5
       objectReference: {fileID: 0}
     - target: {fileID: 2897805550903216673, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
       propertyPath: m_LocalRotation.w
@@ -546,6 +554,42 @@ PrefabInstance:
       propertyPath: material
       value: 
       objectReference: {fileID: 2100000, guid: 8af9d2d11211b9049b63e2aa526a4c0c, type: 2}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab
+      value: 
+      objectReference: {fileID: 6464291239341278365, guid: 552bbd209987f3140979951a8671225a, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[0]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: 1a9c831d0b102624aa1a7b613e42256b, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[1]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: 552bbd209987f3140979951a8671225a, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[2]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: 552bbd209987f3140979951a8671225a, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[3]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: b49aa7bc639280c4e9acb8e6f663dd53, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[4]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: b49aa7bc639280c4e9acb8e6f663dd53, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[5]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: b49aa7bc639280c4e9acb8e6f663dd53, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[6]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: 1a9c831d0b102624aa1a7b613e42256b, type: 3}
     - target: {fileID: 2897805550903216687, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
       propertyPath: m_Name
       value: Base (1)
@@ -800,9 +844,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc7d19ea32f36934f923a087fef07712, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 0}
-  smoothTime: 0.1
-  offset: {x: 0, y: 0, z: 0}
 --- !u!1001 &2897805551011970937
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -832,7 +873,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2897805550903216673, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -37.5
+      value: -19.5
       objectReference: {fileID: 0}
     - target: {fileID: 2897805550903216673, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
       propertyPath: m_LocalRotation.w
@@ -862,6 +903,46 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab
+      value: 
+      objectReference: {fileID: 6464291239341278365, guid: 1a9c831d0b102624aa1a7b613e42256b, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[0]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: 1a9c831d0b102624aa1a7b613e42256b, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[1]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: 1a9c831d0b102624aa1a7b613e42256b, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[2]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: 1a9c831d0b102624aa1a7b613e42256b, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[3]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: 552bbd209987f3140979951a8671225a, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[4]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: b49aa7bc639280c4e9acb8e6f663dd53, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[5]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: b49aa7bc639280c4e9acb8e6f663dd53, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[6]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: b49aa7bc639280c4e9acb8e6f663dd53, type: 3}
+    - target: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
+      propertyPath: minionPrefab.Array.data[7]
+      value: 
+      objectReference: {fileID: 1982330210055623403, guid: b49aa7bc639280c4e9acb8e6f663dd53, type: 3}
     - target: {fileID: 2897805550903216687, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
       propertyPath: m_Name
       value: Base

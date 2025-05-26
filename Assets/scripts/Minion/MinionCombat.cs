@@ -12,6 +12,7 @@ abstract public class MinionCombat : MonoBehaviour
     protected float nextAttack = 0f;
 
     [Header("Components")]
+    [SerializeField] TriggerSVFX attackFx;
     [SerializeField] protected Transform hitPoint;
     protected MinionAnimator animator;
     protected Minion minion;
@@ -25,13 +26,18 @@ abstract public class MinionCombat : MonoBehaviour
 
     internal void TryAttack(Hitable target)
     {
-        if(nextAttack <= Time.time)
+        if (nextAttack <= Time.time)
         {
             nextAttack = Time.time + cooldown;
             animator.Attack();
         }
     }
 
-    abstract public void Attack();
+    public void Attack()
+    {
+        attackFx.PlayBase(true, this);
+        AttackInternal();
+    }
+    abstract protected void AttackInternal();
 }
 

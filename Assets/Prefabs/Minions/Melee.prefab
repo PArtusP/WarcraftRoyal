@@ -84,12 +84,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b678657e86662ec44a25e29780690b2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 100
-  sightRadius: 0
-  hitRadius: 0
+  health: 180
+  sightRadius: 20
+  hitRadius: 2
   hitableLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
 --- !u!114 &8151470149151273264
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -102,10 +102,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1a62e381b7ef5842aa6af5640c82bde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 10
-  cooldown: 1.5
-  hitRadius: 0.4
+  damage: 15
+  cooldown: 1.2
+  hitRadius: 2
+  attackFx:
+    effects: []
+    gameObjects: []
+    particles: []
+    renderers: []
+    animations: []
+    sounds: []
   hitPoint: {fileID: 5938653573581385588}
+  bonusMultiplier: 2
 --- !u!114 &114836369411734941
 MonoBehaviour:
   m_ObjectHideFlags: 0
