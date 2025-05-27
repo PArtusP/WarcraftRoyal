@@ -5,20 +5,26 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
+
 public class Player : MonoBehaviour
 {
     [SerializeField] Base home;
     [SerializeField] Button startButton;
 
-    [SerializeField] Dictionary<Minion, MinionCombatStats> minionPowerUps = new Dictionary<Minion, MinionCombatStats>();
+    Dictionary<Minion, MinionCombatStats> minionPowerUps = new Dictionary<Minion, MinionCombatStats>();
 
-    PlayerWallet wallet = new PlayerWallet(10);
+    [SerializeField] PlayerExperience xp = new PlayerExperience();
+    [SerializeField] PlayerStats stats = new PlayerStats();
+    PlayerWallet wallet = new PlayerWallet(5);
+
     PlayerScore walletUi;
     ShopUi shopUi;
+    [SerializeField] AnimationCurve levelUpAnimCurve;
 
     internal PlayerWallet Wallet => wallet;
 
     public Base Home  => home; 
+    public UnityEvent OnReadyEvent { get; } = new UnityEvent(); 
 
     private void Awake()
     {
@@ -27,11 +33,34 @@ public class Player : MonoBehaviour
         wallet.OnChange.AddListener(walletUi.Set);
         walletUi.Set(wallet.Value);
 
-        startButton.onClick.AddListener(delegate
+        startButton.onClick.AddListener(delegate() { StartCoroutine(WaitToStartRound()); });
+
+        xp.LevelUpEvent.AddListener(shopUi.EnableButtons);
+    }
+
+    private IEnumerator WaitToStartRound()
+    {
+        if(wallet.Value > 0)
         {
-            FindObjectOfType<GameManager>().StartRound();
-            ShowPreparationUi(false);
-        });
+            var currXp = xp.CurrentXp;
+            var newXp = xp.CurrentXp + wallet.Value;
+            var xpTransitionTime = Mathf.Min(.5f, (newXp - currXp) * .25f);
+            var time = 0f;
+            while (xp.CurrentXp < newXp)
+            {
+                time += Time.deltaTime / xpTransitionTime;
+
+                var t = levelUpAnimCurve.Evaluate(time);
+                var v = t * (newXp - currXp) + currXp; 
+                xp.AddExperience(v - xp.CurrentXp);
+                Debug.Log($"target: {v}, res: {xp.CurrentXp}");
+                yield return new WaitForEndOfFrame();
+            }
+            wallet.Reset();
+        }
+        yield return new WaitForSeconds(.5f);
+        OnReadyEvent.Invoke();
+        ShowPreparationUi(false);
     }
 
     internal bool TryBuy(RightClickButton prefab)
@@ -46,9 +75,9 @@ public class Player : MonoBehaviour
                 }
                 return false;
             case UnitUpgradeButton unitUpgrade:
-                if (wallet.Spend(unitUpgrade.CostValue))
+                if (!unitUpgrade.IsOwned && wallet.Spend(unitUpgrade.Cost))
                 {
-                    AddMinionUpgrade(unitUpgrade.Prefab, unitUpgrade.PowerUp);
+                    AddMinionUpgrade(unitUpgrade.Target, unitUpgrade.PowerUp);
                     return true;
                 }
                 return false;
@@ -70,8 +99,8 @@ public class Player : MonoBehaviour
             case UnitUpgradeButton unitUpgrade:
                 if (unitUpgrade.IsOwned)
                 {
-                    wallet.Earn(unitUpgrade.CostValue);
-                    AddMinionUpgrade(unitUpgrade.Prefab, -unitUpgrade.PowerUp);
+                    wallet.Earn(unitUpgrade.Cost);
+                    AddMinionUpgrade(unitUpgrade.Target, -unitUpgrade.PowerUp);
                     return true;
                 }
                 return false;
@@ -133,4 +162,5 @@ internal class PlayerWallet
         OnChange.Invoke(value);
     }
 
+    internal void Reset() => Spend(value);
 }

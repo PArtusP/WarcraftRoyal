@@ -1,6 +1,6 @@
 ﻿using System;
-using Unity.VisualScripting;
 using UnityEngine;
+
 
 [Serializable]
 public class MinionCombatStats
@@ -10,7 +10,7 @@ public class MinionCombatStats
     [SerializeField] public float speed = 2f;
     [SerializeField] public float cooldown = 1.5f;
     [SerializeField] public float sightRadius = 8f;
-    [SerializeField] public float hitRadius = .4f; 
+    [SerializeField] public float hitRadius = .4f;
 
     static public MinionCombatStats Zero => new MinionCombatStats()
     {

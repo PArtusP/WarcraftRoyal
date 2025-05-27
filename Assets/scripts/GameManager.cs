@@ -16,17 +16,20 @@ public class GameManager : MonoBehaviour
 {
     List<Player> players;
     List<AiPlayer> ais;
-    int roundCount = 1;
+    int roundCount = 0;
     Phase phase = Phase.Preparation;
     ShopUi shopUi;
 
     private void Awake()
     {
-        players = FindObjectsOfType<Player>().ToList();
+        players = FindObjectsOfType<Player>().ToList(); 
         ais = FindObjectsOfType<AiPlayer>().ToList();
         shopUi = FindObjectOfType<ShopUi>();
         players.ForEach(p => p.Home.EndOfRoundEvent.AddListener(EndOfRound));
+        players.ForEach(p => p.OnReadyEvent.AddListener(StartRound));
         ais.ForEach(p => p.Home.EndOfRoundEvent.AddListener(EndOfRound));
+
+        EndOfRound();
     }
 
     private void EndOfRound()
@@ -49,16 +52,16 @@ public class GameManager : MonoBehaviour
         {
             p.Home.ResetForNextRound();
         }); 
-        roundCount++;
     }
 
     public void StartRound()
     {
         if (phase == Phase.Combat) return;
         phase = Phase.Combat;
-        ais.ForEach(a => a.StartNewRound(roundCount == 1 ? 10 : 5 + roundCount * 2));
+        ais.ForEach(a => a.StartNewRound(5 + roundCount * 2));
         players.ForEach(p => p.StartNewRound());
         shopUi.Reset();
+        roundCount++;
 
     }
 }

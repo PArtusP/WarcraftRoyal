@@ -2,6 +2,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+
+
 public class UnitUpgradeButton : RightClickButton
 {
 
@@ -12,14 +14,16 @@ public class UnitUpgradeButton : RightClickButton
     [SerializeField] Image image;
     [SerializeField] new string name;
 
-    public Minion Prefab { get => prefab; set => prefab = value; }
-    public int CostValue   => costValue;
+    [SerializeField] UnitUpgrade upgrade;
 
-    public MinionCombatStats PowerUp   => powerUp;
+    public Minion Target => upgrade.Target;
+    public int Cost => upgrade.Cost;
+
+    public MinionCombatStats PowerUp => upgrade.PowerUp;
     public bool IsOwned => status.text == "Sold !";
 
     public Sprite Image { get => image.sprite; set => image.sprite = value; }
-    public string Name { get => name; set => name = value; }
+    public string Name => upgrade.Name;
 
     override public void Buy() => status.text = "Sold !";
 
