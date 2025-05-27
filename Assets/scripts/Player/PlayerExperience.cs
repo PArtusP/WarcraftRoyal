@@ -27,6 +27,7 @@ public class PlayerExperience
     public int Level => level;
 
     public UnityEvent<int> LevelUpEvent { get; } = new UnityEvent<int>();
+    public static int NbLevel => thresholds.Length;
 
     public void AddExperience(float value)
     {

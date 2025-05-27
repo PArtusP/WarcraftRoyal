@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -44,9 +45,16 @@ public class Player : MonoBehaviour
         {
             var currXp = xp.CurrentXp;
             var newXp = xp.CurrentXp + wallet.Value;
-            var xpTransitionTime = Mathf.Min(.5f, (newXp - currXp) * .25f);
+            var level = xp.Level;
+            while(level < PlayerExperience.NbLevel - 1 && newXp >= PlayerExperience.GetThreshold(level))
+            {
+                newXp -= PlayerExperience.GetThreshold(level);
+                level++;
+            }
+
             var time = 0f;
-            while (xp.CurrentXp < newXp)
+            var xpTransitionTime = Mathf.Min(.5f, (newXp - currXp) * .25f); 
+            while (xp.CurrentXp < newXp || xp.Level < level)
             {
                 time += Time.deltaTime / xpTransitionTime;
 
