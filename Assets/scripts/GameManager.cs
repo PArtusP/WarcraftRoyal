@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
         {
             p.Home.ResetForNextRound();
             p.Wallet.Earn(5 + roundCount * 2);
-            p.ShowStartButton(true);
+            p.ShowPreparationUi(true);
         }); 
         ais.ForEach(p =>
         {

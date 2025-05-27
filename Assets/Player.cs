@@ -14,6 +14,7 @@ public class Player : MonoBehaviour
 
     PlayerWallet wallet = new PlayerWallet(10);
     PlayerScore walletUi;
+    ShopUi shopUi;
 
     internal PlayerWallet Wallet => wallet;
 
@@ -21,6 +22,7 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        shopUi = GetComponentInChildren<ShopUi>();
         walletUi = GetComponentInChildren<PlayerScore>();
         wallet.OnChange.AddListener(walletUi.Set);
         walletUi.Set(wallet.Value);
@@ -28,7 +30,7 @@ public class Player : MonoBehaviour
         startButton.onClick.AddListener(delegate
         {
             FindObjectOfType<GameManager>().StartRound();
-            startButton.gameObject.SetActive(false);
+            ShowPreparationUi(false);
         });
     }
 
@@ -89,7 +91,12 @@ public class Player : MonoBehaviour
         }
     }
 
-    internal void ShowStartButton(bool v) => startButton.gameObject.SetActive(v);
+    internal void ShowPreparationUi(bool v)
+    {
+        walletUi.gameObject.SetActive(v);
+        startButton.gameObject.SetActive(v);
+        shopUi.gameObject.SetActive(v);
+    }
 
     internal void StartNewRound()
     {

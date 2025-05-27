@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,6 +10,14 @@ public class MinionController : MonoBehaviour
     MinionAnimator animator;
 
     public Vector3 Destination { get => agent.destination; }
+    public NavMeshAgent Agent
+    {
+        get
+        {
+            if (agent == null) agent = GetComponent<NavMeshAgent>();
+            return agent;
+        }
+    }
 
     private void Awake()
     {
@@ -16,7 +25,7 @@ public class MinionController : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
     }
     private void Update()
-    { 
+    {
         animator.SetSpeed(agent.velocity);
     }
     public void SetDestination(Vector3 destination)
@@ -31,7 +40,7 @@ public class MinionController : MonoBehaviour
     public void Stop(bool v)
     {
         if (!agent.isOnNavMesh) return;
-        agent.isStopped = v; 
+        agent.isStopped = v;
     }
 
     private void OnDrawGizmos()
@@ -39,4 +48,6 @@ public class MinionController : MonoBehaviour
         Gizmos.color = Color.blue;
         Gizmos.DrawCube(Destination, Vector3.one * .2f);
     }
+
+    internal void SetSpeed(float speed) => Agent.speed = speed;
 }

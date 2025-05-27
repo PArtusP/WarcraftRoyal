@@ -11,7 +11,7 @@ abstract public class Hitable : MonoBehaviour
 
     [Header("Stats")]
     [SerializeField] internal int cost;
-    [SerializeField] protected float health = 100f; 
+    abstract public float Health { get; set; }
 
     protected HealthBar healthbar;
 
@@ -21,8 +21,8 @@ abstract public class Hitable : MonoBehaviour
     private void Awake()
     {
         healthbar = GetComponentInChildren<HealthBar>();
-        healthbar.SetMaxHealth(health);
-        healthbar.SetHealth(health);
+        healthbar.SetMaxHealth(Health);
+        healthbar.SetHealth(Health);
         AwakeInternal();
     }
 
@@ -30,15 +30,15 @@ abstract public class Hitable : MonoBehaviour
 
     virtual public bool GetHit(float damage, Hitable opponent)
     {
-        health = Mathf.Max(0f, health - damage);
-        healthbar.SetHealth(health);
-        if (health == 0f)
+        Health = Mathf.Max(0f, Health - damage);
+        healthbar.SetHealth(Health);
+        if (Health == 0f)
         {
-            Die(); 
+            Die();
             return true;
         }
         return false;
-    } 
+    }
 
     virtual public void Die()
     {

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.AI;
@@ -18,19 +19,23 @@ public class Minion : Hitable
     MinionController controller;
     MinionCombat combat;
     [SerializeField] private MinionCombatStats baseStats;
-    [SerializeField] private MinionCombatStats powerUp; 
-    [SerializeField] float sightRadius; 
+    [SerializeField] private MinionCombatStats powerUp;
+    [SerializeField] float sightRadius;
     MinionState state;
 
     [SerializeField] private LayerMask hitableLayer;
     private Hitable target;
     private bool isAsset = true;
+    private float health;
 
+    public override float Health { get => health; set => health = value; }
     public LayerMask HitableLayer { get => hitableLayer; set => hitableLayer = value; }
-    public Hitable Target { get => target; set
+    public Hitable Target
+    {
+        get => target; set
         {
             target = value;
-            if(target == null)
+            if (target == null)
             {
                 state = MinionState.Walk;
                 controller.SetDestination(new Vector3(home.transform.position.x, home.transform.position.y, -home.transform.position.z));
@@ -49,20 +54,21 @@ public class Minion : Hitable
     {
         isAsset = false;
         controller = GetComponent<MinionController>();
+        ApplyStatsAndStatus();
         combat = GetComponent<MinionCombat>();
         combat.Init(this);
     }
 
     private void Update()
-    { 
+    {
         switch (state)
         {
             case MinionState.Walk:
                 CheckForTarget();
                 break;
             case MinionState.Follow:
-                if ((transform.position - controller.Destination).magnitude > sightRadius || target == null) 
-                    Target = null;   
+                if ((transform.position - controller.Destination).magnitude > sightRadius || target == null)
+                    Target = null;
                 else if ((transform.position - controller.Destination).magnitude > Stats.hitRadius)
                     controller.SetDestination(target.transform.position);
                 else if ((transform.position - controller.Destination).magnitude < Stats.hitRadius)
@@ -73,8 +79,8 @@ public class Minion : Hitable
                 }
                 break;
             case MinionState.Combat:
-                if(target == null) 
-                    Target = null; 
+                if (target == null)
+                    Target = null;
                 if ((transform.position - controller.Destination).magnitude > Stats.hitRadius)
                     state = MinionState.Follow;
                 else
@@ -96,8 +102,8 @@ public class Minion : Hitable
         {
             foreach (var col in cols)
             {
-                if (col.GetComponent<Hitable>() && col.GetComponent<Hitable>() != this && col.GetComponent<Hitable>().Home != this.Home) 
-                    targets.Add(col.GetComponent<Hitable>()); 
+                if (col.GetComponent<Hitable>() && col.GetComponent<Hitable>() != this && col.GetComponent<Hitable>().Home != this.Home)
+                    targets.Add(col.GetComponent<Hitable>());
             }
             if (targets.Any())
             {
@@ -133,19 +139,45 @@ public class Minion : Hitable
 
     internal void SetState(MinionState state)
     {
-        switch(this.state)
+        switch (this.state)
         {
         }
-        this.state = state; 
+        this.state = state;
         switch (this.state)
         {
             case MinionState.Stop:
                 controller.Stop(true);
                 break;
 
-            case MinionState.Walk: 
+            case MinionState.Walk:
                 controller.Stop(false);
                 break;
+        }
+    }
+
+    internal void ApplyStatsAndStatus()
+    {
+        controller.SetSpeed(Stats.speed);
+        Health = Stats.health;
+        healthbar.SetMaxHealth(Stats.health);
+        healthbar.SetHealth(Health);
+    }
+
+    internal void SetPowerUp(MinionCombatStats powerUp)
+    {
+        var old = Stats;
+        PowerUp = powerUp;
+
+        if (old.speed != Stats.speed)
+            controller.SetSpeed(Stats.speed);
+
+        if (old.health != Stats.health)
+        {
+            var percentHealth = Health / old.health;
+            var currPercent = Health / Stats.health;
+
+            if (currPercent < percentHealth)
+                Health = percentHealth * Stats.health;
         }
     }
 }

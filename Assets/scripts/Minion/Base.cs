@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.VersionControl;
 using UnityEngine;
@@ -13,9 +15,11 @@ public class Base : Hitable
     [SerializeField] List<Minion> spawnList;
     [SerializeField] Material material;
     private List<Minion> spawnedUnits = new List<Minion>();
+    private float health;
 
     public Vector3 direction { get; private set; }
     public UnityEvent EndOfRoundEvent { get; private set; } = new UnityEvent();
+    public override float Health { get => health; set => health = value; }
 
     // Start is called before the first frame update
     override protected void AwakeInternal()
@@ -24,7 +28,7 @@ public class Base : Hitable
         var bases = FindObjectsByType<Base>(FindObjectsSortMode.None).ToList();
         bases.Remove(this);
 
-        direction = (bases[0].transform.position - this.transform.position).normalized; 
+        direction = (bases[0].transform.position - this.transform.position).normalized;
     }
     public void SpawnMinion(Dictionary<Minion, MinionCombatStats> minionPowerUps)
     {
@@ -81,10 +85,12 @@ public class Base : Hitable
 
                 unit.transform.position = spawnPos;
                 unit.transform.rotation = Quaternion.LookRotation(direction, Vector3.up);
+
             }
             else
             {
                 unit = Instantiate(units[i], spawnPos, Quaternion.LookRotation(direction, Vector3.up), transform);
+                unit.ApplyStatsAndStatus();
                 unit.SourcePrefab = units[i];
                 unit.GetComponentInChildren<SkinnedMeshRenderer>().sharedMaterial = material;
                 unit.Home = this;
@@ -92,10 +98,10 @@ public class Base : Hitable
             }
             if (minionPowerUps.TryGetValue(unit.SourcePrefab, out MinionCombatStats powerUp))
             {
-                unit.PowerUp = powerUp;
+                unit.SetPowerUp(powerUp);  
                 Debug.Log($"Applying power-up to {unit.name}: {powerUp} (Total: {unit.Stats})");
             }
-            else unit.PowerUp = MinionCombatStats.Zero;
+            else unit.PowerUp = MinionCombatStats.Zero; 
 
             unit.Target = null;
             spawnedUnits.Add(unit);
@@ -131,5 +137,5 @@ public class Base : Hitable
             spawnList.AddRange(spawnedUnits);
         }
         spawnedUnits.Clear();
-    } 
+    }
 }

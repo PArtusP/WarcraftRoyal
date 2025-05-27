@@ -226,8 +226,16 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
+      propertyPath: powerUp.speed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
       propertyPath: powerUp.damage
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
+      propertyPath: powerUp.health
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
       propertyPath: stats.cooldown
@@ -235,7 +243,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
       propertyPath: powerUp.cooldown
-      value: -0.6
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
       propertyPath: powerUp.hitRadius
@@ -365,7 +373,15 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
+      propertyPath: powerUp.speed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
       propertyPath: powerUp.damage
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
+      propertyPath: powerUp.health
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
@@ -664,8 +680,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
+      propertyPath: powerUp.speed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
       propertyPath: powerUp.damage
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
+      propertyPath: powerUp.health
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
       propertyPath: stats.cooldown
@@ -971,7 +995,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 12.5
+  orthographic size: 10.1
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -994,14 +1018,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.27059805, y: -0.6532815, z: 0.27059805, w: 0.6532815}
-  m_LocalPosition: {x: 21.43, y: 21.2, z: 0}
+  m_LocalRotation: {x: 0.3032774, y: -0.37999636, z: 0.13344523, w: 0.8636075}
+  m_LocalPosition: {x: 12.6, y: 13.75, z: -11.68}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 45, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 38.7, y: -47.5, z: 0}
 --- !u!114 &976252767 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2897805550903216686, guid: cb23e567b9ff1bd4195b1808a441a9e7, type: 3}
@@ -1102,7 +1126,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a9533d5394e0716459ef96b519ce4728, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.7
+      value: 0.88
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a9533d5394e0716459ef96b519ce4728, type: 3}
       propertyPath: m_LocalScale.z
@@ -1841,7 +1865,15 @@ PrefabInstance:
       value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
+      propertyPath: powerUp.speed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
       propertyPath: powerUp.damage
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
+      propertyPath: powerUp.health
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
@@ -2641,8 +2673,16 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
+      propertyPath: powerUp.speed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
       propertyPath: powerUp.damage
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
+      propertyPath: powerUp.health
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
       propertyPath: stats.cooldown
@@ -3502,8 +3542,16 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
+      propertyPath: powerUp.speed
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
       propertyPath: powerUp.damage
-      value: 8
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
+      propertyPath: powerUp.health
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6154643347089949832, guid: e9b5827a8dc02694c84a27672b825432, type: 3}
       propertyPath: powerUp.cooldown

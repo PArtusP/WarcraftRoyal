@@ -85,14 +85,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cost: 3
-  health: 60
   baseStats:
+    health: 60
     damage: 10
+    speed: 1.6
     cooldown: 1.5
     sightRadius: 14
     hitRadius: 5
   powerUp:
+    health: 0
     damage: 0
+    speed: 0
     cooldown: 0
     sightRadius: 0
     hitRadius: 0
@@ -156,7 +159,7 @@ NavMeshAgent:
   m_AgentTypeID: 0
   m_Radius: 0.29
   m_Speed: 2
-  m_Acceleration: 2
+  m_Acceleration: 5
   avoidancePriority: 50
   m_AngularSpeed: 240
   m_StoppingDistance: 1
