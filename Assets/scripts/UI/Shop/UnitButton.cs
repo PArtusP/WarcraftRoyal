@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-abstract public class RightClickButton : MonoBehaviour, IPointerClickHandler
+abstract public class RightClickButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] Button button;
     [SerializeField] protected TMPro.TextMeshProUGUI cost;
@@ -14,6 +14,8 @@ abstract public class RightClickButton : MonoBehaviour, IPointerClickHandler
 
     public System.Action OnLeftClick;
     public System.Action OnRightClick;
+    public System.Action PointerEnter;
+    public System.Action PointerExit;
 
     private void Awake()
     {
@@ -33,6 +35,8 @@ abstract public class RightClickButton : MonoBehaviour, IPointerClickHandler
             OnRightClick?.Invoke();
         }
     }
+    public void OnPointerEnter(PointerEventData eventData) => PointerEnter?.Invoke(); 
+    public void OnPointerExit(PointerEventData eventData) => PointerExit?.Invoke(); 
 
     abstract public void Buy();
     abstract public void Sell();

@@ -270,13 +270,17 @@ MonoBehaviour:
   button: {fileID: 4013327196528174711}
   cost: {fileID: 4013327196064748560}
   powerUp:
+    health: 100
     damage: 0
+    speed: 2
     cooldown: 0
     sightRadius: 0
     hitRadius: 0
   costValue: 2
   prefab: {fileID: 1982330210055623403, guid: 1a9c831d0b102624aa1a7b613e42256b, type: 3}
   status: {fileID: 8062422862594672522}
+  image: {fileID: 3218101527455271083}
+  name: 
 --- !u!222 &4013327196528174709
 CanvasRenderer:
   m_ObjectHideFlags: 0

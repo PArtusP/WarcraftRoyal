@@ -6,6 +6,7 @@ using UnityEngine;
 public class ShopUi : MonoBehaviour
 {
     Player player;
+    [SerializeField] UnitUpgradeDetailUi detailUi;
     [SerializeField] List<UnitButton> unitButtons;
     [SerializeField] List<UnitUpgradeButton> unitUpradeButtons;
 
@@ -33,6 +34,13 @@ public class ShopUi : MonoBehaviour
         
         foreach (var button in unitUpradeButtons)
         {
+            button.PointerEnter = () => {
+                detailUi.gameObject.SetActive(true);
+                detailUi.Display(button);
+            };
+            button.PointerExit = () => {
+                detailUi.gameObject.SetActive(false); 
+            };
             button.OnLeftClick = () => {
                 bool res = player.TryBuy(button);
                 if (res) button.Buy();
