@@ -47,8 +47,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c32d371c0266314aad6157337f2e0ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 1000
-  minionPrefab: {fileID: 6464291239341278365, guid: 1a9c831d0b102624aa1a7b613e42256b, type: 3}
+  cost: 0
+  aimPoint: {fileID: 2897805550903216673}
+  spawnList: []
   material: {fileID: 2100000, guid: 1be9027966c798a46bc7309352eb1abc, type: 2}
 --- !u!136 &2188029812074851898
 CapsuleCollider:
@@ -205,6 +206,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0

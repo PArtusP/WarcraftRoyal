@@ -14,6 +14,7 @@ abstract public class Hitable : MonoBehaviour
     abstract public float Health { get; set; }
 
     protected HealthBar healthbar;
+    public Transform aimPoint;
 
     public Base Home { get => home; set => home = value; }
     public UnityEvent OnDieEvent { get; internal set; } = new UnityEvent();

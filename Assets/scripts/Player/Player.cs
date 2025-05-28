@@ -45,6 +45,8 @@ public class Player : MonoBehaviour
         {
             var currXp = xp.CurrentXp;
             var newXp = xp.CurrentXp + wallet.Value;
+            var xpTransitionTime = Mathf.Min(.5f, (newXp - currXp) * .25f); 
+
             var level = xp.Level;
             while(level < PlayerExperience.NbLevel - 1 && newXp >= PlayerExperience.GetThreshold(level))
             {
@@ -53,12 +55,11 @@ public class Player : MonoBehaviour
             }
 
             var time = 0f;
-            var xpTransitionTime = Mathf.Min(.5f, (newXp - currXp) * .25f); 
             while (xp.CurrentXp < newXp || xp.Level < level)
             {
                 time += Time.deltaTime / xpTransitionTime;
 
-                var t = levelUpAnimCurve.Evaluate(time);
+                var t = levelUpAnimCurve.Evaluate(Mathf.Clamp(time, 0f, 1f));
                 var v = t * (newXp - currXp) + currXp; 
                 xp.AddExperience(v - xp.CurrentXp);
                 Debug.Log($"target: {v}, res: {xp.CurrentXp}");
