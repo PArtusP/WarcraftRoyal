@@ -1,14 +1,7 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem.XR;
 
 public class Base : Hitable
 {
@@ -98,10 +91,10 @@ public class Base : Hitable
             }
             if (minionPowerUps.TryGetValue(unit.SourcePrefab, out MinionCombatStats powerUp))
             {
-                unit.SetPowerUp(powerUp);  
+                unit.SetPowerUp(powerUp);
                 Debug.Log($"Applying power-up to {unit.name}: {powerUp} (Total: {unit.Stats})");
             }
-            else unit.PowerUp = MinionCombatStats.Zero; 
+            else unit.PowerUp = MinionCombatStats.Zero;
 
             unit.Target = null;
             spawnedUnits.Add(unit);

@@ -1,15 +1,24 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml.Linq;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
 
-public class Player : MonoBehaviour
+[System.Serializable]
+public class PlayerGameInfo
 {
-    [SerializeField] Base home;
+    public string name;
+    public Guid id;
+    public float elo;
+    public string gameVersion; 
+}
+
+
+public class Player : NetworkBehaviour
+{ 
     [SerializeField] Button startButton;
 
     Dictionary<Minion, MinionCombatStats> minionPowerUps = new Dictionary<Minion, MinionCombatStats>();
@@ -21,34 +30,47 @@ public class Player : MonoBehaviour
     PlayerScore walletUi;
     ShopUi shopUi;
     [SerializeField] AnimationCurve levelUpAnimCurve;
+    [SerializeField] internal Sprite selectedSprite;
+    [SerializeField] internal Sprite iconSprite;
 
     internal PlayerWallet Wallet => wallet;
 
-    public Base Home  => home; 
-    public UnityEvent OnReadyEvent { get; } = new UnityEvent(); 
+    public Base Home { get; set; }
+    public UnityEvent OnReadyEvent { get; } = new UnityEvent();
+    public UnityEvent OnDieEvent { get; } = new UnityEvent();
 
     private void Awake()
     {
-        shopUi = GetComponentInChildren<ShopUi>();
-        walletUi = GetComponentInChildren<PlayerScore>();
-        wallet.OnChange.AddListener(walletUi.Set);
-        walletUi.Set(wallet.Value);
+        if (IsOwner)
+        {
+            shopUi = GetComponentInChildren<ShopUi>();
+            walletUi = GetComponentInChildren<PlayerScore>();
+            wallet.OnChange.AddListener(walletUi.Set);
+            walletUi.Set(wallet.Value);
 
-        startButton.onClick.AddListener(delegate() { StartCoroutine(WaitToStartRound()); });
+            startButton.onClick.AddListener(delegate () { StartCoroutine(WaitToStartRound()); });
 
-        xp.LevelUpEvent.AddListener(shopUi.EnableButtons);
+            xp.LevelUpEvent.AddListener(shopUi.EnableButtons);
+        }
+    }
+
+    [ClientRpc]
+    public void SetHomeClientRpc(ulong objId)
+    {
+        Home = GetNetworkObject(objId).GetComponent<Base>();
+        if (IsOwner) Home.OnDieEvent.AddListener(OnDieEvent.Invoke);
     }
 
     private IEnumerator WaitToStartRound()
     {
-        if(wallet.Value > 0)
+        if (wallet.Value > 0)
         {
             var currXp = xp.CurrentXp;
             var newXp = xp.CurrentXp + wallet.Value;
-            var xpTransitionTime = Mathf.Min(.5f, (newXp - currXp) * .25f); 
+            var xpTransitionTime = Mathf.Min(.5f, (newXp - currXp) * .25f);
 
             var level = xp.Level;
-            while(level < PlayerExperience.NbLevel - 1 && newXp >= PlayerExperience.GetThreshold(level))
+            while (level < PlayerExperience.NbLevel - 1 && newXp >= PlayerExperience.GetThreshold(level))
             {
                 newXp -= PlayerExperience.GetThreshold(level);
                 level++;
@@ -60,7 +82,7 @@ public class Player : MonoBehaviour
                 time += Time.deltaTime / xpTransitionTime;
 
                 var t = levelUpAnimCurve.Evaluate(Mathf.Clamp(time, 0f, 1f));
-                var v = t * (newXp - currXp) + currXp; 
+                var v = t * (newXp - currXp) + currXp;
                 xp.AddExperience(v - xp.CurrentXp);
                 Debug.Log($"target: {v}, res: {xp.CurrentXp}");
                 yield return new WaitForEndOfFrame();
@@ -79,7 +101,7 @@ public class Player : MonoBehaviour
             case UnitButton unit:
                 if (wallet.Spend(unit.Prefab.cost))
                 {
-                    home.AddMinion(unit.Prefab);
+                    Home.AddMinion(unit.Prefab);
                     return true;
                 }
                 return false;
@@ -99,7 +121,7 @@ public class Player : MonoBehaviour
         switch (prefab)
         {
             case UnitButton unit:
-                if (home.RemoveMinion(unit.Prefab))
+                if (Home.RemoveMinion(unit.Prefab))
                 {
                     wallet.Earn(unit.Prefab.cost);
                     return true;
@@ -124,7 +146,7 @@ public class Player : MonoBehaviour
             existingPowerUp.Add(powerUp);
         else
         {
-            var newPowerUp = MinionCombatStats.Zero + powerUp; 
+            var newPowerUp = MinionCombatStats.Zero + powerUp;
             minionPowerUps.Add(prefab, newPowerUp);
         }
     }

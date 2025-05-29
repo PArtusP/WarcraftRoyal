@@ -1,10 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
 
-abstract public class Hitable : MonoBehaviour
+abstract public class Hitable : NetworkBehaviour
 {
     [Header("Team")]
     protected Base home;

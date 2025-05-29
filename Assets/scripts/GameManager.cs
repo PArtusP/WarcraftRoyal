@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.UI;
 
 public enum Phase
 {
@@ -22,9 +19,9 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        players = FindObjectsOfType<Player>().ToList(); 
-        ais = FindObjectsOfType<AiPlayer>().ToList();
-        shopUi = FindObjectOfType<ShopUi>();
+        players = FindObjectsByType<Player>(FindObjectsSortMode.None).ToList();
+        ais = FindObjectsByType<AiPlayer>(FindObjectsSortMode.None).ToList();
+        shopUi = FindFirstObjectByType<ShopUi>();
         players.ForEach(p => p.Home.EndOfRoundEvent.AddListener(EndOfRound));
         players.ForEach(p => p.OnReadyEvent.AddListener(StartRound));
         ais.ForEach(p => p.Home.EndOfRoundEvent.AddListener(EndOfRound));
@@ -47,11 +44,11 @@ public class GameManager : MonoBehaviour
             p.Home.ResetForNextRound();
             p.Wallet.Earn(5 + roundCount * 2);
             p.ShowPreparationUi(true);
-        }); 
+        });
         ais.ForEach(p =>
         {
             p.Home.ResetForNextRound();
-        }); 
+        });
     }
 
     public void StartRound()
