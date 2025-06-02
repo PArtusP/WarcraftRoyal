@@ -4,6 +4,7 @@
 ```
 docker build --target GameServer -t jausseran/ageofroyalserver --no-cache . 
 docker image push jausseran/ageofroyalserver
+docker run -d jausseran/ageofroyalserver
 
 docker build --target MatchMakingAPI -t jausseran/ageofroyalmmapi .
 docker image push jausseran/ageofroyalmmapi
@@ -30,12 +31,31 @@ AZUREFUNC_NAME=AgeOfRoyal-MMAPI          # Azure region in which you'll deploy y
 az group create --name $AKS_RESOURCE_GROUP --location $AKS_LOCATION
 
 # Create 1 node AKS cluster. Node size : Standard A1 v2 and Kub v1.28. SSH keys will be generated
-az aks create --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --node-count 1 --generate-ssh-keys --node-vm-size Standard_A4_v2 --kubernetes-version 1.31 --enable-node-public-ip
+az aks create --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --node-count 1 --generate-ssh-keys --node-vm-size Standard_A4_v2 --kubernetes-version 1.32 --enable-node-public-ip
 
 az aks install-cli      # Install kubectl
 
 # Get credentials for your new AKS cluster
 az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME
+
+# Get config to copy/paste
+az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --file MatchMakingAPI/AzureFunctions/.kube/config
+
+
+RESOURCE_GROUP_WITH_AKS_RESOURCES=MC_TPS_RG_ageofroyal_cluster_francecentral        # Azure namespace
+NSG_NAME=aks-agentpool-22065260-nsg
+
+###   Security group 
+az network nsg rule create \
+  --resource-group $RESOURCE_GROUP_WITH_AKS_RESOURCES \
+  --nsg-name $NSG_NAME \
+  --name AgonesUDP \
+  --access Allow \
+  --protocol Udp \
+  --direction Inbound \
+  --priority 520 \
+  --source-port-range "*" \
+  --destination-port-range 7000-8000
 ``` 
 
 ### Install agones : 
@@ -60,15 +80,18 @@ kubectl apply -f agones-sdk-clusterrolebinding.yaml
 
 ### Logs
 ```
-kubectl logs --follow fleet-9qpw4-4s456 -n gameserver
+kubectl logs --follow fleet-tpkfc-ntmhd -n gameserver
+kubectl logs --follow fleet-tpkfc-ntmhd -n gameserver -c ageofroyal-server
+kubectl logs --follow fleet-tpkfc-ntmhd -n gameserver -c agones-gameserver-sidecar 
 kubectl get gameservers -n gameserver --watch
+kubectl get fleet -n gameserver
+
 ```
 
 ### Cleaning
 ```
-kubectl delete gs tps-server-t64jn -n gameserver
+kubectl delete gs fleet-tpkfc-ntmhd -n gameserver
 kubectl delete fleet fleet -n gameserver
 kubectl delete fas gamefleet-autoscaler -n gameserver
 ```
-
-
+ 

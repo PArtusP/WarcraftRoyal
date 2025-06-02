@@ -1,10 +1,10 @@
 ###     Create cluster
 # Declare necessary variables, modify them according to your needs
-AKS_RESOURCE_GROUP=Swingball_RG     # Name of the resource group your AKS cluster will be created in
+AKS_RESOURCE_GROUP=TPS_RG     # Name of the resource group your AKS cluster will be created in
 AKS_NAME=gamecluster                 # Name of your AKS cluster
 AKS_LOCATION=francecentral          # Azure region in which you'll deploy your AKS cluster
 AKS_NAMESPACE=gameserver          # Azure namespace
-RESOURCE_GROUP_WITH_AKS_RESOURCES=MC_Swingball_RG_gamecluster_francecentral        # Azure namespace
+RESOURCE_GROUP_WITH_AKS_RESOURCES=MC_TPS_RG_ageofroyal_cluster_francecentral        # Azure namespace
 
 # Create the Resource Group where your AKS resource will be installed
 az group create --name $AKS_RESOURCE_GROUP --location $AKS_LOCATION
@@ -22,7 +22,7 @@ az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME
 
 ## 2 --------Find the security group before (named like this : aks-agentpool-********-nsg )-------
 
-AKS_SECUGROUP=aks-agentpool-12539702-nsg
+AKS_SECUGROUP=aks-agentpool-22065260-nsg
 
 ###   Security group 
 az network nsg rule create \

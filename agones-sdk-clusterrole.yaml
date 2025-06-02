@@ -8,4 +8,4 @@ rules:
   verbs: ["list", "get", "watch", "patch"]
 - apiGroups: [""]
   resources: ["events"]
-  verbs: ["create"]
+  verbs: ["create", "patch"]  # ← Add "patch" here
