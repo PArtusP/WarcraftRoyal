@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e55978e6f73aa044b3ecc27af034b96, type: 3}
+  m_Name: Big arrow
+  m_EditorClassIdentifier: 
+  powerUp:
+    health: 0
+    damage: 3
+    speed: 0
+    cooldown: 0
+    sightRadius: 0
+    hitRadius: 0
+  cost: 2
+  target: {fileID: 1982330210055623403, guid: b49aa7bc639280c4e9acb8e6f663dd53, type: 3}
+  image: {fileID: 21300000, guid: 313131c603f5bf9449704f776ff0a16e, type: 3}

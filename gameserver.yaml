@@ -1,0 +1,23 @@
+apiVersion: "agones.dev/v1"
+kind: GameServer
+metadata:
+  generateName: "tps-server-"
+spec:
+  players:
+    initialCapacity: 20
+  ports:
+  - name: default
+    portPolicy: Dynamic
+    containerPort: 7777
+  template:
+    spec:
+      containers:
+      - name: ageofroyal-server
+        image: jausseran/ageofroyalserver:0.1
+        resources:
+          requests:
+            memory: "4Gi"  # Request 4 GB of memory
+            cpu: "2"       # Request 2 vCPUs
+          limits:
+            memory: "8Gi"  # Limit to 8 GB of memory
+            cpu: "4"       # Limit to 4 vCPUs
