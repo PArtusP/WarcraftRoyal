@@ -28,6 +28,8 @@ public class PlayerExperience
     public UnityEvent<int> LevelUpEvent { get; } = new UnityEvent<int>();
     public static int NbLevel => thresholds.Length - 1;
 
+    public HealthBar HealthBar  => healthBar; 
+
     public void AddExperience(float value)
     {
         if (level == thresholds.Length - 1) return;

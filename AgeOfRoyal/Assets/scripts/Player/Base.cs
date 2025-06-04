@@ -5,8 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 public class Base : Hitable
-{
-    private const int HealthBase = 100;
+{ 
     [SerializeField] List<Minion> spawnList;
     [SerializeField] Material material;
     private List<Minion> spawnedUnits = new List<Minion>();
@@ -14,6 +13,7 @@ public class Base : Hitable
     public Vector3 direction { get; private set; }
     public UnityEvent EndOfRoundEvent { get; private set; } = new UnityEvent();
     public List<Minion> SpawnList { get => spawnList; set => spawnList = value; }
+    protected override float MaxHealth { get; set; } = 1000;
 
     // Start is called before the first frame update
     override protected void AwakeInternal()
@@ -23,11 +23,11 @@ public class Base : Hitable
         bases.Remove(this);
 
         direction = (bases[0].transform.position - this.transform.position).normalized;
-        healthbar.SetMaxHealth(HealthBase);
-        Health = HealthBase;
+        healthbar.SetMaxHealth(MaxHealth);
+        Health = MaxHealth;
     }
     #region Spawn minions
-    public void SpawnMinion(Dictionary<int, MinionCombatStats> minionPowerUps)
+    public void SpawnMinion(Dictionary<int, MinionCombatStats> minionPowerUps, Dictionary<int, List<UnitModule>> minionModules)
     {
         float laneSpacing = 1.5f;
         float rowSpacing = 1.5f;
@@ -46,14 +46,14 @@ public class Base : Hitable
         Vector3 basePos = transform.position;
 
         float zOffset = Mathf.Sign(direction.z) * 3f;
-        zOffset += SpawnLine(melees, basePos, zOffset, laneSpacing, minionPowerUps) * -direction.z * rowSpacing;
-        zOffset += SpawnLine(mages, basePos, zOffset, laneSpacing, minionPowerUps) * -direction.z * rowSpacing;
-        zOffset += SpawnLine(archers, basePos, zOffset, laneSpacing, minionPowerUps) * -direction.z * rowSpacing;
+        zOffset += SpawnLine(melees, basePos, zOffset, laneSpacing, minionPowerUps, minionModules) * -direction.z * rowSpacing;
+        zOffset += SpawnLine(mages, basePos, zOffset, laneSpacing, minionPowerUps, minionModules) * -direction.z * rowSpacing;
+        zOffset += SpawnLine(archers, basePos, zOffset, laneSpacing, minionPowerUps, minionModules) * -direction.z * rowSpacing;
 
         spawnList.Clear();
     }
 
-    int SpawnLine(List<Minion> units, Vector3 basePos, float zOffset, float laneSpacing, Dictionary<int, MinionCombatStats> minionPowerUps)
+    int SpawnLine(List<Minion> units, Vector3 basePos, float zOffset, float laneSpacing, Dictionary<int, MinionCombatStats> minionPowerUps, Dictionary<int, List<UnitModule>> minionModules)
     {
         const int maxPerRow = 10;
         float rowSpacing = 1.5f;
@@ -101,6 +101,12 @@ public class Base : Hitable
                 Debug.Log($"Applying power-up to {unit.name}: {powerUp} (Total: {unit.Stats})");
             }
             else unit.PowerUp = MinionCombatStats.Zero;
+
+            if (minionModules.TryGetValue(unit.ID, out List<UnitModule> modules))
+            {
+                unit.AddModules(modules);
+                Debug.Log($"Adding modules to {unit.name}:  Total: {modules.Count})");
+            }
 
             unit.Target = null;
             spawnedUnits.Add(unit);

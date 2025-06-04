@@ -10,6 +10,7 @@ using UnityEngine.VFX;
 static public class DbResolver
 {
     static List<Minion> minions = null; 
+    static List<UnitUpgrade> upgrades = null; 
     public static List<Minion> Minions
     {
         get
@@ -19,9 +20,20 @@ static public class DbResolver
             return minions;
         }
     } 
+    public static List<UnitUpgrade> Upgrades
+    {
+        get
+        {
+            if (upgrades == null)
+                upgrades = Resources.LoadAll<UnitUpgrade>("").ToList();
+            return upgrades;
+        }
+    } 
 
     public static Minion GetMinionById(int id)
         => Minions.FirstOrDefault(m => m.ID == id) ?? throw new Exception($"Minion with ID {id} not found in resources.");
+    public static UnitUpgrade GetUpgradeById(int id)
+        => Upgrades.FirstOrDefault(m => m.ID == id) ?? throw new Exception($"Module with ID {id} not found in resources.");
 }
 
 
@@ -209,16 +221,8 @@ static class GameLayers
     public static LayerData Default = new LayerData(0);
     public static LayerData TransparentFX = new LayerData(1);
     public static LayerData IgnoreRaycast = new LayerData(2);
-    public static LayerData Player = new LayerData(3);
-    public static LayerData Water = new LayerData(4);
-    public static LayerData UI = new LayerData(5);
-    public static LayerData Enemy = new LayerData(6);
-    public static LayerData NoPush = new LayerData(7);
-    public static LayerData Door = new LayerData(8);
-    public static LayerData Interactable = new LayerData(9);
-    public static LayerData Weapon = new LayerData(10);
-    public static LayerData Blockwall = new LayerData(11);
-    public static LayerData Ragdoll = new LayerData(11);
+    public static LayerData Hitable = new LayerData(3);
+    public static LayerData Water = new LayerData(4); 
 
     static public bool IsInLayer(int layer, LayerMask mask)
     {

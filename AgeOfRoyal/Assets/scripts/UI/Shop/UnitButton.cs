@@ -10,6 +10,8 @@ abstract public class RightClickButton : MonoBehaviour, IPointerClickHandler, IP
 {
     [SerializeField] Button button;
     [SerializeField] protected TMPro.TextMeshProUGUI cost;
+    [SerializeField] Image image;
+    public Sprite Image { get => image.sprite; set => image.sprite = value; }
     public Button Button { get => button; set => button = value; }
 
     public System.Action OnLeftClick;
@@ -19,9 +21,11 @@ abstract public class RightClickButton : MonoBehaviour, IPointerClickHandler, IP
 
     private void Awake()
     {
+        SetSprite();
         SetCost();
     }
 
+    protected abstract void SetSprite();
     protected abstract void SetCost();
 
     public void OnPointerClick(PointerEventData eventData)
@@ -55,6 +59,7 @@ public class UnitButton : RightClickButton
     override public void Sell() => counter.text = (int.Parse(counter.text) - 1).ToString();
 
     protected override void SetCost() => cost.text = prefab.cost.ToString();
+    protected override void SetSprite() => Image = prefab.icon;
 
     internal void Reset() => counter.text = 0.ToString();
 }

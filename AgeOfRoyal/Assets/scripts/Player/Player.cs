@@ -22,6 +22,7 @@ public class Player : NetworkBehaviour
     [SerializeField] Button startButton;
 
     Dictionary<int, MinionCombatStats> minionPowerUps = new Dictionary<int, MinionCombatStats>();
+    Dictionary<int, List<UnitModule>> minionModules = new Dictionary<int, List<UnitModule>>();
 
     [SerializeField] PlayerExperience xp = new PlayerExperience();
     [SerializeField] PlayerStats stats = new PlayerStats();
@@ -32,6 +33,7 @@ public class Player : NetworkBehaviour
     [SerializeField] AnimationCurve levelUpAnimCurve;
     [SerializeField] internal Sprite selectedSprite;
     [SerializeField] internal Sprite iconSprite;
+    private List<UnitUpgrade> upgrades = new List<UnitUpgrade>();
 
     public NetworkVariable<bool> IsReadyForBattle { get; } = new NetworkVariable<bool>(false,
         NetworkVariableReadPermission.Everyone,
@@ -43,6 +45,7 @@ public class Player : NetworkBehaviour
     public UnityEvent OnReadyEvent { get; } = new UnityEvent();
     public UnityEvent OnDieEvent { get; } = new UnityEvent();
     public Dictionary<int, MinionCombatStats> MinionPowerUps => minionPowerUps;
+    public Dictionary<int, List<UnitModule>> MinionModules => minionModules;
 
     #region Init & Awake
     private void Awake()
@@ -116,7 +119,7 @@ public class Player : NetworkBehaviour
     }
     internal void StartNewCombatRound()
     {
-        Home.SpawnMinion(minionPowerUps);
+        Home.SpawnMinion(minionPowerUps, minionModules);
         Home.CheckEndRound(null);
     }
 
@@ -136,8 +139,10 @@ public class Player : NetworkBehaviour
             case UnitUpgradeButton unitUpgrade:
                 if (!unitUpgrade.IsOwned && wallet.Spend(unitUpgrade.Cost))
                 {
-                    AddMinionUpgrade(unitUpgrade.Target.ID, unitUpgrade.PowerUp);
-                    AddMinionUpgradeServerRpc(unitUpgrade.Target.ID, JsonUtility.ToJson(unitUpgrade.PowerUp));
+                    upgrades.Add(DbResolver.GetUpgradeById(unitUpgrade.ID));
+                    AddMinionPowerUp(unitUpgrade.Target.ID, unitUpgrade.PowerUp);
+                    AddMinionModules(unitUpgrade.Target.ID, unitUpgrade.Modules);
+                    AddMinionUpgradeServerRpc(unitUpgrade.ID);
                     return true;
                 }
                 return false;
@@ -162,8 +167,10 @@ public class Player : NetworkBehaviour
                 if (unitUpgrade.IsOwned)
                 {
                     wallet.Earn(unitUpgrade.Cost);
-                    AddMinionUpgrade(unitUpgrade.Target.ID, -unitUpgrade.PowerUp);  // @TOOO : Better to do ask and approve
-                    AddMinionUpgradeServerRpc(unitUpgrade.Target.ID, JsonUtility.ToJson(-unitUpgrade.PowerUp));
+                    upgrades.Remove(DbResolver.GetUpgradeById(unitUpgrade.ID));
+                    AddMinionPowerUp(unitUpgrade.Target.ID, -unitUpgrade.PowerUp);  // @TOOO : Better to do ask and approve
+                    RemoveMinionModules(unitUpgrade.Target.ID, unitUpgrade.Modules);  // @TOOO : Better to do ask and approve
+                    RemoveMinionUpgradeServerRpc(unitUpgrade.ID);
                     return true;
                 }
                 return false;
@@ -172,7 +179,7 @@ public class Player : NetworkBehaviour
         }
     }
 
-    private void AddMinionUpgrade(int prefabID, MinionCombatStats powerUp)
+    private void AddMinionPowerUp(int prefabID, MinionCombatStats powerUp)
     {
         if (minionPowerUps.TryGetValue(prefabID, out MinionCombatStats existingPowerUp))
             existingPowerUp.Add(powerUp);
@@ -181,22 +188,44 @@ public class Player : NetworkBehaviour
             var newPowerUp = MinionCombatStats.Zero + powerUp;
             minionPowerUps.Add(prefabID, newPowerUp);
         }
+    }
+    private void AddMinionModules(int prefabID, List<UnitModule> modules)
+    {
+        if (minionModules.TryGetValue(prefabID, out List<UnitModule> existingModules))
+            existingModules.AddRange(modules);
+        else
+            minionModules.Add(prefabID, new List<UnitModule>(modules));
+    }
+    private void RemoveMinionModules(int prefabID, List<UnitModule> modules)
+    {
+        modules.ForEach(m =>
+        {
+            if (minionModules.TryGetValue(prefabID, out List<UnitModule> existingModules))
+                existingModules.Remove(m);
+        });
+    }
+
+    [ServerRpc]
+    private void AddMinionUpgradeServerRpc(int iD)
+    {
+        var upgrade = DbResolver.GetUpgradeById(iD);
+        upgrades.Add(upgrade);
+        AddMinionModules(upgrade.Target.ID, upgrade.Modules);
+        AddMinionPowerUp(upgrade.Target.ID, upgrade.PowerUp);
     }
     [ServerRpc]
-    private void AddMinionUpgradeServerRpc(int prefabID, string powerUpjson)
+    private void RemoveMinionUpgradeServerRpc(int iD)
     {
-        var powerUp = JsonUtility.FromJson<MinionCombatStats>(powerUpjson);
-        if (minionPowerUps.TryGetValue(prefabID, out MinionCombatStats existingPowerUp))
-            existingPowerUp.Add(powerUp);
-        else
-        {
-            var newPowerUp = MinionCombatStats.Zero + powerUp;
-            minionPowerUps.Add(prefabID, newPowerUp);
-        }
+        var upgrade = DbResolver.GetUpgradeById(iD);
+        upgrades.Remove(upgrade);
+        RemoveMinionModules(upgrade.Target.ID, upgrade.Modules);
+        AddMinionPowerUp(upgrade.Target.ID, -upgrade.PowerUp);
     }
+
 
     internal void ShowPreparationUi(bool v)
     {
+        xp.HealthBar.transform.parent.gameObject.SetActive(v);
         walletUi.gameObject.SetActive(v);
         startButton.gameObject.SetActive(v);
         shopUi.gameObject.SetActive(v);

@@ -20,7 +20,10 @@ public class Minion : Hitable
 {
     [Header("Shop attributes")]
     [SerializeField] public int ID = -1;
+    [SerializeField] new private string name;
     [SerializeField] internal int cost;
+    [SerializeField] internal Sprite icon;
+    [SerializeField] private string description;
 
     [Header("Visuals")]
     [SerializeField] public List<RendererToColor> rendererToColor = new List<RendererToColor>(); 
@@ -29,8 +32,7 @@ public class Minion : Hitable
 
     [Header("Stats")]
     [SerializeField] private MinionCombatStats baseStats;
-    [SerializeField] private MinionCombatStats powerUp;
-    [SerializeField] float sightRadius;
+    [SerializeField] private MinionCombatStats powerUp;  
     [SerializeField] private LayerMask hitableLayer;
 
     Hitable target;
@@ -57,6 +59,8 @@ public class Minion : Hitable
     public Minion SourcePrefab { get; internal set; } = null;
     public SerializedMinion Serialized => new SerializedMinion() { ID = ID, Health = Health }; // Serialized data for saving/loading purposes
 
+    protected override float MaxHealth { get => Stats.health; set => Stats.health = value; }
+
     override protected void AwakeInternal()
     {
         IsAsset = false;
@@ -75,7 +79,7 @@ public class Minion : Hitable
                 CheckForTarget();
                 break;
             case MinionState.Follow:
-                if ((transform.position - controller.Destination).magnitude > sightRadius || target == null)
+                if ((transform.position - controller.Destination).magnitude > Stats.sightRadius || target == null)
                     Target = null;
                 else if ((transform.position - controller.Destination).magnitude > Stats.hitRadius)
                     controller.SetDestination(target.transform.position);
@@ -106,7 +110,7 @@ public class Minion : Hitable
 
     private void CheckForTarget()
     {
-        var cols = Physics.OverlapSphere(transform.position, sightRadius, hitableLayer);
+        var cols = Physics.OverlapSphere(transform.position, Stats.sightRadius, hitableLayer);
         List<Hitable> targets = new List<Hitable>();
         if (cols.Length > 0)
         {
@@ -189,6 +193,12 @@ public class Minion : Hitable
             if (currPercent < percentHealth)
                 Health = percentHealth * Stats.health;
         }
+    }
+
+    internal void AddModules(List<UnitModule> modules)
+    {
+        // @TODO check if exiting same modules, compare, take best stats
+        combat.Modules.AddRange(modules);
     }
 }
 [Serializable]

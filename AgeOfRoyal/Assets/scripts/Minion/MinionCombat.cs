@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -9,19 +10,25 @@ abstract public class MinionCombat : NetworkBehaviour
     [SerializeField] TriggerSVFX attackFx;
     [SerializeField] protected Transform hitPoint;
     protected MinionAnimator animator;
+    protected List<UnitModule> modules = new List<UnitModule>();
     protected Minion minion;
 
     [Header("Range specific")]
     [SerializeField] private ProjectileMove vfx;
 
     public Minion Owner { get; private set; }
+    public Transform HitPoint { get => hitPoint; set => hitPoint = value; }
+    public List<UnitModule> Modules => modules; 
 
     private void Awake()
     {
         animator = GetComponent<MinionAnimator>();
         minion = GetComponent<Minion>();
     }
-
+    private void Update()
+    {
+        modules.ForEach(m => m.Use(this));
+    }
 
     internal void TryAttack(Hitable target)
     {
