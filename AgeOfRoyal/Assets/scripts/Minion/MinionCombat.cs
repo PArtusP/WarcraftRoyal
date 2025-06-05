@@ -10,7 +10,7 @@ abstract public class MinionCombat : NetworkBehaviour
     [SerializeField] TriggerSVFX attackFx;
     [SerializeField] protected Transform hitPoint;
     protected MinionAnimator animator;
-    protected List<UnitModule> modules = new List<UnitModule>();
+    [SerializeField] protected List<UnitModule> modules = new List<UnitModule>();
     protected Minion minion;
 
     [Header("Range specific")]

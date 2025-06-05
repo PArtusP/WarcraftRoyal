@@ -10,7 +10,7 @@ public class MinionController : NetworkBehaviour
     NavMeshAgent agent;
     MinionAnimator animator;
 
-    public Vector3 Destination { get => agent.destination; }
+    public Vector3 Destination { get => agent ? agent.destination : transform.position; }
     public NavMeshAgent Agent
     {
         get

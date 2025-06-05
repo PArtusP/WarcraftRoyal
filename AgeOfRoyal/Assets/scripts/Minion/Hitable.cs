@@ -70,6 +70,5 @@ abstract public class Hitable : NetworkBehaviour
     {
         OnDieEvent.Invoke();
         Destroy(gameObject);
-    }
-
+    } 
 }

@@ -15046,7 +15046,7 @@ MonoBehaviour:
   cost: {fileID: 8219278808337531831}
   image: {fileID: 7568988691790389004}
   status: {fileID: 3044987182288850989}
-  upgrade: {fileID: 11400000, guid: 7acf24d25e038a34bbeae85f1ef18280, type: 2}
+  upgrade: {fileID: 11400000, guid: a9837be2e01902e468eeba8a9610705f, type: 2}
 --- !u!222 &8219278808264061394
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -15460,7 +15460,7 @@ MonoBehaviour:
   cost: {fileID: 8489857579603502298}
   image: {fileID: 7982847937357756513}
   status: {fileID: 3279536757066413888}
-  upgrade: {fileID: 11400000, guid: 7acf24d25e038a34bbeae85f1ef18280, type: 2}
+  upgrade: {fileID: 11400000, guid: 1b0e3ab6f75fffc4bb79549c5f409c3f, type: 2}
 --- !u!222 &8489857579794552511
 CanvasRenderer:
   m_ObjectHideFlags: 0

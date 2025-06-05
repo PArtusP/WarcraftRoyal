@@ -200,6 +200,8 @@ public class Minion : Hitable
         // @TODO check if exiting same modules, compare, take best stats
         combat.Modules.AddRange(modules);
     }
+
+    internal void SetTarget(Minion unit) => target = unit; 
 }
 [Serializable]
 public class RendererToColor

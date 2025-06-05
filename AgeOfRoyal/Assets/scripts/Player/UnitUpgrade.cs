@@ -6,7 +6,7 @@ public class UnitUpgrade : ScriptableObject
 {
     [SerializeField] public int ID = -1;
     [SerializeField] string perkName;
-    [SerializeField] MinionCombatStats powerUp;
+    [SerializeField] MinionCombatStats powerUp = MinionCombatStats.Zero;
     [SerializeField] List<UnitModule> modules;
     [SerializeField] int cost;
     [SerializeField] string description;

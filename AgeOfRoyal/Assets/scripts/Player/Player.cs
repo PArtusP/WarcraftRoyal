@@ -86,37 +86,40 @@ public class Player : NetworkBehaviour
     {
         if (wallet.Value > 0 && xp.Level < PlayerExperience.NbLevel)
         {
-            Debug.Log("Player, WaitToStartRound: reset waller");
-            var currXp = xp.CurrentXp;
-            var newXp = xp.CurrentXp + wallet.Value;
-            var xpTransitionTime = Mathf.Min(.5f, (newXp - currXp) * .25f);
+            Debug.Log("Player, WaitToStartRound: reset wallet");
+            float currXp = xp.CurrentXp;
+            float targetXp = currXp + wallet.Value;
 
-            var level = xp.Level;
-            while (level < PlayerExperience.NbLevel && newXp >= PlayerExperience.GetThreshold(level))
+            float xpTransitionTime = Mathf.Min(0.5f, (targetXp - currXp) * 0.25f);
+            float elapsed = 0f;
+
+            while (xp.CurrentXp < targetXp)
             {
-                newXp -= PlayerExperience.GetThreshold(level);
-                level++;
-            }
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / xpTransitionTime);
+                float curveT = levelUpAnimCurve.Evaluate(t);
 
-            var time = 0f;
-            while (xp.CurrentXp < newXp || xp.Level < level)
-            {
-                time += Time.deltaTime / xpTransitionTime;
+                float interpolatedXp = Mathf.Lerp(currXp, targetXp, curveT);
+                float xpToAdd = interpolatedXp - xp.CurrentXp;
 
-                var t = levelUpAnimCurve.Evaluate(Mathf.Clamp(time, 0f, 1f));
-                var v = t * (newXp - currXp) + currXp;
-                xp.AddExperience(v - xp.CurrentXp);
-                Debug.Log($"target xp: {v}, xp: {xp.CurrentXp}, target level: {level}, level: {xp.Level}");
+                if (xpToAdd > 0f)
+                {
+                    xp.AddExperience(xpToAdd);
+                }
+
+                Debug.Log($"target xp: {interpolatedXp}, xp: {xp.CurrentXp}, level: {xp.Level}");
                 yield return new WaitForEndOfFrame();
             }
+
             wallet.Reset();
         }
-        yield return new WaitForSeconds(.5f);
+
+        yield return new WaitForSeconds(0.5f);
         ShowPreparationUi(false);
 
         IsReadyForBattle.Value = true;
-        //SendUnitToServerRpc(JsonUtility.ToJson(Home.SpawnList.Select(m => m.Serialized)), JsonUtility.ToJson(minionPowerUps)); 
     }
+
     internal void StartNewCombatRound()
     {
         Home.SpawnMinion(minionPowerUps, minionModules);
