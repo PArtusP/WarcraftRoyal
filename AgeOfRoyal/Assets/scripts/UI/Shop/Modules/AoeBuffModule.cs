@@ -14,7 +14,7 @@ public class AoeBuffModule : AoeUnitModule
     public override string Description => 
         $"{(picking.SameTeam == Target.Friends ? "Grants" : "Inflicts")} " +
         $"{buff.PowerUp.Short}" +
-        $"{(buff.Heal > 0 ? $"{(buff.PowerUp.Short != string.Empty ? " & " : string.Empty)}{buff.Heal}Hp/s" : string.Empty)}" +
+        $"{(buff.Heal > 0 ? $"{(buff.PowerUp.Short != string.Empty ? " & " : string.Empty)}{buff.Heal}HP/s" : string.Empty)}" +
         $"{(buff.Dispel ? $"{(buff.PowerUp.Short != string.Empty || buff.Heal > 0 ? " & " : string.Empty)}dispel" : string.Empty)} " +
         $"to {picking.MaxTarget} {(picking.SameTeam == Target.Friends ? "allies" : picking.SameTeam == Target.Foes ? "foes" : "unit")} " +
         $"within {radius}m";
