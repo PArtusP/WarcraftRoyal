@@ -2,6 +2,7 @@ using System.Collections;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 
 public enum Phase
@@ -9,11 +10,17 @@ public enum Phase
     Preparation,
     Combat,
 }
+public enum RewardType
+{
+    KeepSurvivor,
+    EarnHalfValue,
+}
 public class MatchManager : NetworkBehaviour
 {
     private const int preparationTime = 20;
     [Header("UI")]
     [SerializeField] Canvas restartCanvas;
+    [SerializeField] RewardType rewardType = RewardType.EarnHalfValue;
     [SerializeField] CountDownUi countDownUi;
     ShopUi shopUi;
     int roundCount = 0;
@@ -21,6 +28,15 @@ public class MatchManager : NetworkBehaviour
 
     [Header("Players")]
     [SerializeField] PlayerManager playerManager;
+
+    private void Update()
+    {
+        if (UnitUpgradeDetailUi.Instance == null) return;
+        if (UnitUpgradeDetailUi.Instance.gameObject.activeSelf
+            && Mouse.current.rightButton.wasPressedThisFrame)
+            UnitUpgradeDetailUi.Instance.Close();
+    }
+
 
     #region Set game up 
     public void AskSetUpGame()
@@ -82,8 +98,16 @@ public class MatchManager : NetworkBehaviour
 
             playerManager.Players[nb] = player;
             if (player.IsOwner)
-                countDownUi.EndCountDownEvent.AddListener(delegate () { EndPreparationCooldown(player); });
+            {
+                player.IsReadyForBattle.OnValueChanged += StopCountDown;
+                countDownUi.EndCountDownEvent.AddListener(delegate () { player.WaitToStartRound(); });
+            }
         }
+    }
+
+    private void StopCountDown(bool previousValue, bool newValue)
+    {
+        if (newValue) countDownUi.StopCountDown();
     }
 
     private void SetUiServer()
@@ -119,37 +143,58 @@ public class MatchManager : NetworkBehaviour
     #endregion
 
     #region Game loop
-
-    private void EndOfCombatRound()
-    {
-        if (phase == Phase.Preparation) return;
-        phase = Phase.Preparation;
-        StartCoroutine(PreparationPhase());
-    }
     #region Game loop - Preparation phase
     private IEnumerator PreparationPhase()
     {
         yield return new WaitForSeconds(1f);
-        playerManager.Players.ForEach(p => p.Home.ResetForNextRound());
-        PreparationPhase_ResetPlayerClientRpc();
-        StartCoroutine(countDownUi.CountDown(preparationTime));
+
+
+        playerManager.Players.ForEach(p =>
+        {
+            var moneyReward = 5 + roundCount * 2;
+            switch (rewardType)
+            {
+                case RewardType.KeepSurvivor: // Stop survivors, respawn them next time
+                    if (p.Home.SpawnedUnits.Any())
+                    {
+                        p.Home.SpawnedUnits.ForEach(u => u.SetState(MinionState.Stop));
+                        p.Home.SpawnList.AddRange(p.Home.SpawnedUnits);
+                        p.Home.SpawnedUnits.Clear();
+                    }
+                    break;
+                case RewardType.EarnHalfValue: // Despawn survivors, earn half the total value of the survivors
+                    if (p.Home.SpawnedUnits.Any())
+                    {
+                        p.Home.SpawnedUnits.ForEach(u => u.NetworkObject.Despawn());
+                        moneyReward += p.Home.SpawnedUnits.Sum(u => Mathf.Min(1, Mathf.FloorToInt(u.cost * .5f)));
+                        p.Home.SpawnedUnits.Clear();
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            PreparationPhase_ResetPlayerClientRpc(p.NetworkObjectId, moneyReward);
+        });
+
+        countDownUi.StartCountDown(preparationTime);
         roundCount++;
     }
     [ClientRpc]
-    private void PreparationPhase_ResetPlayerClientRpc()
+    private void PreparationPhase_ResetPlayerClientRpc(ulong playerObjectId, int moneyReward)
     {
-        StartCoroutine(countDownUi.CountDown(preparationTime));
-        playerManager.Players.ForEach(p =>
-        {
-            if (p.IsOwner)
-            {
-                p.StartPreparationPhase(5 + roundCount * 2);
-                roundCount++;
-            }
-        });
+        var player = GetNetworkObject(playerObjectId).GetComponent<Player>();
+        if (!player.IsOwner) return;
+
+        countDownUi.StartCountDown(preparationTime);
+        player.StartPreparationPhase(moneyReward);
+        roundCount++;
     }
 
-    private void EndPreparationCooldown(Player p) => StartCoroutine(p.WaitToStartRound());
+    /*    private void EndPreparationCooldown(Player p)
+        {
+            p.WaitToStartRound();
+        }*/
     #endregion
 
     #region Game loop - Combat phase
@@ -160,9 +205,16 @@ public class MatchManager : NetworkBehaviour
         playerManager.Players.ForEach(p => p.StartNewCombatRound());
     }
 
+    private void EndOfCombatRound()
+    {
+        if (phase == Phase.Preparation) return;
+        phase = Phase.Preparation;
+        StartCoroutine(PreparationPhase());
+    }
+
     #endregion
 
-    #endregion 
+    #endregion
 
     #region Death
     private void ProcessDeath(ulong objectId)

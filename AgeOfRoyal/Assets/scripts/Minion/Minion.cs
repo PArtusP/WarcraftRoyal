@@ -1,114 +1,308 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Netcode;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.XR;
+using static UnityEditor.AnimationUtility;
+using static UnityEngine.GraphicsBuffer;
+using static UnityEngine.Rendering.RayTracingAccelerationStructure;
 
-enum MinionState
+public enum MinionState
 {
     Walk,
     Follow,
     Combat,
     Stop
 }
+public enum Class
+{
+    Melee,
+    Range,
+    Mage
+}
 public class SerializedMinion
 {
     public int ID = -1;
     public float Health = 0;
 }
-public class Minion : Hitable
+abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 {
+
     [Header("Shop attributes")]
     [SerializeField] public int ID = -1;
-    [SerializeField] new private string name;
+    [SerializeField] protected Class type = Class.Melee;
+    [SerializeField] new protected string name;
     [SerializeField] internal int cost;
     [SerializeField] internal Sprite icon;
-    [SerializeField] private string description;
+    [SerializeField] protected string description;
 
     [Header("Visuals")]
-    [SerializeField] public List<RendererToColor> rendererToColor = new List<RendererToColor>(); 
-    MinionController controller;
-    MinionCombat combat;
+    [SerializeField] public List<RendererToColor> rendererToColor = new List<RendererToColor>();
+    protected MinionController controller;
+    protected MinionCombat combat;
 
     [Header("Stats")]
-    [SerializeField] private MinionCombatStats baseStats;
-    [SerializeField] private MinionCombatStats powerUp;  
-    [SerializeField] private LayerMask hitableLayer;
+    [SerializeField] protected UnitStats baseStats;
+    [SerializeField] protected LayerMask hitableLayer;
+    [SerializeField] protected List<UnitBuff> buffs = new List<UnitBuff>();
 
-    Hitable target;
-
-    MinionState State { get; set; } = MinionState.Stop;
-    public bool IsAsset { get; set; } = true; 
-    public bool IsStopped => State == MinionState.Stop; 
-
-    public LayerMask HitableLayer { get => hitableLayer; set => hitableLayer = value; }
-    public Hitable Target
-    {
-        get => target; set
-        { 
-            target = value;
-            if (target == null)
-            { 
-                SetState(MinionState.Walk);
-                controller.SetDestination(new Vector3(home.transform.position.x, home.transform.position.y, -home.transform.position.z));
-            }
-        }
-    } 
-    public MinionCombatStats Stats => baseStats + powerUp; 
-    public MinionCombatStats PowerUp { get => powerUp; set => powerUp = value; }
+    protected Hitable target;
+    public bool IsAsset { get; set; } = true;
+    public UnitStats Stats => baseStats + TotalBuff;
+    public List<UnitBuff> Buffs => buffs;
+    UnitPowerUp StatBuffs => buffs.Where(b => b.PowerUp.IsBuff).Select(b => b.PowerUp).SumPowerUps();
+    UnitPowerUp StatDebuffs => buffs.Where(b => b.PowerUp.IsBuff).Select(b => b.PowerUp).SumPowerUps();
+    public UnitPowerUp TotalBuff => buffs.Select(b => b.PowerUp).SumPowerUps();
+    public List<UnitModule> Modules => combat.Modules;
     public Minion SourcePrefab { get; internal set; } = null;
     public SerializedMinion Serialized => new SerializedMinion() { ID = ID, Health = Health }; // Serialized data for saving/loading purposes
 
     protected override float MaxHealth { get => Stats.health; set => Stats.health = value; }
+    public string Name { get => name; set => name = value; }
+    public MinionCombat Combat { get => combat; set => combat = value; }
+    internal Class Type { get => type; set => type = value; }
+    public LayerMask HitableLayer { get => hitableLayer; set => hitableLayer = value; }
+    public Hitable Target
+    {
+        get => target; set
+        {
+            target = value;
+            if (target == null)
+                controller.SetDestination(new Vector3(home.transform.position.x, home.transform.position.y, -home.transform.position.z));
+        }
+    }
 
+    abstract public bool IsStopped { get; }
     override protected void AwakeInternal()
     {
         IsAsset = false;
         controller = GetComponent<MinionController>();
-        ApplyStatsAndStatus();
         combat = GetComponent<MinionCombat>();
         combat.Init(this);
+        ApplyStatsAndStatus();
     }
+
+
+    private void OnValidate()
+    {
+        controller = GetComponent<MinionController>();
+        combat = GetComponent<MinionCombat>();
+    }
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (!IsServer)
+            UnitUpgradeDetailUi.Instance.Display(this, TotalBuff);
+    }
+    internal void ApplyStatsAndStatus()
+    {
+        controller.SetSpeed(Stats.speed);
+        healthbar.SetMaxHealth(Stats.health);
+        Health = Stats.health;
+    }
+
+    public override bool GetHit(float damage, Hitable opponent)
+    {
+        if (opponent is Minion m)
+        {
+            if (m.Type == Class.Mage) damage *= 1f - Stats.armorRange;
+            if (m.Type == Class.Range) damage *= 1f - Stats.armorRange;
+            if (m.Type == Class.Melee) damage *= 1f - Stats.armorMelee;
+        }
+        return base.GetHit(damage, opponent);
+    }
+
+    internal void AddPowerUp(UnitBuff powerUp, float duration = 0, Hitable source = null)
+    {
+        powerUp = powerUp.Clone();
+        powerUp.Source = source ?? this;
+        if (buffs.Where(b => b.SourceId == powerUp.SourceId).Count() == 1 && powerUp.BuffType == UnitBuffType.Refreshable)
+            buffs.First(b => b.SourceId == powerUp.SourceId).Refresh();
+
+        if (buffs.Where(b => b.SourceId == powerUp.SourceId).Count() >= powerUp.MaxStack)
+            return;
+
+        if (buffs.Any(b => b.BuffType != UnitBuffType.Stackable && b.SourceId == powerUp.SourceId && b.Source == powerUp.Source))
+            return;
+
+        if (powerUp.BuffType == UnitBuffType.OneShot)
+        { // Add other OneShot effect here, like dispel, heal, etc.
+            if (powerUp.Heal != 0)
+                Heal(powerUp.Heal);
+            if (powerUp.Dispel)
+                RemoveBuffs(Home == source.Home);
+        }
+        else if (!UnitPowerUp.Identity.Equals(powerUp.PowerUp) || powerUp.Heal != 0)
+        {
+            var old = Stats;
+            buffs.Add(powerUp);
+
+            if (old.speed != Stats.speed)
+                controller.SetSpeed(Stats.speed);
+
+            if (old.health != Stats.health)
+            {
+                var percentHealth = Health / old.health;
+                var currPercent = Health / Stats.health;
+
+                if (currPercent < percentHealth)
+                    Health = percentHealth * Stats.health;
+            }
+
+            if (powerUp.BuffType == UnitBuffType.Temporary || powerUp.BuffType == UnitBuffType.Refreshable)
+                StartCoroutine(WaitToRemovePowerUp(powerUp, duration));
+        }
+        powerUp.Apply();
+
+    }
+    private IEnumerator WaitToRemovePowerUp(UnitBuff powerUp, float duration)
+    {
+        while (!powerUp.IsExpired())
+        {
+            yield return new WaitForSeconds(powerUp.AppliedTime);
+        }
+        buffs.Remove(powerUp);
+    }
+
+    internal void AddModules(List<UnitModule> modules)
+    {
+        // @TODO check if exiting same modules, compare, take best stats
+        combat.Modules.AddRange(modules);
+    }
+
+    internal void SetTarget(Hitable unit) => target = unit;
+
+    internal void RemoveBuffs(bool removeDebuff) => buffs.RemoveAll(item => buffs.Where(b => b.CanBeDispelled && b.PowerUp.IsBuff != removeDebuff).Contains(item)); // @TODO pas opti
+}
+
+abstract public class UnitBase<T> : UnitWithoutState where T : Enum
+{
+    protected FSM<T> fsm = new FSM<T>();
+    private AttackConditions<T> validContition;
+    private List<AttackConditions<T>> conditons;
+     
+    abstract public T Stop { get;  }
+    abstract public T Walk { get;   }
+    abstract public T Follow { get;   }
+    abstract public T InCombat { get;   }
 
     private void Update()
     {
         if (!IsServer) return;
-        switch (State)
-        {
-            case MinionState.Walk:
-                CheckForTarget();
-                break;
-            case MinionState.Follow:
+
+        buffs.RemoveAll(b => b.IsExpired());
+
+        var sumHeal = buffs.Sum(b => b.Heal);
+        if (sumHeal > 0)
+            Heal(sumHeal * Time.deltaTime);
+
+        fsm.CheckNextState();
+        fsm.Update();
+    }
+    protected override void AwakeInternal()
+    {
+        base.AwakeInternal();
+        SetUpFSM();
+    }
+
+    #region FSM
+    virtual protected void SetUpFSM()
+    {
+        fsm.states = new List<State<T>>() {
+            new State<T>(Stop,
+                    null,
+                    null,
+                    () => controller.Stop(true)
+                ),
+            new State<T>(Walk,
+                    () => CheckForTarget(),
+                    null,
+                    () => {
+                        controller.Stop(false); 
+                        Target = null;
+                    }
+            ),
+            new State<T>(Follow,
+            () => {
                 if ((transform.position - controller.Destination).magnitude > Stats.sightRadius || target == null)
-                    Target = null;
+                {
+                    return Walk;
+                }
                 else if ((transform.position - controller.Destination).magnitude > Stats.hitRadius)
                     controller.SetDestination(target.transform.position);
                 else if ((transform.position - controller.Destination).magnitude < Stats.hitRadius)
                 {
-                    SetState(MinionState.Combat);
                     controller.SetDestination(target.transform.position);
                     controller.Stop(true);
+                    return InCombat;
+
+
+                    AttackConditions<T> success = conditons.Where(c => TryAttackCondition(c)).FirstOrDefault();
+                    if (success != null)
+                    {
+                        validContition = success;
+                        //return !success.NextStage.Equals(CheckForTarget) ? success.NextStage : HitTarget;
+                        return success.NextStage;
+                    }
+
                 }
-                break;
-            case MinionState.Combat:
-                if (target == null)
-                    Target = null;
-                if ((transform.position - controller.Destination).magnitude > Stats.hitRadius)
-                    SetState(MinionState.Follow);
-                else
-                {
-                    transform.LookAt(target.transform, Vector3.up);
-                    combat.TryAttack(target);
-                }
-                break;
-            case MinionState.Stop:
-                Debug.Log($"Stopped: {gameObject.name}"); break;
-            default:
-                break;
-        }
+                return Follow;
+            }, 
+            null
+            ),
+            new State<T>(InCombat,
+                    () => {
+                        if (target == null)
+                            return Walk;
+                        else if ((transform.position - controller.Destination).magnitude > Stats.hitRadius)
+                            return Follow;
+                        return InCombat;
+                    },
+            () => {
+                transform.LookAt(target.transform, Vector3.up);
+                        combat.TryAttack(target);
+                    }
+                ),
+        };
     }
 
-    private void CheckForTarget()
+    protected bool TryAttackCondition(AttackConditions<T> c)
+    {
+        return (transform.position - Target.transform.position).magnitude <= c.Condition.outRadius
+                                && (transform.position - Target.transform.position).magnitude >= c.Condition.inRadius
+                                //&& CheckAngle(Target, c.Condition.angle)
+                                && (!c.Condition.directSight 
+                                //|| IsClearPathToHitable(Target, c.Condition.outRadius, GameLayers.Hitable.Mask
+                                );
+                                //&& (c.attack.lastComboEnd == 0 || c.attack.lastComboEnd + c.attack.Previous.isNotAttackingTime < Time.time);
+    }
+    public bool IsClearPathToHitable(Hitable target, float checkRadius, LayerMask check)
+    {
+        Ray ray = new Ray(transform.position + Vector3.up * .5f, target.transform.position - transform.position);
+        var all = Physics.RaycastAll(
+            transform.position + Vector3.up * .5f,
+            target.transform.position - transform.position,
+            checkRadius,
+            check).ToList();
+        all = all.OrderBy(h => (transform.position + Vector3.up * .5f - h.point).magnitude).ToList();
+        foreach (var item in all)
+        {
+            // Check if the hit object is the target
+            if (item.collider.gameObject == target.gameObject)
+                return true; // Direct hit, no obstruction 
+            else
+            {
+                UnitWithoutState hit = item.collider.GetComponent<UnitWithoutState>() ? item.collider.GetComponent<UnitWithoutState>() : item.collider.GetComponentInParent<UnitWithoutState>() ? item.collider.GetComponentInParent<UnitWithoutState>() : null;
+                if (!hit /*|| hit.BlockAttack*/) return false; // Something is obstructing the view
+            }
+        }
+        return false;
+    }
+
+
+    protected T CheckForTarget()
     {
         var cols = Physics.OverlapSphere(transform.position, Stats.sightRadius, hitableLayer);
         List<Hitable> targets = new List<Hitable>();
@@ -125,14 +319,14 @@ public class Minion : Hitable
 
                 Target = targets.First();
                 controller.SetDestination(target.transform.position);
-                SetState(MinionState.Follow);
+                return Follow;
             }
         }
+        return Walk;
     }
-
     private void OnDrawGizmos()
     {
-        switch (State)
+        switch (fsm.CurrentState)
         {
             case MinionState.Walk:
                 Gizmos.color = Color.green;
@@ -151,61 +345,124 @@ public class Minion : Hitable
         }
     }
 
-    internal void SetState(MinionState state)
-    {
-        Debug.Log($"Minion, SetState: {gameObject.name} to {state}");
-        switch (this.State)
-        {
-        }
-        this.State = state;
-        switch (this.State)
-        {
-            case MinionState.Stop:
-                controller.Stop(true);
-                break;
+    internal void SetState(T state) => fsm.SwitchState(state);
 
-            case MinionState.Walk:
-                controller.Stop(false);
-                break;
-        }
-    }
+    #endregion
 
-    internal void ApplyStatsAndStatus()
-    {
-        controller.SetSpeed(Stats.speed);
-        healthbar.SetMaxHealth(Stats.health);
-        Health = Stats.health; 
-    }
+}
 
-    internal void SetPowerUp(MinionCombatStats powerUp)
-    {
-        var old = Stats;
-        PowerUp = powerUp;
+public class Minion : UnitBase<MinionState>
+{
+    public override bool IsStopped => fsm.CurrentState == MinionState.Stop;
 
-        if (old.speed != Stats.speed)
-            controller.SetSpeed(Stats.speed);
+    public override MinionState Stop => MinionState.Stop;
 
-        if (old.health != Stats.health)
-        {
-            var percentHealth = Health / old.health;
-            var currPercent = Health / Stats.health;
+    public override MinionState Walk => MinionState.Walk;
 
-            if (currPercent < percentHealth)
-                Health = percentHealth * Stats.health;
-        }
-    }
+    public override MinionState Follow => MinionState.Follow;
 
-    internal void AddModules(List<UnitModule> modules)
-    {
-        // @TODO check if exiting same modules, compare, take best stats
-        combat.Modules.AddRange(modules);
-    }
-
-    internal void SetTarget(Minion unit) => target = unit; 
+    public override MinionState InCombat => MinionState.Combat;
 }
 [Serializable]
 public class RendererToColor
 {
     public int id = 0;
     public Renderer renderer;
+}
+
+
+
+[System.Serializable]
+public class FSM<T> where T : Enum
+{
+    [SerializeField] private State<T> currentState;
+    public List<State<T>> states;
+
+    public T CurrentState { get => currentState != null ? currentState.type : default; }
+
+    public void CheckNextState()
+    {
+        if (currentState.checkNextState == null) return;
+        var nextState = currentState.checkNextState();
+        if (!nextState.Equals(currentState.type))
+        {
+            SwitchState(nextState);
+        }
+    }
+
+    public void SwitchState(T nextState)
+    {
+        var oldState = currentState;
+        currentState = states.Find(s => s.type.Equals(nextState));
+        if (oldState != null && oldState.onEnd != null)
+            oldState.onEnd();
+        if (currentState.onStart != null)
+            currentState.onStart();
+    }
+
+    public void Update()
+    {
+        if (currentState.onUpdate != null)
+            currentState.onUpdate();
+    }
+
+
+}
+[System.Serializable]
+public class State<T> where T : Enum
+{
+    public T type;
+    internal Func<T> checkNextState = null;
+    internal Action onUpdate = null;
+    internal Action onStart = null;
+    internal Action onEnd = null;
+
+    public State(T type, Func<T> checkNextState, Action onUpdate, Action onStart = null, Action onEnd = null)
+    {
+        this.type = type;
+        this.checkNextState = checkNextState;
+        this.onUpdate = onUpdate;
+        this.onStart = onStart;
+        this.onEnd = onEnd;
+    }
+}
+public class AttackConditions<T> where T : Enum
+{
+    internal UnitAction action = null;
+    internal T NextStage = default;
+    internal AttackCondition<T> Condition { get; set; }
+}
+public class AttackCondition<T> where T : Enum
+{
+    internal float inRadius = 0f;
+    internal float outRadius = .5f;
+    internal float angle = 5f;
+    internal float cooldown = .6f;
+    internal bool directSight = true;
+    internal float rotateUntil = 0f;
+
+    internal Func<UnitBase<T>, Hitable, bool> Check { get; set; } = null;
+}
+[Serializable]
+public class MinionSound
+{
+    public AudioClip detect;
+    public AudioClip hitReaction;
+    public AudioClip die;
+
+    void SetClipAndPlay(AudioSource source, AudioClip clip)
+    {
+        source.clip = clip;
+        source.Play();
+    }
+    void SetClipAndPlayLoop(AudioSource source, AudioClip clip)
+    {
+        source.clip = clip;
+        source.loop = true;
+        source.Play();
+    }
+
+    public void Detect(AudioSource source) => SetClipAndPlay(source, detect);
+    public void Die(AudioSource source) => SetClipAndPlay(source, die);
+    internal void HitReaction(AudioSource source) => SetClipAndPlay(source, hitReaction);
 }

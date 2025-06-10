@@ -1,22 +1,14 @@
-﻿using System.Linq;
-using UnityEngine;
- 
-[System.Serializable]
-[CreateAssetMenu(fileName = "___ - MOD AOE Taunt", menuName = "Unit Modules/AOE Taunt", order = 1)]
-public class AoeTauntModule : UnitModule
-{ 
-    [SerializeField] private float radius = 8f;
+﻿using UnityEngine;
 
-    override public void Use(MinionCombat owner)
+[System.Serializable]
+[CreateAssetMenu(fileName = "___ - MOD AOE Taunt", menuName = "Unit Modules/AOE Taunt", order = 4)]
+public class AoeTauntModule : AoeUnitModule
+{
+    public override string Description => $"Foes within {radius}m target this unit";
+
+    override protected void ApplyEffect(Hitable target, MinionCombat owner)
     {
-        var cols = Physics.OverlapSphere(owner.HitPoint.position, radius, GameLayers.Hitable.Mask);
-        cols.ToList().ForEach(c =>
-        {
-            var h = c.GetComponent<Minion>();
-            if (h != null 
-            && h != owner.Owner 
-            && h.Home != owner.Owner.Home )
-                h.SetTarget(owner.Owner);
-        });
+        if (target is Minion m && m.Target != owner.Owner)
+            m.SetTarget(owner.Owner);
     }
 }

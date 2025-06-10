@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -39,8 +35,8 @@ abstract public class RightClickButton : MonoBehaviour, IPointerClickHandler, IP
             OnRightClick?.Invoke();
         }
     }
-    public void OnPointerEnter(PointerEventData eventData) => PointerEnter?.Invoke(); 
-    public void OnPointerExit(PointerEventData eventData) => PointerExit?.Invoke(); 
+    public void OnPointerEnter(PointerEventData eventData) => PointerEnter?.Invoke();
+    public void OnPointerExit(PointerEventData eventData) => PointerExit?.Invoke();
 
     abstract public void Buy();
     abstract public void Sell();
@@ -49,17 +45,19 @@ abstract public class RightClickButton : MonoBehaviour, IPointerClickHandler, IP
 public class UnitButton : RightClickButton
 {
 
-    [SerializeField] Minion prefab; 
-    [SerializeField] TMPro.TextMeshProUGUI counter;
+    [SerializeField] Minion prefab;
+    [SerializeField] TMPro.TextMeshProUGUI buyCounter;
+    [SerializeField] TMPro.TextMeshProUGUI currentCounter; // Not used now
 
-    public Minion Prefab { get => prefab; set => prefab = value; } 
+    public Minion Prefab { get => prefab; set => prefab = value; }
 
-    override public void Buy() => counter.text = (int.Parse(counter.text) + 1).ToString();
+    override public void Buy() => buyCounter.text = (buyCounter.text == string.Empty ? 1 : int.Parse(buyCounter.text) + 1).ToString();
 
-    override public void Sell() => counter.text = (int.Parse(counter.text) - 1).ToString();
+    override public void Sell() => buyCounter.text = (buyCounter.text == string.Empty ? 0 : int.Parse(buyCounter.text) - 1).ToString();
 
     protected override void SetCost() => cost.text = prefab.cost.ToString();
+    protected void SetCurrentCount(int count) => currentCounter.text = count.ToString(); // @TODO
     protected override void SetSprite() => Image = prefab.icon;
 
-    internal void Reset() => counter.text = 0.ToString();
+    internal void Reset() => buyCounter.text = string.Empty;
 }

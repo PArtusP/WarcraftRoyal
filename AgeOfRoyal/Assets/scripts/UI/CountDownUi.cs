@@ -8,6 +8,7 @@ public class CountDownUi : MonoBehaviour
     [SerializeField] AudioSource source;
     [SerializeField] AudioClip clipEnd;
     [SerializeField] AudioClip clipCount;
+    private Coroutine countdownCoroutine;
 
     public UnityEvent EndCountDownEvent { get; } = new UnityEvent();
 
@@ -26,6 +27,27 @@ public class CountDownUi : MonoBehaviour
             source.PlayOneShot(value == 0 ? clipEnd : clipCount);
 
     }
+    public void StartCountDown(int countdown)
+    {
+        gameObject.SetActive(true);
+        // Stop if one is already running
+        if (countdownCoroutine != null)
+        {
+            StopCoroutine(countdownCoroutine);
+        }
+
+        countdownCoroutine = StartCoroutine(CountDown(countdown));
+    }
+    public void StopCountDown()
+    {
+        if (countdownCoroutine != null)
+        {
+            StopCoroutine(countdownCoroutine);
+            countdownCoroutine = null;
+            gameObject.SetActive(false);
+        }
+    }
+
     public IEnumerator CountDown(int countdown)
     {
         gameObject.SetActive(true);

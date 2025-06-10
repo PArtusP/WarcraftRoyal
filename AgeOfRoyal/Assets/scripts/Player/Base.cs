@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
@@ -5,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 public class Base : Hitable
-{ 
+{
     [SerializeField] List<Minion> spawnList;
     [SerializeField] Material material;
     private List<Minion> spawnedUnits = new List<Minion>();
@@ -14,6 +15,7 @@ public class Base : Hitable
     public UnityEvent EndOfRoundEvent { get; private set; } = new UnityEvent();
     public List<Minion> SpawnList { get => spawnList; set => spawnList = value; }
     protected override float MaxHealth { get; set; } = 1000;
+    public List<Minion> SpawnedUnits  => spawnedUnits; 
 
     // Start is called before the first frame update
     override protected void AwakeInternal()
@@ -27,7 +29,7 @@ public class Base : Hitable
         Health = MaxHealth;
     }
     #region Spawn minions
-    public void SpawnMinion(Dictionary<int, MinionCombatStats> minionPowerUps, Dictionary<int, List<UnitModule>> minionModules)
+    public void SpawnMinion(Dictionary<int, List<UnitBuff>> minionPowerUps, Dictionary<int, List<UnitModule>> minionModules)
     {
         float laneSpacing = 1.5f;
         float rowSpacing = 1.5f;
@@ -38,9 +40,9 @@ public class Base : Hitable
 
         foreach (var prefab in spawnList)
         {
-            if (prefab.GetComponent<MeleeCombat>()) melees.Add(prefab);
-            else if (prefab.GetComponent<MageCombat>()) mages.Add(prefab);
-            else if (prefab.GetComponent<ArcherCombat>()) archers.Add(prefab);
+            if (prefab.Type == Class.Melee) melees.Add(prefab);
+            else if (prefab.Type == Class.Mage) mages.Add(prefab);
+            else if (prefab.Type == Class.Range) archers.Add(prefab);
         }
 
         Vector3 basePos = transform.position;
@@ -53,7 +55,7 @@ public class Base : Hitable
         spawnList.Clear();
     }
 
-    int SpawnLine(List<Minion> units, Vector3 basePos, float zOffset, float laneSpacing, Dictionary<int, MinionCombatStats> minionPowerUps, Dictionary<int, List<UnitModule>> minionModules)
+    int SpawnLine(List<Minion> units, Vector3 basePos, float zOffset, float laneSpacing, Dictionary<int, List<UnitBuff>> minionPowerUps, Dictionary<int, List<UnitModule>> minionModules)
     {
         const int maxPerRow = 10;
         float rowSpacing = 1.5f;
@@ -95,12 +97,11 @@ public class Base : Hitable
                 unit.Home = this;
                 unit.OnDieEvent.AddListener(delegate { CheckEndRound(unit); });
             }
-            if (minionPowerUps.TryGetValue(unit.ID, out MinionCombatStats powerUp))
+            if (minionPowerUps.TryGetValue(unit.ID, out List<UnitBuff> powerUp))
             {
-                unit.SetPowerUp(powerUp);
+                powerUp.ForEach(p => unit.AddPowerUp(p)); 
                 Debug.Log($"Applying power-up to {unit.name}: {powerUp} (Total: {unit.Stats})");
             }
-            else unit.PowerUp = MinionCombatStats.Zero;
 
             if (minionModules.TryGetValue(unit.ID, out List<UnitModule> modules))
             {
@@ -108,7 +109,8 @@ public class Base : Hitable
                 Debug.Log($"Adding modules to {unit.name}:  Total: {modules.Count})");
             }
 
-            unit.Target = null;
+            unit.SetState(MinionState.Walk);
+            unit.name = unit.name + " " + Guid.NewGuid().ToString();
             spawnedUnits.Add(unit);
         }
 
@@ -141,7 +143,7 @@ public class Base : Hitable
         return false;
     }
 
-    internal void ResetForNextRound()
+/*    internal void ResetForNextRound()
     {
         if (spawnedUnits.Any())
         {
@@ -153,7 +155,7 @@ public class Base : Hitable
             spawnList.AddRange(spawnedUnits);
         }
         spawnedUnits.Clear();
-    }
+    }*/
     public void CheckEndRound(Minion unit)
     {
         if (unit) spawnedUnits.Remove(unit);

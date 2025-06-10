@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 [System.Serializable]
 public class ListWrapper<T>
@@ -14,17 +15,33 @@ public class ShopUi : MonoBehaviour
 {
     Player player;
     [SerializeField] UnitUpgradeDetailUi detailUi;
-    [SerializeField] List<UnitButton> unitButtons = new List<UnitButton>();
+    [SerializeField] List<ListWrapper<UnitButton>> unitButtons = new List<ListWrapper<UnitButton>>();
     [SerializeField] List<ListWrapper<UnitUpgradeButton>> unitUpradeButtons = new List<ListWrapper<UnitUpgradeButton>>();
+    private int lastLevelUnlocked = 0;
 
-    internal void Reset() => unitButtons.ForEach(b => b.Reset());  
+    public UnitUpgradeDetailUi DetailUi { get => detailUi; set => detailUi = value; }
 
-    private void Awake()
+    internal void Reset() => unitButtons.SelectMany(b => b.List).ToList().ForEach(b => b.Reset());
+
+    //private void Validate() => SetUp(); 
+    private void Awake() => SetUp();
+
+    private void SetUp()
     {
         player = GetComponentInParent<Player>();
 
-        foreach (var button in unitButtons)
+        foreach (var button in unitButtons.SelectMany(b => b.List).ToList())
         {
+            button.PointerEnter = () =>
+            {
+                detailUi.gameObject.SetActive(true);
+                player.MinionPowerUps.TryGetValue(button.Prefab.ID, out var value);
+                detailUi.Display(button.Prefab, value == null ? null : value.Select(v => v.PowerUp).Any() ? value.Select(v => v.PowerUp).ToList().SumPowerUps() : null);
+            };
+            button.PointerExit = () =>
+            {
+                detailUi.Close();
+            };
             button.OnLeftClick = () =>
             {
                 bool res = player.TryBuy(button);
@@ -41,12 +58,11 @@ public class ShopUi : MonoBehaviour
         {
             button.PointerEnter = () =>
             {
-                detailUi.gameObject.SetActive(true);
                 detailUi.Display(button);
             };
             button.PointerExit = () =>
             {
-                detailUi.gameObject.SetActive(false);
+                detailUi.Close();
             };
             button.OnLeftClick = () =>
             {
@@ -58,7 +74,29 @@ public class ShopUi : MonoBehaviour
                 bool res = button.Button.interactable && player.TrySell(button);
                 if (res) button.Sell();
             };
-        }
+        } 
     }
-    public void EnableButtons(int level) => unitUpradeButtons[level].List.ForEach(b => b.Button.interactable = true);
+
+    public void EnableNewButtons(int level)
+    {
+        lastLevelUnlocked = level;
+        unitButtons[level].List.ForEach(b => b.Button.interactable = true);
+        unitUpradeButtons[level].List.ForEach(b => b.Button.interactable = true);
+    }
+
+    internal void EnableButtons(bool value)
+    {
+        if (value)
+            for (int i = 0; i <= lastLevelUnlocked; i++)
+            {
+                unitButtons[i].List.ForEach(b => b.Button.interactable = true);
+                unitUpradeButtons[i].List.ForEach(b => b.Button.interactable = true);
+            }
+        else
+            for (int i = 0; i < unitButtons.Count; i++)
+            {
+                unitButtons[i].List.ForEach(b => b.Button.interactable = false);
+                unitUpradeButtons[i].List.ForEach(b => b.Button.interactable = false);
+            }
+    }
 }

@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-
 [System.Serializable]
 public class PlayerGameInfo
 {
@@ -16,12 +15,13 @@ public class PlayerGameInfo
     public string gameVersion;
 }
 
-
 public class Player : NetworkBehaviour
 {
     [SerializeField] Button startButton;
 
-    Dictionary<int, MinionCombatStats> minionPowerUps = new Dictionary<int, MinionCombatStats>();
+    [SerializeField] Button xpPlusButton;
+
+    Dictionary<int, List<UnitBuff>> minionPowerUps = new Dictionary<int, List<UnitBuff>>();
     Dictionary<int, List<UnitModule>> minionModules = new Dictionary<int, List<UnitModule>>();
 
     [SerializeField] PlayerExperience xp = new PlayerExperience();
@@ -34,6 +34,7 @@ public class Player : NetworkBehaviour
     [SerializeField] internal Sprite selectedSprite;
     [SerializeField] internal Sprite iconSprite;
     private List<UnitUpgrade> upgrades = new List<UnitUpgrade>();
+    private bool waitToSpendXp;
 
     public NetworkVariable<bool> IsReadyForBattle { get; } = new NetworkVariable<bool>(false,
         NetworkVariableReadPermission.Everyone,
@@ -44,8 +45,10 @@ public class Player : NetworkBehaviour
     public Base Home { get; set; }
     public UnityEvent OnReadyEvent { get; } = new UnityEvent();
     public UnityEvent OnDieEvent { get; } = new UnityEvent();
-    public Dictionary<int, MinionCombatStats> MinionPowerUps => minionPowerUps;
-    public Dictionary<int, List<UnitModule>> MinionModules => minionModules;
+    public Dictionary<int, List<UnitBuff>> MinionPowerUps => minionPowerUps = new Dictionary<int, List<UnitBuff>>();
+    public Dictionary<int, List<UnitModule>> MinionModules => minionModules = new Dictionary<int, List<UnitModule>>();
+
+    public ShopUi ShopUi => shopUi;
 
     #region Init & Awake
     private void Awake()
@@ -53,6 +56,11 @@ public class Player : NetworkBehaviour
         shopUi = GetComponentInChildren<ShopUi>();
         walletUi = GetComponentInChildren<PlayerScore>();
         ShowPreparationUi(false);
+
+        xpPlusButton.onClick.AddListener(TryAddXp);
+        xpPlusButton.interactable = false;
+        startButton.interactable = false;
+        shopUi.EnableButtons(false);
     }
 
     [ClientRpc]
@@ -66,57 +74,29 @@ public class Player : NetworkBehaviour
             wallet.OnChange.AddListener(walletUi.Set);
             walletUi.Set(wallet.Value);
 
-            startButton.onClick.AddListener(delegate () { StartCoroutine(WaitToStartRound()); });
+            startButton.onClick.AddListener(WaitToStartRound);
 
-            xp.LevelUpEvent.AddListener(shopUi.EnableButtons);
+            xp.LevelUpEvent.AddListener(shopUi.EnableNewButtons);
             ShowPreparationUi(true);
         }
     }
     #endregion
 
     internal void StartPreparationPhase(int earnings)
-    {
-        Home.ResetForNextRound();
+    { 
         Wallet.Earn(earnings);
         shopUi.Reset();
         ShowPreparationUi(true);
+        shopUi.EnableButtons(true);
+        xpPlusButton.interactable = true;
+        startButton.interactable = true;
         IsReadyForBattle.Value = false;
     }
-    internal IEnumerator WaitToStartRound()
+    internal void WaitToStartRound()
     {
-        if (wallet.Value > 0 && xp.Level < PlayerExperience.NbLevel)
-        {
-            Debug.Log("Player, WaitToStartRound: reset wallet");
-            float currXp = xp.CurrentXp;
-            float targetXp = currXp + wallet.Value;
-
-            float xpTransitionTime = Mathf.Min(0.5f, (targetXp - currXp) * 0.25f);
-            float elapsed = 0f;
-
-            while (xp.CurrentXp < targetXp)
-            {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / xpTransitionTime);
-                float curveT = levelUpAnimCurve.Evaluate(t);
-
-                float interpolatedXp = Mathf.Lerp(currXp, targetXp, curveT);
-                float xpToAdd = interpolatedXp - xp.CurrentXp;
-
-                if (xpToAdd > 0f)
-                {
-                    xp.AddExperience(xpToAdd);
-                }
-
-                Debug.Log($"target xp: {interpolatedXp}, xp: {xp.CurrentXp}, level: {xp.Level}");
-                yield return new WaitForEndOfFrame();
-            }
-
-            wallet.Reset();
-        }
-
-        yield return new WaitForSeconds(0.5f);
-        ShowPreparationUi(false);
-
+        xpPlusButton.interactable = false;
+        shopUi.EnableButtons(false);
+        startButton.interactable = false; 
         IsReadyForBattle.Value = true;
     }
 
@@ -124,6 +104,12 @@ public class Player : NetworkBehaviour
     {
         Home.SpawnMinion(minionPowerUps, minionModules);
         Home.CheckEndRound(null);
+        StartNewCombatRoundClientRpc();
+    }
+    [ClientRpc]
+    private void StartNewCombatRoundClientRpc()
+    {
+        ShowPreparationUi(false); 
     }
 
     #region Shop methods
@@ -143,8 +129,11 @@ public class Player : NetworkBehaviour
                 if (!unitUpgrade.IsOwned && wallet.Spend(unitUpgrade.Cost))
                 {
                     upgrades.Add(DbResolver.GetUpgradeById(unitUpgrade.ID));
-                    AddMinionPowerUp(unitUpgrade.Target.ID, unitUpgrade.PowerUp);
-                    AddMinionModules(unitUpgrade.Target.ID, unitUpgrade.Modules);
+                    unitUpgrade.Target.ForEach(t =>
+                    {
+                        AddMinionModules(t.ID, unitUpgrade.Modules);// @TOOO : Better to do ask and approve
+                        AddMinionPowerUp(t.ID, unitUpgrade.Buff);// @TOOO : Better to do ask and approve
+                    }); 
                     AddMinionUpgradeServerRpc(unitUpgrade.ID);
                     return true;
                 }
@@ -171,8 +160,11 @@ public class Player : NetworkBehaviour
                 {
                     wallet.Earn(unitUpgrade.Cost);
                     upgrades.Remove(DbResolver.GetUpgradeById(unitUpgrade.ID));
-                    AddMinionPowerUp(unitUpgrade.Target.ID, -unitUpgrade.PowerUp);  // @TOOO : Better to do ask and approve
-                    RemoveMinionModules(unitUpgrade.Target.ID, unitUpgrade.Modules);  // @TOOO : Better to do ask and approve
+                    unitUpgrade.Target.ForEach(t =>
+                    {
+                        RemoveMinionModules(t.ID, unitUpgrade.Modules);// @TOOO : Better to do ask and approve
+                        RemoveMinionPowerUp(t.ID, unitUpgrade.Buff);// @TOOO : Better to do ask and approve
+                    }); 
                     RemoveMinionUpgradeServerRpc(unitUpgrade.ID);
                     return true;
                 }
@@ -182,15 +174,17 @@ public class Player : NetworkBehaviour
         }
     }
 
-    private void AddMinionPowerUp(int prefabID, MinionCombatStats powerUp)
+    private void AddMinionPowerUp(int prefabID, UnitBuff powerUp)
     {
-        if (minionPowerUps.TryGetValue(prefabID, out MinionCombatStats existingPowerUp))
+        if (minionPowerUps.TryGetValue(prefabID, out List<UnitBuff> existingPowerUp))
             existingPowerUp.Add(powerUp);
         else
-        {
-            var newPowerUp = MinionCombatStats.Zero + powerUp;
-            minionPowerUps.Add(prefabID, newPowerUp);
-        }
+            minionPowerUps.Add(prefabID, new List<UnitBuff>() { powerUp });
+    }
+    private void RemoveMinionPowerUp(int prefabID, UnitBuff powerUp)
+    {
+        if (minionPowerUps.TryGetValue(prefabID, out List<UnitBuff> existingPowerUp))
+            existingPowerUp.Remove(powerUp);
     }
     private void AddMinionModules(int prefabID, List<UnitModule> modules)
     {
@@ -213,28 +207,73 @@ public class Player : NetworkBehaviour
     {
         var upgrade = DbResolver.GetUpgradeById(iD);
         upgrades.Add(upgrade);
-        AddMinionModules(upgrade.Target.ID, upgrade.Modules);
-        AddMinionPowerUp(upgrade.Target.ID, upgrade.PowerUp);
+        upgrade.Target.ForEach(t =>
+        {
+            AddMinionModules(t.ID, upgrade.Modules);
+            AddMinionPowerUp(t.ID, upgrade.Buff);
+        });
     }
     [ServerRpc]
     private void RemoveMinionUpgradeServerRpc(int iD)
     {
         var upgrade = DbResolver.GetUpgradeById(iD);
         upgrades.Remove(upgrade);
-        RemoveMinionModules(upgrade.Target.ID, upgrade.Modules);
-        AddMinionPowerUp(upgrade.Target.ID, -upgrade.PowerUp);
+        upgrade.Target.ForEach(t =>
+        {
+            RemoveMinionModules(t.ID, upgrade.Modules);
+            RemoveMinionPowerUp(t.ID, upgrade.Buff);
+        }); 
     }
 
 
     internal void ShowPreparationUi(bool v)
     {
-        xp.HealthBar.transform.parent.gameObject.SetActive(v);
+        xp.HealthBar.transform.parent.parent.gameObject.SetActive(v); // @WHACK
         walletUi.gameObject.SetActive(v);
         startButton.gameObject.SetActive(v);
         shopUi.gameObject.SetActive(v);
     }
     #endregion
 
+    #region XP
+
+    private void TryAddXp()
+    {
+        if (!waitToSpendXp && wallet.Value > 0 && xp.Level < PlayerExperience.NbLevel)
+        {
+            wallet.Spend(1);
+            waitToSpendXp = true;
+            StartCoroutine(AddXp(1f * stats.moneyToExperienceMultiplier));
+        }
+    }
+    private IEnumerator AddXp(float value)
+    {
+        float currXp = xp.CurrentXp;
+        float targetXp = currXp + value;
+
+        float xpTransitionTime = Mathf.Min(0.5f, (targetXp - currXp) * 0.25f);
+        float elapsed = 0f;
+
+        while (xp.CurrentXp < targetXp)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / xpTransitionTime);
+            float curveT = levelUpAnimCurve.Evaluate(t);
+
+            float interpolatedXp = Mathf.Lerp(currXp, targetXp, curveT);
+            float xpToAdd = interpolatedXp - xp.CurrentXp;
+
+            if (xpToAdd > 0f)
+            {
+                xp.AddExperience(xpToAdd);
+            }
+
+            Debug.Log($"target xp: {interpolatedXp}, xp: {xp.CurrentXp}, level: {xp.Level}");
+            yield return new WaitForEndOfFrame();
+        }
+        waitToSpendXp = false;
+    }
+    #endregion
 }
 
 internal class PlayerWallet

@@ -14,17 +14,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 8
   perkName: By the SWORD !!
-  powerUp:
-    health: 0
-    damage: 0
-    speed: 0
-    cooldown: 0
-    sightRadius: 0
-    hitRadius: 0
-    armorRange: -0.33
-    armorMelee: 0
-  modules:
-  - {fileID: 11400000, guid: 89b0f7d7d2dc7e245b1dc60162c6994a, type: 2}
+  buff:
+    buffType: 2
+    duration: 0
+    maxStack: 1
+    canBeDispelled: 0
+    powerup:
+      addStats:
+        health: 0
+        damage: 0
+        speed: 0
+        cooldown: 0
+        sightRadius: 0
+        hitRadius: 0
+        armorRange: 0
+        armorMelee: 0
+      multStats:
+        health: 1
+        damage: 1
+        speed: 1
+        cooldown: 1
+        sightRadius: 1
+        hitRadius: 1
+        armorRange: 1.3
+        armorMelee: 1
+    heal: 0
+  modules: []
   cost: 5
   description: Upgrade range armor
   target: {fileID: 1982330210055623403, guid: 523657598c0b0024abd97964af12f025, type: 3}

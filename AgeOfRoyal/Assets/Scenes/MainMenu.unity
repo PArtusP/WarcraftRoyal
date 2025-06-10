@@ -1328,7 +1328,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Select character
+  m_text: Select your realm
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3014,7 +3014,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 142755365179879207, guid: 3a99e4ddacd5f994cafd9360f252e218, type: 3}
       propertyPath: m_Name
-      value: CharacterSelector
+      value: RealmSelector
       objectReference: {fileID: 0}
     - target: {fileID: 142755365179879207, guid: 3a99e4ddacd5f994cafd9360f252e218, type: 3}
       propertyPath: m_IsActive

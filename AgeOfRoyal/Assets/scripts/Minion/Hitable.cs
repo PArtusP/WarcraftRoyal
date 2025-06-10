@@ -6,17 +6,19 @@ using UnityEngine;
 using UnityEngine.Events;
 
 abstract public class Hitable : NetworkBehaviour
-{ 
-    protected Base home; 
+{
+    protected Base home;
     protected HealthBar healthbar;
     public Transform aimPoint;
 
     public TriggerSVFX healEffect;
     private float healVfxEnd = 0;
+    private Coroutine healCoroutine;
 
-    [SerializeField] protected NetworkVariable<float> health { get; } = new NetworkVariable<float>(
-            0f, 
-            NetworkVariableReadPermission.Everyone, 
+    [SerializeField]
+    protected NetworkVariable<float> health { get; } = new NetworkVariable<float>(
+            0f,
+            NetworkVariableReadPermission.Everyone,
             NetworkVariableWritePermission.Server);
     protected abstract float MaxHealth { get; set; }
     public float Health { get => health.Value; set => health.Value = value; }
@@ -28,15 +30,15 @@ abstract public class Hitable : NetworkBehaviour
     {
         healthbar = GetComponentInChildren<HealthBar>();
         health.OnValueChanged += UpdateHealthBar;
-        AwakeInternal(); 
+        AwakeInternal();
     }
 
-    private void UpdateHealthBar(float previousValue, float newValue) 
+    private void UpdateHealthBar(float previousValue, float newValue)
         => healthbar.SetHealth(newValue);
 
     abstract protected void AwakeInternal();
 
-    virtual public bool GetHit(float damage, Hitable opponent)
+    virtual public bool GetHit(float damage, Hitable opponent) // @TODO called from client ?
     {
         Health = Mathf.Max(0f, Health - damage);
         if (Health == 0f)
@@ -51,24 +53,36 @@ abstract public class Hitable : NetworkBehaviour
         Health = Mathf.Min(Health + v, MaxHealth);
         if (healVfxEnd > Time.time)
         {
-            if (healVfxEnd < Time.time + .2f) healVfxEnd = Time.time + .2f;
-                return;
+            if (healVfxEnd < Time.time + .1f) healVfxEnd = Time.time + .1f;
+            return;
         }
-        healVfxEnd = Time.time + .2f;
-        StartCoroutine(WaitToEndHealEffect());
-        healEffect.PlayBase(true, this, false, null, null, transform.position, Quaternion.identity);
+        healVfxEnd = Time.time + .1f;
+        if (healCoroutine == null)
+        {
+            PlayHealLoopVfx(true);
+            healCoroutine = StartCoroutine(WaitToEndHealEffect());
+
+            PlayHealLoopVfxClientRpc(true);
+        }
     }
+    private void PlayHealLoopVfx(bool play) => healEffect.PlayBase(play, this, false, null, null, transform.position, Quaternion.identity); 
+
+    [ClientRpc]
+    private void PlayHealLoopVfxClientRpc(bool play) => PlayHealLoopVfx(play);
 
     private IEnumerator WaitToEndHealEffect()
     {
         while (healVfxEnd > Time.time)
             yield return new WaitForEndOfFrame();
-        healEffect.PlayBase(false, this, false, null, null, transform.position, Quaternion.identity);
+
+        PlayHealLoopVfx(false);
+        healCoroutine = null;
+        PlayHealLoopVfxClientRpc(false);
     }
 
     virtual public void Die()
     {
         OnDieEvent.Invoke();
         Destroy(gameObject);
-    } 
+    }
 }

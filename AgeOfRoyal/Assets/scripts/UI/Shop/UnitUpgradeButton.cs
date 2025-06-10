@@ -11,8 +11,8 @@ public class UnitUpgradeButton : RightClickButton
     [SerializeField] UnitUpgrade upgrade;
 
     public int ID => upgrade.ID;
-    public Minion Target => upgrade.Target;
-    public MinionCombatStats PowerUp => upgrade.PowerUp;
+    public List<Minion> Target => upgrade.Target;
+    public UnitBuff Buff => upgrade.Buff;
     public List<UnitModule> Modules => upgrade.Modules;
     public int Cost => upgrade.Cost; 
     public string Name => upgrade.Name; 
