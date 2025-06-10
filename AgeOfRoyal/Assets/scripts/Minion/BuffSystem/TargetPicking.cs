@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Rendering;
 using UnityEngine;
 
 public enum PickingFields
@@ -19,27 +18,27 @@ public enum PickingFields
 
 [Serializable]
 public class TargetPicking
-{ 
+{
     [SerializeField] int maxTarget = 3;
     [SerializeField] protected Target sameTeam = Target.Friends;
     [SerializeField] List<TargetingOrderBy> orders = new List<TargetingOrderBy>();
     [SerializeField] List<TargetingFilter> filters = new List<TargetingFilter>();
 
-    public Target SameTeam  => sameTeam;
+    public Target SameTeam => sameTeam;
 
-    public int MaxTarget => maxTarget;  
+    public int MaxTarget => maxTarget;
 
     public List<Minion> PickTargets(List<Minion> targets, UnitWithoutState source)
     {
         targets = targets.Where(t => t != null && t.Health > 0 && CheckTeam(source, t)).ToList(); // @TODO for resurect, change here
 
-        foreach (var filter in filters) 
-            targets = filter.Pick(targets, source); 
+        foreach (var filter in filters)
+            targets = filter.Pick(targets, source);
 
-        for (int i = orders.Count - 1; i >  0; i--) 
-            targets = orders[i].Pick(targets, source); 
+        for (int i = orders.Count - 1; i > 0; i--)
+            targets = orders[i].Pick(targets, source);
 
-        return targets.Any() ? targets.Where(t => targets.IndexOf  (t) < maxTarget).ToList() : new List<Minion>();
+        return targets.Any() ? targets.Where(t => targets.IndexOf(t) < maxTarget).ToList() : new List<Minion>();
     }
     private bool CheckTeam(UnitWithoutState owner, Minion target)
     {
@@ -110,20 +109,20 @@ public class TargetingOrderBy
 [Serializable]
 public class TargetingFilter
 {
-    [SerializeField] PickingFields field; 
+    [SerializeField] PickingFields field;
 
     public List<Minion> Pick(List<Minion> targets, Hitable source)
     {
         switch (field)
         {
-/*            case PickingFields.Cost:
-                return targets.OrderBy(t => t.cost).ToList();
-            case PickingFields.Health:
-                return targets.OrderBy(t => t.Health).ToList();
-            case PickingFields.Damage:
-                return targets.OrderBy(t => t.Stats.damage).ToList();
-            case PickingFields.Rate:
-                return targets.OrderBy(t => t.Stats.cooldown).ToList();*/
+            /*            case PickingFields.Cost:
+                            return targets.OrderBy(t => t.cost).ToList();
+                        case PickingFields.Health:
+                            return targets.OrderBy(t => t.Health).ToList();
+                        case PickingFields.Damage:
+                            return targets.OrderBy(t => t.Stats.damage).ToList();
+                        case PickingFields.Rate:
+                            return targets.OrderBy(t => t.Stats.cooldown).ToList();*/
 
             case PickingFields.Melee:
                 return targets.Where(t => t.Type == Class.Melee).ToList();
@@ -135,11 +134,11 @@ public class TargetingFilter
             case PickingFields.ToDispel:
                 return targets.Where(t => t.TotalBuff.IsBuff != (t.Home == source.Home)).ToList();
 
-/*            case PickingFields.Furthest:
-                return targets.OrderBy(t => (t.transform.position - source.transform.position).magnitude).ToList();*/
+            /*            case PickingFields.Furthest:
+                            return targets.OrderBy(t => (t.transform.position - source.transform.position).magnitude).ToList();*/
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(field), field, null);
         }
-    } 
+    }
 }

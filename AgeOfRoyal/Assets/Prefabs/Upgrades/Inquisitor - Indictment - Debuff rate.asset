@@ -12,11 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cedb2030692a4c4680aae9d83ff901c, type: 3}
   m_Name: Inquisitor - Indictment - Debuff rate
   m_EditorClassIdentifier: 
-  radius: 6
-  sameTeam: 1
+  cooldown: 5
+  radius: 10
+  picking:
+    maxTarget: 3
+    sameTeam: 1
+    orders:
+    - field: 4
+      ascending: 0
+    - field: 3
+      ascending: 0
+    filters: []
   buff:
-    buffType: 4
-    duration: 1
+    buffType: 1
+    duration: 7
+    maxStack: 1
+    canBeDispelled: 1
     powerup:
       addStats:
         health: 0
@@ -36,7 +47,6 @@ MonoBehaviour:
         hitRadius: 1
         armorRange: 1
         armorMelee: 1
-    maxStack: 3
-    canBeDispelled: 0
     heal: 0
+    dispel: 0
   targets: []

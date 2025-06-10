@@ -11,7 +11,13 @@ public class AoeBuffModule : AoeUnitModule
     [SerializeField] private List<Minion> targets = new List<Minion>(); 
 
 
-    public override string Description => $"{(buff.PowerUp.IsBuff ? "Grants" : "Inflicts")} {buff.PowerUp.Short} to {(picking.SameTeam == Target.Friends ? "allies" : picking.SameTeam == Target.Foes ? "foes" : "unit")} within {radius}m";
+    public override string Description => 
+        $"{(picking.SameTeam == Target.Friends ? "Grants" : "Inflicts")} " +
+        $"{buff.PowerUp.Short}" +
+        $"{(buff.Heal > 0 ? $"{(buff.PowerUp.Short != string.Empty ? " & " : string.Empty)}{buff.Heal}Hp/s" : string.Empty)}" +
+        $"{(buff.Dispel ? $"{(buff.PowerUp.Short != string.Empty || buff.Heal > 0 ? " & " : string.Empty)}dispel" : string.Empty)} " +
+        $"to {picking.MaxTarget} {(picking.SameTeam == Target.Friends ? "allies" : picking.SameTeam == Target.Foes ? "foes" : "unit")} " +
+        $"within {radius}m";
     override protected void ApplyEffect(Hitable target, MinionCombat owner)
     {
         if(target is Minion m && !targets.Contains(m))

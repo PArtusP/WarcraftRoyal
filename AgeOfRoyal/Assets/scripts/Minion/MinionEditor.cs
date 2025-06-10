@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
 using UnityEditor;
 
 [CustomEditor(typeof(Minion))]
@@ -23,6 +23,7 @@ public class MinionEditor : Editor
             {
                 EditorGUILayout.Space();
                 EditorGUILayout.Space();
+                EditorGUILayout.Space();
                 EditorGUILayout.LabelField($"Buff#{minion.Buffs.IndexOf(b)}:");
                 EditorGUILayout.Space();
                 EditorGUILayout.LabelField($"Buff#{minion.Buffs.IndexOf(b)}, Source:", b.Source.ToString());
@@ -39,11 +40,12 @@ public class MinionEditor : Editor
         {
             EditorGUILayout.HelpBox("Failed to calculate TotalBuff (likely during edit-time).", MessageType.Info);
         }
-    /* }
-        else
-        {
-            EditorGUILayout.Space();
-            EditorGUILayout.HelpBox("Runtime-only info (like TotalBuff) will be visible during Play mode.", MessageType.None);
-        }*/
+        /* }
+            else
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.HelpBox("Runtime-only info (like TotalBuff) will be visible during Play mode.", MessageType.None);
+            }*/
     }
 }
+#endif

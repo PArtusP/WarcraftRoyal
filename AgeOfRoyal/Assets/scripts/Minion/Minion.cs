@@ -2,13 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem.XR;
-using static UnityEditor.AnimationUtility;
-using static UnityEngine.GraphicsBuffer;
-using static UnityEngine.Rendering.RayTracingAccelerationStructure;
 
 public enum MinionState
 {
@@ -182,11 +177,11 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
     protected FSM<T> fsm = new FSM<T>();
     private AttackConditions<T> validContition;
     private List<AttackConditions<T>> conditons;
-     
-    abstract public T Stop { get;  }
-    abstract public T Walk { get;   }
-    abstract public T Follow { get;   }
-    abstract public T InCombat { get;   }
+
+    abstract public T Stop { get; }
+    abstract public T Walk { get; }
+    abstract public T Follow { get; }
+    abstract public T InCombat { get; }
 
     private void Update()
     {
@@ -220,7 +215,7 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
                     () => CheckForTarget(),
                     null,
                     () => {
-                        controller.Stop(false); 
+                        controller.Stop(false);
                         Target = null;
                     }
             ),
@@ -249,7 +244,7 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
 
                 }
                 return Follow;
-            }, 
+            },
             null
             ),
             new State<T>(InCombat,
@@ -273,10 +268,10 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
         return (transform.position - Target.transform.position).magnitude <= c.Condition.outRadius
                                 && (transform.position - Target.transform.position).magnitude >= c.Condition.inRadius
                                 //&& CheckAngle(Target, c.Condition.angle)
-                                && (!c.Condition.directSight 
+                                && (!c.Condition.directSight
                                 //|| IsClearPathToHitable(Target, c.Condition.outRadius, GameLayers.Hitable.Mask
                                 );
-                                //&& (c.attack.lastComboEnd == 0 || c.attack.lastComboEnd + c.attack.Previous.isNotAttackingTime < Time.time);
+        //&& (c.attack.lastComboEnd == 0 || c.attack.lastComboEnd + c.attack.Previous.isNotAttackingTime < Time.time);
     }
     public bool IsClearPathToHitable(Hitable target, float checkRadius, LayerMask check)
     {

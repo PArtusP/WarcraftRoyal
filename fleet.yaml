@@ -57,7 +57,8 @@ spec:
         spec:
           containers:
           - name: ageofroyal-server
-            image: jausseran/ageofroyalserver:0.1
+            #image: jausseran/ageofroyalserver:0.1
+            image: jausseran/ageofroyalserver:latest
             resources:
               requests:
                 memory: "4Gi"  # Request 4 GB of memory

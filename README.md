@@ -80,9 +80,10 @@ kubectl apply -f agones-sdk-clusterrolebinding.yaml
 
 ### Logs
 ```
-kubectl logs --follow fleet-tpkfc-ntmhd -n gameserver
-kubectl logs --follow fleet-tpkfc-ntmhd -n gameserver -c ageofroyal-server
-kubectl logs --follow fleet-tpkfc-ntmhd -n gameserver -c agones-gameserver-sidecar 
+kubectl logs --follow fleet-xhkbr-mx9qr -n gameserver
+kubectl logs --follow fleet-xhkbr-mx9qr -n gameserver -c ageofroyal-server
+kubectl logs --follow fleet-xhkbr-mx9qr -n gameserver -c tps-server
+kubectl logs --follow fleet-xhkbr-mx9qr -n gameserver -c agones-gameserver-sidecar 
 kubectl get gameservers -n gameserver --watch
 kubectl get fleet -n gameserver
 
@@ -90,7 +91,7 @@ kubectl get fleet -n gameserver
 
 ### Cleaning
 ```
-kubectl delete gs fleet-tpkfc-ntmhd -n gameserver
+kubectl delete gs fleet-xhkbr-mx9qr -n gameserver
 kubectl delete fleet fleet -n gameserver
 kubectl delete fas gamefleet-autoscaler -n gameserver
 ```
