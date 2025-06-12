@@ -8,6 +8,8 @@ public class UnitsManager : NetworkBehaviour
     List<Hitable> units = new List<Hitable>();
     List<Hitable> deads = new List<Hitable>();
 
+    public List<Hitable> Deads => deads;
+
     public void AddRange(IEnumerable<Hitable> units)
     { 
       this.units.AddRange(units);
