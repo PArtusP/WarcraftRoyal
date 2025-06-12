@@ -13,7 +13,7 @@ public class UnitsManager : NetworkBehaviour
       this.units.AddRange(units);
       this.units.ForEach(u => u.OnDieEvent.AddListener(delegate() {StoreAsDead(u)});
     }
-    public void Clean(bool deleteAlive = true) 
+    public void Clean(bool deleteAlive) 
     {
         deads.ForEach(u => u.NetworkObject.Despawn());
         If(deleteAlive) units.ForEach(u => u.NetworkObject.Despawn());
