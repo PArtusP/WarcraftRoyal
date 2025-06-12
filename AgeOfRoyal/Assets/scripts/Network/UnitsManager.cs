@@ -5,12 +5,12 @@ using UnityEngine;
  
 public class UnitsManager : NetworkBehaviour
 {
-    List<Hitable> units = new List<Hitable>();
-    List<Hitable> deads = new List<Hitable>();
+    List<UnitWithoutState> units = new List<UnitWithoutState>();
+    List<UnitWithoutState> deads = new List<UnitWithoutState>();
 
-    public List<Hitable> Deads => deads;
+    public List<UnitWithoutState> Deads => deads;
 
-    public void AddRange(IEnumerable<Hitable> units)
+    public void AddRange(IEnumerable<UnitWithoutState> units)
     { 
       this.units.AddRange(units);
       this.units.ForEach(u => u.OnDieEvent.AddListener(delegate() {StoreAsDead(u)});
@@ -21,15 +21,15 @@ public class UnitsManager : NetworkBehaviour
         If(deleteAlive) units.ForEach(u => u.NetworkObject.Despawn());
         units.Clean();
     }
-    void StoreAsDead(Hitable unit) 
+    void StoreAsDead(UnitWithoutState unit) 
     { 
         unit.gameObject.SetActive(false);
         units.Remove(unit);
         deads.Add(unit);
     }    
-    public void Resurect(Hitable unit, float healthPercent = 1f, float healthCeiling = 0) 
+    public void Resurect(UnitWithoutState unit, float healthPercent = 1f, float healthCeiling = 0) 
     { 
-        Hitable target = null;
+        UnitWithoutState target = null;
         try
         {
             target = deads.First(u => u == unit);
