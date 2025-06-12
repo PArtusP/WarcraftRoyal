@@ -82,7 +82,6 @@ abstract public class Hitable : NetworkBehaviour
 
     virtual public void Die()
     {
-        OnDieEvent.Invoke();
-        Destroy(gameObject);
+        OnDieEvent.Invoke(); 
     }
 }
