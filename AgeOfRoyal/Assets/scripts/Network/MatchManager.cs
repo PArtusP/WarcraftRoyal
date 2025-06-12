@@ -23,14 +23,14 @@ public class MatchManager : NetworkBehaviour
     [SerializeField] RewardType rewardType = RewardType.EarnHalfValue;
     [SerializeField] CountDownUi countDownUi;
     
-    MinionManager minionManager; 
+    UnitManager unitManager; 
     int roundCount = 0;
     Phase phase = Phase.Preparation;
     PlayerManager playerManager;
     
     private void Awake()
     {
-        minionManager = GetComponent<MinionManager>();
+        unitManager = GetComponent<UnitManager>();
         playerManager = GetComponent<PlayerManager>();
     }
 
@@ -151,6 +151,7 @@ public class MatchManager : NetworkBehaviour
     private IEnumerator PreparationPhase()
     {
         yield return new WaitForSeconds(1f);
+        var despawnSurvivors = true;
         playerManager.Players.ForEach(p =>
         {
             var moneyReward = 5 + roundCount * 2;
@@ -162,6 +163,7 @@ public class MatchManager : NetworkBehaviour
                         p.Home.SpawnedUnits.ForEach(u => u.SetState(MinionState.Stop));
                         p.Home.SpawnList.AddRange(p.Home.SpawnedUnits);
                         p.Home.SpawnedUnits.Clear();
+                        despawnSurvivors = false;
                     }
                     break;
                 case RewardType.EarnHalfValue: // Despawn survivors, earn half the total value of the survivors
@@ -178,7 +180,7 @@ public class MatchManager : NetworkBehaviour
 
             PreparationPhase_ResetPlayerClientRpc(p.NetworkObjectId, moneyReward);
         });
-        minionManager.Clean();
+        unitManager.Clean(despawnSurvivors);
         countDownUi.StartCountDown(preparationTime);
         roundCount++;
     }
@@ -200,7 +202,7 @@ public class MatchManager : NetworkBehaviour
         if (phase == Phase.Combat) return;
         phase = Phase.Combat;
         playerManager.Players.ForEach(p => p.StartNewCombatRound());
-        playerManager.Players.ForEach(p => minionManager.AddRange(p.Home.SpawnedUnits));
+        playerManager.Players.ForEach(p => unitManager.AddRange(p.Home.SpawnedUnits));
     }
 
     private void EndOfCombatRound()
