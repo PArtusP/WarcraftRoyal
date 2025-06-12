@@ -1,0 +1,46 @@
+using System.Collections;
+using System.Linq;
+using Unity.Netcode;
+using UnityEngine; 
+ 
+public class UnitsManager : NetworkBehaviour
+{
+    List<Hitable> units = new List<Hitable>();
+    List<Hitable> deads = new List<Hitable>();
+
+    public void AddRange(IEnumerable<Hitable> units)
+    { 
+      this.units.AddRange(units);
+      this.units.ForEach(u => u.OnDieEvent.AddListener(delegate() {StoreAsDead(u)});
+    }
+    public void Clean(bool deleteAlive = true) 
+    {
+        deads.ForEach(u => u.NetworkObject.Despawn());
+        If(deleteAlive) units.ForEach(u => u.NetworkObject.Despawn());
+        units.Clean();
+    }
+    void StoreAsDead(Hitable unit) 
+    { 
+        unit.gameObject.SetActive(false);
+        units.Remove(unit);
+        deads.Add(unit);
+    }    
+    public void Resurect(Hitable unit) 
+    { 
+        Hitable target = null;
+        try
+        {
+            target = deads.First(u => u == unit);
+        }
+        catch(Exception e)
+        {
+            Debug.LogError($"Couldn't find dead unity '{unit.Name} ({unit.NetworkObjectId})' in dead list : [{string.Join(", ", dead.Select(u => $"{unit.Name} ({unit.NetworkObjectId})"))}].");
+            throw;
+        }
+        target.Health = target.MaxHealth;
+        target.gameObject.SetActive(true);
+        deads.Remove(target);
+        units.Add(target);
+        target.PlayResurectAnimation();
+    }    
+}
