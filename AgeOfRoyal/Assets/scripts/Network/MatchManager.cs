@@ -23,14 +23,14 @@ public class MatchManager : NetworkBehaviour
     [SerializeField] RewardType rewardType = RewardType.EarnHalfValue;
     [SerializeField] CountDownUi countDownUi;
     
-    UnitManager unitManager; 
+    UnitsManager unitsManager; 
     int roundCount = 0;
     Phase phase = Phase.Preparation;
     PlayerManager playerManager;
     
     private void Awake()
     {
-        unitManager = GetComponent<UnitManager>();
+        unitsManager = GetComponent<UnitsManager>();
         playerManager = GetComponent<PlayerManager>();
     }
 
@@ -180,7 +180,7 @@ public class MatchManager : NetworkBehaviour
 
             PreparationPhase_ResetPlayerClientRpc(p.NetworkObjectId, moneyReward);
         });
-        unitManager.Clean(despawnSurvivors);
+        unitsManager.Clean(despawnSurvivors);
         countDownUi.StartCountDown(preparationTime);
         roundCount++;
     }
@@ -202,7 +202,7 @@ public class MatchManager : NetworkBehaviour
         if (phase == Phase.Combat) return;
         phase = Phase.Combat;
         playerManager.Players.ForEach(p => p.StartNewCombatRound());
-        playerManager.Players.ForEach(p => unitManager.AddRange(p.Home.SpawnedUnits));
+        playerManager.Players.ForEach(p => unitsManager.AddRange(p.Home.SpawnedUnits));
     }
 
     private void EndOfCombatRound()
