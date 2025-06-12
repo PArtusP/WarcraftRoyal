@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cedb2030692a4c4680aae9d83ff901c, type: 3}
+  m_Name: Inquisitor - base - Dispel
+  m_EditorClassIdentifier: 
+  ID: 2
+  onTargetVfx:
+    effects:
+    - instanciate: 1
+      asChild: 1
+      timer: 2
+      effect: {fileID: 7868308634086037558, guid: eeb22ae599cd5b24a9dc2beb3ef0e022, type: 3}
+    gameObjects: []
+    particles: []
+    renderers: []
+    animations: []
+    sounds: []
+  onSelfVfx:
+    effects: []
+    gameObjects: []
+    particles: []
+    renderers: []
+    animations: []
+    sounds: []
+  cooldown: 0.2
+  radius: 8
+  picking:
+    maxTarget: 1
+    sameTeam: 2
+    orders:
+    - field: 8
+      ascending: 0
+    filters:
+    - field: 8
+  buff:
+    buffType: 0
+    duration: 0
+    maxStack: 1
+    canBeDispelled: 0
+    powerup:
+      addStats:
+        health: 0
+        damage: 0
+        speed: 0
+        cooldown: 0
+        sightRadius: 0
+        hitRadius: 0
+        armorRange: 0
+        armorMelee: 0
+      multStats:
+        health: 1
+        damage: 1
+        speed: 1
+        cooldown: 1
+        sightRadius: 1
+        hitRadius: 1
+        armorRange: 1
+        armorMelee: 1
+    heal: 0
+    dispel: 1
+  targets: []

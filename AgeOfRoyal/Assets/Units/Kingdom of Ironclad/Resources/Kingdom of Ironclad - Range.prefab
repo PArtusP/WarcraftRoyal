@@ -176,6 +176,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   buffs: []
+  actions:
+  - {fileID: 11400000, guid: a784da576db7630439346f24d0f20509, type: 2}
 --- !u!114 &-502141383173912839
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -196,7 +198,7 @@ MonoBehaviour:
     renderers: []
     animations: []
     sounds: []
-  attack: {fileID: 11400000, guid: a784da576db7630439346f24d0f20509, type: 2}
+  action: {fileID: 0}
   hitPoint: {fileID: 5938653573581385588}
   modules: []
   vfx: {fileID: 5938167112633497383, guid: 663f623c25f897b46a27928160ba6243, type: 3}

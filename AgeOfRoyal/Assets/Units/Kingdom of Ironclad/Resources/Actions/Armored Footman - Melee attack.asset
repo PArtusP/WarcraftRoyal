@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42d50f8213ba08a4e98e7f665fbbac71, type: 3}
+  m_Name: Armored Footman - Melee attack
+  m_EditorClassIdentifier: 
+  ID: 1
+  vfx:
+    effects:
+    - effect: {fileID: 997303349635725295, guid: a96b08105ce7e0342863e5b34ad538fe, type: 3}
+      instanciate: 1
+      asChild: 1
+      timer: 1
+    gameObjects: []
+    particles: []
+    renderers: []
+    animations: []
+    sounds: []
+  radius: 2
+  bonusMultiplier: 2
+  bonusAgainst: 1

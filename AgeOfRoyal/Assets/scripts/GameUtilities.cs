@@ -11,6 +11,8 @@ static public class DbResolver
 {
     static List<Minion> minions = null; 
     static List<UnitUpgrade> upgrades = null; 
+    static List<UnitModule> modules = null; 
+    static List<UnitAction> actions = null; 
     public static List<Minion> Minions
     {
         get
@@ -29,11 +31,33 @@ static public class DbResolver
             return upgrades;
         }
     } 
+    public static List<UnitModule> Modules
+    {
+        get
+        {
+            if (modules == null)
+                modules = Resources.LoadAll<UnitModule>("").ToList();
+            return modules;
+        }
+    } 
+    public static List<UnitAction> Actions
+    {
+        get
+        {
+            if (actions == null)
+                actions = Resources.LoadAll<UnitAction>("").ToList();
+            return actions;
+        }
+    } 
 
     public static Minion GetMinionById(int id)
         => Minions.FirstOrDefault(m => m.ID == id) ?? throw new Exception($"Minion with ID {id} not found in resources.");
     public static UnitUpgrade GetUpgradeById(int id)
-        => Upgrades.FirstOrDefault(m => m.ID == id) ?? throw new Exception($"Module with ID {id} not found in resources.");
+        => Upgrades.FirstOrDefault(m => m.ID == id) ?? throw new Exception($"Upgrade with ID {id} not found in resources.");
+    public static UnitModule GetModuleById(int id)
+        => Modules.FirstOrDefault(m => m.ID == id) ?? throw new Exception($"Module with ID {id} not found in resources.");
+    public static UnitAction GetActionById(int id)
+        => Actions.FirstOrDefault(m => m.ID == id) ?? throw new Exception($"Action with ID {id} not found in resources.");
 }
 
 

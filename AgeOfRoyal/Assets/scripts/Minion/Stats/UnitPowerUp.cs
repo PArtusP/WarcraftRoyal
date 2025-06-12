@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Android;
 
 [Serializable]
-public class UnitPowerUp
+public class UnitPowerUp : INetworkSerializable
 {
     [SerializeField] public UnitStats addStats = UnitStats.Zero;
     [SerializeField] public UnitStats multStats = UnitStats.One;
@@ -21,12 +22,18 @@ public class UnitPowerUp
         return false;
     }
 
-    public bool IsBuff => addStats.health < 0 || addStats.damage < 0 || addStats.speed < 0 ||
-                            addStats.cooldown > 0 || addStats.sightRadius < 0 || addStats.hitRadius < 0 ||
-                            addStats.armorRange < 0 || addStats.armorMelee < 0 ||
-                            multStats.health < 1 || multStats.damage < 1 || multStats.speed < 1 ||
-                            multStats.cooldown > 1 || multStats.sightRadius < 1 || multStats.hitRadius < 1 ||
-                            multStats.armorRange < 1 || multStats.armorMelee < 1 ? false : true;
+    public bool IsBuff
+    {
+        get
+        { 
+            return addStats.health >= 0 && addStats.damage >= 0 && addStats.speed >= 0 &&
+                   addStats.cooldown <= 0 && addStats.sightRadius >= 0 && addStats.hitRadius >= 0 &&
+                   addStats.armorRange >= 0 && addStats.armorMelee >= 0 &&
+                   multStats.health >= 1 && multStats.damage >= 1 && multStats.speed >= 1 &&
+                   multStats.cooldown <= 1 && multStats.sightRadius >= 1 && multStats.hitRadius >= 1 &&
+                   multStats.armorRange >= 1 && multStats.armorMelee >= 1;
+        }
+    }
     public string Short
     {
         get
@@ -117,13 +124,18 @@ public class UnitPowerUp
             multStats = 1f / p.multStats
         };
     }
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref addStats);
+        serializer.SerializeValue(ref multStats);
+    }
 }
 
 public static class UnitPowerUpExtensions
 {
     public static UnitPowerUp SumPowerUps(this IEnumerable<UnitPowerUp> buffs)
     {
-        var result = new UnitPowerUp();
+        var result = UnitPowerUp.Identity;
 
         foreach (var buff in buffs)
             result += buff;

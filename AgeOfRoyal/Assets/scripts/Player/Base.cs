@@ -99,7 +99,7 @@ public class Base : Hitable
             }
             if (minionPowerUps.TryGetValue(unit.ID, out List<UnitBuff> powerUp))
             {
-                powerUp.ForEach(p => unit.AddPowerUp(p)); 
+                powerUp.ForEach(p => unit.AddBuff(p)); 
                 Debug.Log($"Applying power-up to {unit.name}: {powerUp} (Total: {unit.Stats})");
             }
 
@@ -107,8 +107,7 @@ public class Base : Hitable
             {
                 unit.AddModules(modules);
                 Debug.Log($"Adding modules to {unit.name}:  Total: {modules.Count})");
-            }
-
+            } 
             unit.SetState(MinionState.Walk);
             unit.name = unit.name + " " + Guid.NewGuid().ToString();
             spawnedUnits.Add(unit);

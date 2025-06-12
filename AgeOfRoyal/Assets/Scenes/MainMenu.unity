@@ -2463,7 +2463,7 @@ MonoBehaviour:
   startServerAuto: 1
   startHostAuto: 1
   characterSelector: {fileID: 741625698}
-  localTest: 0
+  localTest: 1
 --- !u!4 &646777878
 Transform:
   m_ObjectHideFlags: 0

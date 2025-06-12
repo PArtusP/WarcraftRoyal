@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cedb2030692a4c4680aae9d83ff901c, type: 3}
+  m_Name: ___ - MOD AOE Buff
+  m_EditorClassIdentifier: 
+  ID: -1
+  onTargetVfx:
+    effects:
+    - effect: {fileID: 7868308634086037558, guid: d465cb5b4c3db6b47a92da359e50ee5a, type: 3}
+      instanciate: 1
+      asChild: 1
+      timer: 2
+    gameObjects: []
+    particles: []
+    renderers: []
+    animations: []
+    sounds: []
+  onSelfVfx:
+    effects: []
+    gameObjects: []
+    particles: []
+    renderers: []
+    animations: []
+    sounds: []
+  cooldown: 5
+  radius: 3
+  picking:
+    maxTarget: 3
+    sameTeam: 0
+    orders: []
+    filters: []
+  buff:
+    buffType: 1
+    duration: 2
+    maxStack: 1
+    canBeDispelled: 1
+    powerup:
+      addStats:
+        health: 0
+        damage: 1
+        speed: 0
+        cooldown: 0
+        sightRadius: 0
+        hitRadius: 0
+        armorRange: 0
+        armorMelee: 0
+      multStats:
+        health: 1
+        damage: 1
+        speed: 1
+        cooldown: 1
+        sightRadius: 1
+        hitRadius: 1
+        armorRange: 1
+        armorMelee: 1
+    heal: 0
+    dispel: 0
+  targets: []

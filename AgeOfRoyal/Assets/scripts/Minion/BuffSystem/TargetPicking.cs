@@ -53,6 +53,16 @@ public class TargetPicking
                 return true;
         }
     }
+    public TargetPicking Clone()
+    {
+        return new TargetPicking
+        {
+            maxTarget = this.maxTarget,
+            sameTeam = this.sameTeam,
+            orders = this.orders?.Select(o => o?.Clone()).ToList() ?? new List<TargetingOrderBy>(),
+            filters = this.filters?.Select(f => f?.Clone()).ToList() ?? new List<TargetingFilter>()
+        };
+    }
 }
 
 [Serializable]
@@ -88,7 +98,7 @@ public class TargetingOrderBy
                 return ReorderByMatch(targets, t => t.Type == Class.Mage);
 
             case PickingFields.ToDispel:
-                return ReorderByMatch(targets, t => t.TotalBuff.IsBuff != (t.Home == source.Home));
+                return ReorderByMatch(targets, t => t.CanBeDispelled(t.Home == source.Home));
 
             case PickingFields.Furthest:
                 return ascending ? targets.OrderBy(t => (t.transform.position - source.transform.position).magnitude).ToList() : targets.OrderByDescending(t => (t.transform.position - source.transform.position).magnitude).ToList();
@@ -103,6 +113,14 @@ public class TargetingOrderBy
         var matched = input.Where(predicate);
         var unmatched = input.Where(t => !predicate(t));
         return matched.Concat(unmatched).ToList();
+    }
+    public TargetingOrderBy Clone()
+    {
+        return new TargetingOrderBy
+        {
+            field = this.field,
+            ascending = this.ascending
+        };
     }
 }
 
@@ -132,13 +150,20 @@ public class TargetingFilter
                 return targets.Where(t => t.Type == Class.Mage).ToList();
 
             case PickingFields.ToDispel:
-                return targets.Where(t => t.TotalBuff.IsBuff != (t.Home == source.Home)).ToList();
+                return targets.Where(t => t.CanBeDispelled(t.Home == source.Home)).ToList();
 
-            /*            case PickingFields.Furthest:
-                            return targets.OrderBy(t => (t.transform.position - source.transform.position).magnitude).ToList();*/
+            /* case PickingFields.Furthest:
+                return targets.OrderBy(t => (t.transform.position - source.transform.position).magnitude).ToList();*/
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(field), field, null);
         }
+    }
+    public TargetingFilter Clone()
+    {
+        return new TargetingFilter
+        {
+            field = this.field
+        };
     }
 }

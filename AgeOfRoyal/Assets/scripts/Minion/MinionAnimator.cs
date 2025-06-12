@@ -11,10 +11,7 @@ public class MinionAnimator : MonoBehaviour
     {
         animator = GetComponentInChildren<Animator>();
     }
-    internal void Attack()
-    {
-        animator.SetTrigger("Attack");
-    }
+    internal void Action(string animation) => animator.SetTrigger(animation); 
 
     internal void SetSpeed(Vector3 velocity)
     {

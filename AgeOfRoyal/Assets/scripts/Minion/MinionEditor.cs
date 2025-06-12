@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR
+using System.Collections.Generic;
 using UnityEditor;
 
 [CustomEditor(typeof(Minion))]
@@ -12,27 +13,19 @@ public class MinionEditor : Editor
         /*
                 if (Application.isPlaying)
                 {*/
-        EditorGUILayout.Space();
+        EditorGUILayout.Space(); 
         EditorGUILayout.LabelField("=== Runtime Buff Info ===", EditorStyles.boldLabel);
 
         try
         {
             UnitPowerUp total = minion.TotalBuff;
-            EditorGUILayout.LabelField("Total Buffs:", total.Short);
+            EditorGUILayout.LabelField("Total Power up:", total.Short);
             minion.Buffs.ForEach(b =>
-            {
-                EditorGUILayout.Space();
-                EditorGUILayout.Space();
-                EditorGUILayout.Space();
-                EditorGUILayout.LabelField($"Buff#{minion.Buffs.IndexOf(b)}:");
-                EditorGUILayout.Space();
+            { 
+                EditorGUILayout.Space(); 
+                EditorGUILayout.LabelField($"Buff#{minion.Buffs.IndexOf(b)}: ", b.ToString());
                 EditorGUILayout.LabelField($"Buff#{minion.Buffs.IndexOf(b)}, Source:", b.Source.ToString());
-                EditorGUILayout.LabelField($"Buff#{minion.Buffs.IndexOf(b)}, SourceId:", b.SourceId.ToString());
-
-                EditorGUILayout.Space();
-                EditorGUILayout.LabelField($"Buff#{minion.Buffs.IndexOf(b)}, Type:", b.BuffType.ToString());
-                EditorGUILayout.LabelField($"Buff#{minion.Buffs.IndexOf(b)}, Powerup:", b.PowerUp.Short);
-                EditorGUILayout.LabelField($"Buff#{minion.Buffs.IndexOf(b)}, Heal:", b.Heal.ToString());
+                EditorGUILayout.LabelField($"Buff#{minion.Buffs.IndexOf(b)}, SourceId:", b.SourceId.ToString()); 
                 EditorGUILayout.LabelField($"Buff#{minion.Buffs.IndexOf(b)}, End:", b.EndTime.ToString());
             });
         }

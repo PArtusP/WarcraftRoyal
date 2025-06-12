@@ -42,7 +42,9 @@ public class MinionController : NetworkBehaviour
     public void Stop(bool v)
     {
         if (agent.isOnNavMesh) 
-            agent.isStopped = v; 
+            agent.isStopped = v;
+        agent.velocity = Vector3.zero; 
+        animator.SetSpeed(agent.velocity);
     }
 
     private void OnDrawGizmos()

@@ -146,7 +146,7 @@ MonoBehaviour:
   aimPoint: {fileID: 4623872049642623743}
   healEffect:
     effects:
-    - effect: {fileID: 7261517112516083504}
+    - effect: {fileID: 0}
       instanciate: 0
       timer: 0
     gameObjects: []
@@ -176,6 +176,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   buffs: []
+  actions:
+  - {fileID: 11400000, guid: 133a40e0f0b2fb94eaaf0488d2b9243c, type: 2}
 --- !u!114 &7060431445373960657
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -196,9 +198,9 @@ MonoBehaviour:
     renderers: []
     animations: []
     sounds: []
-  attack: {fileID: 11400000, guid: 133a40e0f0b2fb94eaaf0488d2b9243c, type: 2}
   hitPoint: {fileID: 5938653573581385588}
-  modules: []
+  modules:
+  - {fileID: 11400000, guid: ec97d4a29b2651f4e96083f90f458029, type: 2}
   vfx: {fileID: 5938167112633497383, guid: 7aaf2415158176448aaadcff6f2d01f9, type: 3}
 --- !u!114 &114836369411734941
 MonoBehaviour:
@@ -551,11 +553,6 @@ PrefabInstance:
 --- !u!4 &3091043530143161170 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7459171299625071494, guid: ba3adfbbebfe79e46b235a1d00c36f2e, type: 3}
-  m_PrefabInstance: {fileID: 5575979089883506900}
-  m_PrefabAsset: {fileID: 0}
---- !u!2083052967 &7261517112516083504 stripped
-VisualEffect:
-  m_CorrespondingSourceObject: {fileID: 3001592145790621668, guid: ba3adfbbebfe79e46b235a1d00c36f2e, type: 3}
   m_PrefabInstance: {fileID: 5575979089883506900}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6820747572928596710

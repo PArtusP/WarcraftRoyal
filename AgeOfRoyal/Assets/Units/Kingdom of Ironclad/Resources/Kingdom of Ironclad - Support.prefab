@@ -72,7 +72,7 @@ GameObject:
   m_Component:
   - component: {fileID: 811013780055934938}
   - component: {fileID: -1823115702606848141}
-  - component: {fileID: 1982330210055623403}
+  - component: {fileID: 1169530070287653294}
   - component: {fileID: 5795790253762222147}
   - component: {fileID: 114836369411734941}
   - component: {fileID: 4660775619284453135}
@@ -130,7 +130,7 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &1982330210055623403
+--- !u!114 &1169530070287653294
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -139,16 +139,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 6464291239341278365}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b678657e86662ec44a25e29780690b2b, type: 3}
+  m_Script: {fileID: 11500000, guid: 04672d96fa9313545be8b828fadc0d78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   aimPoint: {fileID: 4623872049642623743}
   healEffect:
     effects:
-    - effect: {fileID: 7261517112516083504}
-      instanciate: 0
+    - instanciate: 0
+      asChild: 0
       timer: 0
+      effect: {fileID: 0}
     gameObjects: []
     particles: []
     renderers: []
@@ -165,9 +166,9 @@ MonoBehaviour:
     renderer: {fileID: 6489516716883798690}
   baseStats:
     health: 40
-    damage: 10
+    damage: 0.5
     speed: 2
-    cooldown: 2
+    cooldown: 1.5
     sightRadius: 18
     hitRadius: 8
     armorRange: 0
@@ -176,6 +177,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   buffs: []
+  actions:
+  - {fileID: 11400000, guid: 0ba554939cf7c314eb7463c1e7038b3e, type: 2}
+  - {fileID: 11400000, guid: fb33a8c7bcff0534cb0162035b4866b7, type: 2}
 --- !u!114 &5795790253762222147
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -196,10 +200,8 @@ MonoBehaviour:
     renderers: []
     animations: []
     sounds: []
-  attack: {fileID: 11400000, guid: 0ba554939cf7c314eb7463c1e7038b3e, type: 2}
   hitPoint: {fileID: 5938653573581385588}
-  modules:
-  - {fileID: 11400000, guid: d82d2e455bbfd714da5309ed69a24df4, type: 2}
+  modules: []
   vfx: {fileID: 5938167112633497383, guid: 9057e7839162a45419879bdabab3689d, type: 3}
 --- !u!114 &114836369411734941
 MonoBehaviour:
@@ -552,11 +554,6 @@ PrefabInstance:
 --- !u!4 &3091043530143161170 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7459171299625071494, guid: ba3adfbbebfe79e46b235a1d00c36f2e, type: 3}
-  m_PrefabInstance: {fileID: 5575979089883506900}
-  m_PrefabAsset: {fileID: 0}
---- !u!2083052967 &7261517112516083504 stripped
-VisualEffect:
-  m_CorrespondingSourceObject: {fileID: 3001592145790621668, guid: ba3adfbbebfe79e46b235a1d00c36f2e, type: 3}
   m_PrefabInstance: {fileID: 5575979089883506900}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6820747572928596710

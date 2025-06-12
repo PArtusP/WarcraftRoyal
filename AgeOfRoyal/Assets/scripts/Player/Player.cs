@@ -45,8 +45,8 @@ public class Player : NetworkBehaviour
     public Base Home { get; set; }
     public UnityEvent OnReadyEvent { get; } = new UnityEvent();
     public UnityEvent OnDieEvent { get; } = new UnityEvent();
-    public Dictionary<int, List<UnitBuff>> MinionPowerUps => minionPowerUps = new Dictionary<int, List<UnitBuff>>();
-    public Dictionary<int, List<UnitModule>> MinionModules => minionModules = new Dictionary<int, List<UnitModule>>();
+    public Dictionary<int, List<UnitBuff>> MinionPowerUps => minionPowerUps;
+    public Dictionary<int, List<UnitModule>> MinionModules => minionModules;
 
     public ShopUi ShopUi => shopUi;
 

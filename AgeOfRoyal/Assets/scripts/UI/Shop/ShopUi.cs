@@ -34,9 +34,12 @@ public class ShopUi : MonoBehaviour
         {
             button.PointerEnter = () =>
             {
-                detailUi.gameObject.SetActive(true);
                 player.MinionPowerUps.TryGetValue(button.Prefab.ID, out var value);
-                detailUi.Display(button.Prefab, value == null ? null : value.Select(v => v.PowerUp).Any() ? value.Select(v => v.PowerUp).ToList().SumPowerUps() : null);
+                detailUi.Display(button.Prefab, value == null ?
+                    null :
+                    value.Select(v => v.PowerUp).Any(v => v != null && !UnitPowerUp.Identity.Equals(v)) ?
+                    value.Select(v => v.PowerUp).ToList().SumPowerUps() :
+                    null);
             };
             button.PointerExit = () =>
             {
@@ -44,13 +47,11 @@ public class ShopUi : MonoBehaviour
             };
             button.OnLeftClick = () =>
             {
-                bool res = player.TryBuy(button);
-                if (res) button.Buy();
+                if (button.Button.interactable && player.TryBuy(button)) button.Buy();
             };
             button.OnRightClick = () =>
             {
-                bool res = player.TrySell(button);
-                if (res) button.Sell();
+                if (button.Button.interactable && player.TrySell(button)) button.Sell();
             };
         }
 
@@ -66,15 +67,13 @@ public class ShopUi : MonoBehaviour
             };
             button.OnLeftClick = () =>
             {
-                bool res = button.Button.interactable && player.TryBuy(button);
-                if (res) button.Buy();
+                if (button.Button.interactable && player.TryBuy(button)) button.Buy();
             };
             button.OnRightClick = () =>
             {
-                bool res = button.Button.interactable && player.TrySell(button);
-                if (res) button.Sell();
+                if (button.Button.interactable && player.TrySell(button)) button.Sell();
             };
-        } 
+        }
     }
 
     public void EnableNewButtons(int level)

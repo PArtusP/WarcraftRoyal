@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "___ - Melee attack", menuName = "Unit Attack/Melee Attack", order = 1)]
+[CreateAssetMenu(fileName = "___ - Melee attack", menuName = "Unit Actions/Unit Attacks/Melee Attack", order = 1)]
 public class MeleeAttack : UnitAttack
 {
 

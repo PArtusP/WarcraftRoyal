@@ -1,25 +1,29 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Unity.Netcode;
+using UnityEditor.Rendering;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class MinionCombat : NetworkBehaviour
-{
-    protected float nextAttack = 0f;
-
+{  
     [Header("Components")]
-    [SerializeField] TriggerSVFX attackFx;
-    [SerializeField] UnitAttack attack;
+    [SerializeField] TriggerSVFX attackFx; //To remove
     [SerializeField] protected Transform hitPoint;
-    protected MinionAnimator animator;
     [SerializeField] protected List<UnitModule> modules = new List<UnitModule>();
+    protected MinionAnimator animator;
     protected UnitWithoutState owner;
+    protected UnitAction action;
 
     [Header("Range specific")]
     [SerializeField] private ProjectileMove vfx;
 
     public UnitWithoutState Owner { get; private set; }
-    public Transform HitPoint { get => hitPoint; set => hitPoint = value; }
-    public List<UnitModule> Modules => modules; 
+    public Transform HitPoint { get => hitPoint; set => hitPoint = value; } 
+
+    public UnityEvent OnEndActionEvent { get; } = new UnityEvent();
+    public List<UnitModule> Modules { get => modules; set => modules = value; }
 
     private void Awake()
     {
@@ -31,29 +35,36 @@ public class MinionCombat : NetworkBehaviour
         modules.ForEach(m => m.Use(this));
     }
 
-    internal void TryAttack(Hitable target)
+    internal void StartAction(Hitable target, UnitAction action)
     {
-        if (nextAttack <= Time.time)
+        if (action == null)
         {
-            nextAttack = Time.time + Owner.Stats.cooldown;
-            animator.Attack();
+            UnityEngine.Debug.LogError("Action is null in StartAction"); 
+        }
+        this.action = action;
+        UnityEngine.Debug.Log("StartAction: " + action.name + " on " + target.name);
+        animator.Action(action.AnimationTrigger);
+    }
+
+    public void Action()
+    {
+        if (!IsServer) return;
+        if (!owner.IsStopped && action.Use(owner))
+            owner.Target = null; 
+        if(action.Vfx != null)
+        {
+            PlayAttackVfx();
+            PlayAttackVfxClientRpc(Owner.Actions.IndexOf(action));
         }
     }
 
-    public void Attack()
-    {
-        if (!IsServer) return;
-        if(!owner.IsStopped && attack.Use(owner))
-            owner.Target = null;
-        PlayAttackVfx();
-        PlayAttackVfxClientRpc();
-    }
+    private void PlayAttackVfx() => action.Vfx.PlayBase(true, this);
 
-    private void PlayAttackVfx() => attackFx.PlayBase(true, this);
     [ClientRpc]
-    private void PlayAttackVfxClientRpc()
+    void PlayAttackVfxClientRpc(int v)
     {
         if (IsHost) return;
+        action = Owner.Actions[v];
         PlayAttackVfx();
     }
 

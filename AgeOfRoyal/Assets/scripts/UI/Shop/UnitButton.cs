@@ -26,7 +26,7 @@ abstract public class RightClickButton : MonoBehaviour, IPointerClickHandler, IP
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left)
+        if (button.IsInteractable() && eventData.button == PointerEventData.InputButton.Left)
         {
             OnLeftClick?.Invoke();
         }
@@ -53,7 +53,7 @@ public class UnitButton : RightClickButton
 
     override public void Buy() => buyCounter.text = (buyCounter.text == string.Empty ? 1 : int.Parse(buyCounter.text) + 1).ToString();
 
-    override public void Sell() => buyCounter.text = (buyCounter.text == string.Empty ? 0 : int.Parse(buyCounter.text) - 1).ToString();
+    override public void Sell() => buyCounter.text = (buyCounter.text == string.Empty ? string.Empty : (int.Parse(buyCounter.text) - 1).ToString());
 
     protected override void SetCost() => cost.text = prefab.cost.ToString();
     protected void SetCurrentCount(int count) => currentCounter.text = count.ToString(); // @TODO

@@ -1,8 +1,9 @@
 ﻿using System;
+using Unity.Netcode;
 using UnityEngine;
 
 [Serializable]
-public class UnitStats
+public class UnitStats : INetworkSerializable
 {
     [SerializeField] public float health = 100f;
     [SerializeField] public float damage = 10f;
@@ -104,4 +105,15 @@ public class UnitStats
     {
         return $"Health: {health}, Damage: {damage}, Speed: {speed}, Cooldown: {cooldown}, SightRadius: {sightRadius}, HitRadius: {hitRadius}, ArmorRange: {armorRange}, ArmorMelee: {armorMelee}";
     }
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref health);
+        serializer.SerializeValue(ref damage);
+        serializer.SerializeValue(ref speed);
+        serializer.SerializeValue(ref cooldown);
+        serializer.SerializeValue(ref sightRadius);
+        serializer.SerializeValue(ref hitRadius);
+        serializer.SerializeValue(ref armorRange);
+        serializer.SerializeValue(ref armorMelee);
+    } 
 }

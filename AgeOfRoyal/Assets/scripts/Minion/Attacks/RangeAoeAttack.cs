@@ -2,7 +2,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "___ - Range AOE attack", menuName = "Unit Attack/Range AOE Attack", order = 3)]
+[CreateAssetMenu(fileName = "___ - Range AOE attack", menuName = "Unit Actions/Unit Attacks/Range AOE Attack", order = 3)]
 public class RangeAoeAttack : UnitAttack
 { 
     [SerializeField] protected float radius = 3f;

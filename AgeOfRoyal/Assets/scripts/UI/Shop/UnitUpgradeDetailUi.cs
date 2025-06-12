@@ -5,6 +5,7 @@ using System.Linq;
 using Unity.Netcode;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 
@@ -25,12 +26,15 @@ public class UnitUpgradeDetailUi : MonoBehaviour
             {
                 var players = FindObjectsByType<Player>(FindObjectsSortMode.None);
 
-                var self = players.FirstOrDefault(p =>  p.IsOwner || 
-            NetworkManager.Singleton.IsServer);
+                var self = players.FirstOrDefault(p => p.IsOwner || NetworkManager.Singleton.IsServer);
                 if (self) instance = self.ShopUi.DetailUi;
                 if (instance == null)
                 {
-/*                    throw new NullReferenceException("UnitUpgradeDetailUi instance not found in the scene. Please ensure it is present.");*/
+                    /*throw new NullReferenceException("UnitUpgradeDetailUi instance not found in the scene. Please ensure it is present.");*/
+                }
+                else
+                {
+                    instance.OnUpdateEvent.AddListener(instance.Display);  // Register the Display method to the OnUpdateEvent}
                 }
             }
             return instance;
@@ -51,8 +55,10 @@ public class UnitUpgradeDetailUi : MonoBehaviour
         PowerUp = button.Buff.PowerUp;
         Modules = button.Modules;
     }
+    internal void Display(UnitWithoutState Minion) => Display(Minion, null);
     internal void Display(UnitWithoutState Minion, UnitPowerUp buffs)
     {
+        buffs = buffs != null ? buffs : Minion.TotalBuff;
         gameObject.SetActive(true);
         ClearChildren();
         Name = Minion.Name;
@@ -86,6 +92,7 @@ public class UnitUpgradeDetailUi : MonoBehaviour
 
         Modules = Minion.Modules;
     }
+    public UnityEvent<Minion> OnUpdateEvent { get; internal set; } = new UnityEvent<Minion>();
 
     virtual protected UnitPowerUp PowerUp
     {
@@ -107,7 +114,7 @@ public class UnitUpgradeDetailUi : MonoBehaviour
             if (value.multStats.armorRange != 1) AddStatLineMult("range DEF", value.multStats.armorRange);
             if (value.multStats.armorMelee != 1) AddStatLineMult("melee DEF", value.multStats.armorMelee);
         }
-    } 
+    }
 
 
     private void AddStatLineAdd(string label, float value) => Instantiate(statelinePrefab, statsContainer).SetLineAdd(null, label, value);
@@ -115,9 +122,9 @@ public class UnitUpgradeDetailUi : MonoBehaviour
     private void AddModuleLine(string label) => Instantiate(statelinePrefab, statsContainer).SetLine(null, label);
     private void AddStatLine(string label, float stats, float addBuff, float multBuff) => Instantiate(statelineSmallPrefab, statsContainer).SetStatLineWithBuff(null, label, stats, (stats + addBuff) * multBuff - stats);
     private void AddDoubleStatLine(string label1, float stats1, float addBuff1, float multBuff1,
-        string label2, float stats2, float addBuff2, float multBuff2) => 
+        string label2, float stats2, float addBuff2, float multBuff2) =>
         Instantiate(statelineDoublePrefab, statsContainer)
-        .SetLines(label1, stats1, (stats1 + addBuff1) * multBuff1 - stats1, 
+        .SetLines(label1, stats1, (stats1 + addBuff1) * multBuff1 - stats1,
             label2, stats2, (stats2 + addBuff2) * multBuff2 - stats2);
 
     public void ClearChildren()

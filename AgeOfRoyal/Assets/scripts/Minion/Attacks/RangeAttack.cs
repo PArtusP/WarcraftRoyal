@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "___ - Range attack", menuName = "Unit Attack/Range Attack", order = 2)]
+[CreateAssetMenu(fileName = "___ - Range attack", menuName = "Unit Actions/Unit Attacks/Range Attack", order = 2)]
 public class RangeAttack : UnitAttack
 {
 
     override public bool Use(UnitWithoutState owner)
     {
+        Debug.Log("Use RangeAttack: " + owner.name + " Target: " + (owner.Target != null ? owner.Target.name : "null"));
         if (owner.Target == null) return false;
         owner.Combat.PlayShootVfx(owner.Target);
         owner.Combat.PlayShootVfxClientRpc(owner.Target.NetworkObjectId);
