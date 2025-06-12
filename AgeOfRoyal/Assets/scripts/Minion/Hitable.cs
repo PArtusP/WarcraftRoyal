@@ -23,6 +23,8 @@ abstract public class Hitable : NetworkBehaviour
     protected abstract float MaxHealth { get; set; }
     public float Health { get => health.Value; set => health.Value = value; }
     public float HealthPercent => health.Value / MaxHealth;
+    public bool Dead => Health == 0f;
+    
     public Base Home { get => home; set => home = value; }
     public UnityEvent OnDieEvent { get; internal set; } = new UnityEvent();
 
