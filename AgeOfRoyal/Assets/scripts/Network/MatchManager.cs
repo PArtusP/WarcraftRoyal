@@ -22,12 +22,17 @@ public class MatchManager : NetworkBehaviour
     [SerializeField] Canvas restartCanvas;
     [SerializeField] RewardType rewardType = RewardType.EarnHalfValue;
     [SerializeField] CountDownUi countDownUi;
-    ShopUi shopUi;
+    
+    MinionManager minionManager; 
     int roundCount = 0;
     Phase phase = Phase.Preparation;
-
-    [Header("Players")]
-    [SerializeField] PlayerManager playerManager;
+    PlayerManager playerManager;
+    
+    private void Awake()
+    {
+        minionManager = GetComponent<MinionManager>();
+        playerManager = GetComponent<PlayerManager>();
+    }
 
     private void Update()
     {
@@ -114,6 +119,7 @@ public class MatchManager : NetworkBehaviour
     {
         for (int i = 0; i < playerManager.Players.Count; i++)
         {
+            // If nedded.. it's here bro
         }
     }
     private void SetUiClient()
@@ -124,9 +130,7 @@ public class MatchManager : NetworkBehaviour
             if (pl.IsOwner)
             {
                 Debug.Log("SetUiClient : is owner");
-                //pl.SetHealthBar(healthbars[0]);
-                //pl.SetSpecialBar(specialBar);
-                //pl.SetMoveActionBar(moveActionBar);
+                // If nedded.. it's here bro
             }
             //else pl.SetHealthBar(healthbars[1]);
         }
@@ -147,8 +151,6 @@ public class MatchManager : NetworkBehaviour
     private IEnumerator PreparationPhase()
     {
         yield return new WaitForSeconds(1f);
-
-
         playerManager.Players.ForEach(p =>
         {
             var moneyReward = 5 + roundCount * 2;
@@ -176,7 +178,7 @@ public class MatchManager : NetworkBehaviour
 
             PreparationPhase_ResetPlayerClientRpc(p.NetworkObjectId, moneyReward);
         });
-
+        minionManager.Clean();
         countDownUi.StartCountDown(preparationTime);
         roundCount++;
     }
@@ -190,11 +192,6 @@ public class MatchManager : NetworkBehaviour
         player.StartPreparationPhase(moneyReward);
         roundCount++;
     }
-
-    /*    private void EndPreparationCooldown(Player p)
-        {
-            p.WaitToStartRound();
-        }*/
     #endregion
 
     #region Game loop - Combat phase
@@ -203,6 +200,7 @@ public class MatchManager : NetworkBehaviour
         if (phase == Phase.Combat) return;
         phase = Phase.Combat;
         playerManager.Players.ForEach(p => p.StartNewCombatRound());
+        playerManager.Players.ForEach(p => minionManager.AddRange(p.Home.SpawnedUnits));
     }
 
     private void EndOfCombatRound()
