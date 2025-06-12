@@ -23,14 +23,19 @@ abstract public class ResurectModule : UnitModule
         var unitsManager = owner.FindFirstObjectByType<UnitsManager>();
         List<Minion> minions = picking.PickTargets(unitsManager.Deads).Take(maxTarget).ToList(); 
 
-        owner.Owner.PlayVfx(OnSelfVfx);
-        owner.Owner.PlayModuleOnSelfVfxClientRpc(ID, owner.NetworkObjectId);
 
         var nbTouched = 0;
         foreach (var h in minions)
         {
             unitsManager.Resurect(h, healthPercent, maxHealthFlat);
+            h.PlayVfx(OnTargetVfx);
+            h.PlayModuleOnTargetVfxClientRpc(ID, owner.NetworkObjectId);
+            nbTouched++;
         } 
+        if(nbTouched > 0){
+        owner.Owner.PlayVfx(OnSelfVfx);
+        owner.Owner.PlayModuleOnSelfVfxClientRpc(ID, owner.NetworkObjectId);
+        }
         return nbTouched;
     } 
     public override UnitModule Clone()
