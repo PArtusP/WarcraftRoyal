@@ -40,6 +40,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     [SerializeField] public List<RendererToColor> rendererToColor = new List<RendererToColor>();
     protected MinionController controller;
     protected MinionCombat combat;
+    protected MinionAnimator animator;
     protected UnityEvent<Minion> OnDisplayToUpdate { get; } = new UnityEvent<Minion>();
 
     [Header("Stats")]
@@ -87,6 +88,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     {
         controller = GetComponent<MinionController>();
         combat = GetComponent<MinionCombat>();
+        animator = GetComponent<MinionAnimator>();
         if (combat.Modules.Any())
             combat.Modules = combat.Modules.Select(m => m.Clone()).ToList(); // Init modules
         IsAsset = false;
@@ -127,6 +129,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
         UnitUpgradeDetailUi.Instance.Display(this);
         UnitUpgradeDetailUi.Instance.OnUpdateEvent = OnDisplayToUpdate;
     }
+    public void PlayResurectAnimation() => 
     internal void ApplyStatsAndStatus()
     {
         controller.SetSpeed(Stats.speed);
@@ -292,6 +295,8 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
         PlayVfx(DbResolver.GetModuleById(ID).OnSelfVfx, value);
     }
     #endregion
+
+    internal void PlayResurectAnimation() => animator.Resurect();
 }
 
 abstract public class UnitBase<T> : UnitWithoutState where T : Enum
