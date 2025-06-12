@@ -27,7 +27,7 @@ public class UnitsManager : NetworkBehaviour
         units.Remove(unit);
         deads.Add(unit);
     }    
-    public void Resurect(Hitable unit, float healthPercent = 1f, float? healthCeiling = null) 
+    public void Resurect(Hitable unit, float healthPercent = 1f, float healthCeiling = 0) 
     { 
         Hitable target = null;
         try
@@ -39,7 +39,7 @@ public class UnitsManager : NetworkBehaviour
             Debug.LogError($"Couldn't find dead unity '{unit.Name} ({unit.NetworkObjectId})' in dead list : [{string.Join(", ", dead.Select(u => $"{unit.Name} ({unit.NetworkObjectId})"))}].");
             throw;
         }
-        target.Health = healthCeiling.HasValue ? Mathf.Max(healthCeiling.Value, target.MaxHealth * healthPercent) : target.MaxHealth * healthPercent;
+        target.Health = healthCeiling != 0 ? Mathf.Min(healthCeiling.Value, target.MaxHealth * healthPercent) : target.MaxHealth * healthPercent;
         target.gameObject.SetActive(true);
         deads.Remove(target);
         units.Add(target);
