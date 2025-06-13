@@ -14,7 +14,7 @@ public class Base : Hitable
     public Vector3 direction { get; private set; }
     public UnityEvent EndOfRoundEvent { get; private set; } = new UnityEvent();
     public List<Minion> SpawnList { get => spawnList; set => spawnList = value; }
-    protected override float MaxHealth { get; set; } = 1000;
+    public override float MaxHealth { get; set; } = 1000;
     public List<Minion> SpawnedUnits  => spawnedUnits; 
 
     // Start is called before the first frame update
@@ -90,6 +90,7 @@ public class Base : Hitable
             {
                 unit = Instantiate(units[i], spawnPos, Quaternion.LookRotation(direction, Vector3.up), transform);
                 unit.NetworkObject.Spawn();
+                Debug.Log($"{unit} is spwaned ? {unit.NetworkObject.IsSpawned}");
                 unit.ApplyStatsAndStatus();
                 unit.SourcePrefab = units[i];
                 ColoredUnit(unit);
@@ -123,8 +124,7 @@ public class Base : Hitable
     [ClientRpc]
     private void ColoredUnitClientRpc(ulong unitId) => ColoredUnit(GetNetworkObject(unitId).GetComponent<Minion>());
     #endregion  
-
-
+     
     #region Minion management
     internal void AddMinion(Minion prefab) => spawnList.Add(prefab);
     [ServerRpc(RequireOwnership = false)]

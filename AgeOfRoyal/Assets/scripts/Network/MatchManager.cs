@@ -13,21 +13,21 @@ public enum Phase
 public enum RewardType
 {
     KeepSurvivor,
-    EarnHalfValue,
+    EarnYourAge,
 }
 public class MatchManager : NetworkBehaviour
 {
     private const int preparationTime = 20;
     [Header("UI")]
     [SerializeField] Canvas restartCanvas;
-    [SerializeField] RewardType rewardType = RewardType.EarnHalfValue;
+    [SerializeField] RewardType rewardType = RewardType.EarnYourAge;
     [SerializeField] CountDownUi countDownUi;
-    
-    UnitsManager unitsManager; 
+
+    UnitsManager unitsManager;
     int roundCount = 0;
     Phase phase = Phase.Preparation;
     PlayerManager playerManager;
-    
+
     private void Awake()
     {
         unitsManager = GetComponent<UnitsManager>();
@@ -150,7 +150,8 @@ public class MatchManager : NetworkBehaviour
     #region Game loop - Preparation phase
     private IEnumerator PreparationPhase()
     {
-        yield return new WaitForSeconds(1f);
+        Player winner = playerManager.Players.FirstOrDefault(p => p.Home.SpawnedUnits.Any());
+        yield return new WaitForSeconds(1f);    
         var despawnSurvivors = true;
         playerManager.Players.ForEach(p =>
         {
@@ -166,11 +167,11 @@ public class MatchManager : NetworkBehaviour
                         despawnSurvivors = false;
                     }
                     break;
-                case RewardType.EarnHalfValue: // Despawn survivors, earn half the total value of the survivors
+                case RewardType.EarnYourAge: // Despawn survivors, earn half the total value of the survivors
                     if (p.Home.SpawnedUnits.Any())
                     {
-                        p.Home.SpawnedUnits.ForEach(u => u.NetworkObject.Despawn());
-                        moneyReward += p.Home.SpawnedUnits.Sum(u => Mathf.Min(1, Mathf.FloorToInt(u.cost * .5f)));
+                        if (winner == p)
+                            moneyReward += p.Xp.Level + 1;
                         p.Home.SpawnedUnits.Clear();
                     }
                     break;

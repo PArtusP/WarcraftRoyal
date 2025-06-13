@@ -3102,6 +3102,7 @@ GameObject:
   - component: {fileID: 3985922457731065330}
   - component: {fileID: 3985922457731065331}
   - component: {fileID: 3974790452115796425}
+  - component: {fileID: 2076968991810110834}
   m_Layer: 0
   m_Name: MatchManager
   m_TagString: Untagged
@@ -3166,8 +3167,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   restartCanvas: {fileID: 3985922456778119621}
+  rewardType: 1
   countDownUi: {fileID: 3985922457996010814}
-  playerManager: {fileID: 3974790452115796425}
 --- !u!114 &3974790452115796425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3188,6 +3189,19 @@ MonoBehaviour:
   - {fileID: 6267209802638380723}
   MaxPlayer: 2
   matchManager: {fileID: 3985922457731065331}
+--- !u!114 &2076968991810110834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3985922457731065332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27303db4e2ed33d42b40d8c813c631f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &3985922457942797279
 GameObject:
   m_ObjectHideFlags: 0

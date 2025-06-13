@@ -46,7 +46,7 @@ public class PlayerExperience
         if (level == thresholds.Length - 1) return;
 
         currentXp += value;
-        Debug.Log($"XP, AddExperience : add {value}, level {level}, max {thresholds.Length - 1}");
+        //Debug.Log($"XP, AddExperience : add {value}, level {level}, max {thresholds.Length - 1}");
 
         // While total XP exceeds cumulative threshold for next level, level up
         while (level < thresholds.Length - 1 && currentXp >= GetCumulativeThreshold(level))
@@ -70,4 +70,9 @@ public class PlayerExperience
         float levelThreshold = GetThreshold(level);
         healthBar.SetHealth(levelProgress / levelThreshold * 100f);
     }
+    /// <summary>
+    /// Only for client sync
+    /// </summary>
+    /// <param name="level"></param>
+    internal void SetLevel(int level) => this.level = level; 
 }

@@ -1,7 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
-using UnityEngine; 
+using UnityEngine;
 
 [System.Serializable]
 abstract public class ResurectModule : UnitModule
@@ -13,15 +14,14 @@ abstract public class ResurectModule : UnitModule
 
     float lastUsed = 0f;
 
-    public float Cooldown => cooldown; 
+    public float Cooldown => cooldown;
     public TargetPicking Picking { get => picking; set => picking = value; }
-    public abstract bool VfxLoop => false;
     public override int Use(MinionCombat owner, int maxTargetOverride = -1)
     {
         if (!owner.IsServer) return 0;
         var maxTarget = maxTargetOverride == -1 ? picking.MaxTarget : maxTargetOverride;
-        var unitsManager = owner.FindFirstObjectByType<UnitsManager>();
-        List<Minion> minions = picking.PickTargets(unitsManager.Deads).Take(maxTarget).ToList(); 
+        var unitsManager = Object.FindFirstObjectByType<UnitsManager>();
+        List<Minion> minions = picking.PickTargets(unitsManager.Deads.Select(m => m as Minion).Where(m => m != null).ToList(), owner.Owner).Take(maxTarget).ToList();
 
 
         var nbTouched = 0;
@@ -29,15 +29,17 @@ abstract public class ResurectModule : UnitModule
         {
             unitsManager.Resurect(h, healthPercent, maxHealthFlat);
             h.PlayVfx(OnTargetVfx);
-            h.PlayModuleOnTargetVfxClientRpc(ID, owner.NetworkObjectId);
+            h.PlayModuleOnTargetVfxClientRpc(ID, owner.NetworkObjectId, OnTargetVfx.id.ToString());
             nbTouched++;
-        } 
-        if(nbTouched > 0){
-        owner.Owner.PlayVfx(OnSelfVfx);
-        owner.Owner.PlayModuleOnSelfVfxClientRpc(ID, owner.NetworkObjectId);
+        }
+        if (nbTouched > 0)
+        {
+            NextUse = Time.time + cooldown;
+            owner.Owner.PlayVfx(OnSelfVfx);
+            owner.Owner.PlayModuleOnSelfVfxClientRpc(ID, owner.NetworkObjectId, OnSelfVfx.id.ToString());
         }
         return nbTouched;
-    } 
+    }
     public override UnitModule Clone()
     {
         var clone = Instantiate(this);

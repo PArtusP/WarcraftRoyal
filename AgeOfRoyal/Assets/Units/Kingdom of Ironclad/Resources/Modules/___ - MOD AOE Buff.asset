@@ -15,10 +15,10 @@ MonoBehaviour:
   ID: -1
   onTargetVfx:
     effects:
-    - effect: {fileID: 7868308634086037558, guid: d465cb5b4c3db6b47a92da359e50ee5a, type: 3}
-      instanciate: 1
+    - instanciate: 1
       asChild: 1
       timer: 2
+      effect: {fileID: 7868308634086037558, guid: d465cb5b4c3db6b47a92da359e50ee5a, type: 3}
     gameObjects: []
     particles: []
     renderers: []
@@ -31,8 +31,8 @@ MonoBehaviour:
     renderers: []
     animations: []
     sounds: []
-  cooldown: 5
-  radius: 3
+  cooldown: 10
+  radius: 4
   picking:
     maxTarget: 3
     sameTeam: 0
@@ -40,7 +40,7 @@ MonoBehaviour:
     filters: []
   buff:
     buffType: 1
-    duration: 2
+    duration: 1
     maxStack: 1
     canBeDispelled: 1
     powerup:

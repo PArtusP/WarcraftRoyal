@@ -9,6 +9,7 @@ using UnityEngine.VFX;
 [Serializable]
 public class TriggerSVFX
 {
+    public Guid id = Guid.NewGuid();
     public List<TriggerVisualEffect> effects;
     public List<TriggerEffectGO> gameObjects;
     public List<TriggerParticleSystem> particles;
@@ -24,8 +25,10 @@ public class TriggerSVFX
 
     public bool Playing => playing;
 
-    internal void PlayBase(bool value, MonoBehaviour owner, bool stopSound = false, float? volume = null, float? time = null, Vector3? position = null, Quaternion? rotation = null)
+    internal void PlayBase(bool value, MonoBehaviour owner, Guid? id = null, bool stopSound = false, float? volume = null, float? time = null, Vector3? position = null, Quaternion? rotation = null)
     {
+        if(id.HasValue) this.id = id.Value;
+        Debug.Log($"TriggerSVFX: {(value ? "play" : "stop")} '{id}'");
         playing = value;
         this.StopSound = stopSound;
         if (time.HasValue)
@@ -96,6 +99,7 @@ public class TriggerSVFX
 [Serializable]
 abstract public class TriggerEffectBase
 {
+    protected Guid id = Guid.NewGuid();
     [SerializeField] protected bool instanciate = false;
     [SerializeField] protected bool asChild = false;
     protected GameObject instance = null;
@@ -113,19 +117,22 @@ abstract public class TriggerEffect<T> : TriggerEffectBase
     protected T instanceEffect; 
     public T Effect { get => instanciate ? instanceEffect : effect; }
 
-    virtual protected void Set(bool value, MonoBehaviour owner, Vector3? position = null, Quaternion? rotation = null)
+    virtual protected void Set(bool value, MonoBehaviour owner, Guid id, Vector3? position = null, Quaternion? rotation = null)
     {
         this.owner = owner;
+        this.id = id;
         if (value && Timer.HasValue)
             owner.StartCoroutine(WaitToStop());
         if (value && instanciate)
             InstanciateInternal(position, rotation, owner);
 
+        if(value) instance.AddComponent<TriggerSFVXItem>().Id = id;
+
         SetInternal(value);
         if (!value && instanciate) UnityEngine.Object.Destroy(instance);
     }
-    public void Play(MonoBehaviour owner, Vector3? position = null, Quaternion? rotation = null) => Set(true, owner, position, rotation);
-    public void Stop() => Set(false, owner);
+    public void Play(MonoBehaviour owner, Vector3? position = null, Quaternion? rotation = null) => Set(true, owner, id, position, rotation);
+    public void Stop() => Set(false, owner, id);
     protected IEnumerator WaitToStop()
     {
         yield return new WaitForSeconds(timer);

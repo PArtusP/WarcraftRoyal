@@ -50,6 +50,8 @@ public class Player : NetworkBehaviour
 
     public ShopUi ShopUi => shopUi;
 
+    public PlayerExperience Xp { get => xp; set => xp = value; }
+
     #region Init & Awake
     private void Awake()
     {
@@ -76,14 +78,16 @@ public class Player : NetworkBehaviour
 
             startButton.onClick.AddListener(WaitToStartRound);
 
-            xp.LevelUpEvent.AddListener(shopUi.EnableNewButtons);
+            xp.LevelUpEvent.AddListener(LevelUpSync);
             ShowPreparationUi(true);
         }
     }
+
     #endregion
 
+    #region Game loop
     internal void StartPreparationPhase(int earnings)
-    { 
+    {
         Wallet.Earn(earnings);
         shopUi.Reset();
         ShowPreparationUi(true);
@@ -96,7 +100,7 @@ public class Player : NetworkBehaviour
     {
         xpPlusButton.interactable = false;
         shopUi.EnableButtons(false);
-        startButton.interactable = false; 
+        startButton.interactable = false;
         IsReadyForBattle.Value = true;
     }
 
@@ -109,8 +113,9 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     private void StartNewCombatRoundClientRpc()
     {
-        ShowPreparationUi(false); 
+        ShowPreparationUi(false);
     }
+#endregion
 
     #region Shop methods
     internal bool TryBuy(RightClickButton prefab)
@@ -133,7 +138,7 @@ public class Player : NetworkBehaviour
                     {
                         AddMinionModules(t.ID, unitUpgrade.Modules);// @TOOO : Better to do ask and approve
                         AddMinionPowerUp(t.ID, unitUpgrade.Buff);// @TOOO : Better to do ask and approve
-                    }); 
+                    });
                     AddMinionUpgradeServerRpc(unitUpgrade.ID);
                     return true;
                 }
@@ -164,7 +169,7 @@ public class Player : NetworkBehaviour
                     {
                         RemoveMinionModules(t.ID, unitUpgrade.Modules);// @TOOO : Better to do ask and approve
                         RemoveMinionPowerUp(t.ID, unitUpgrade.Buff);// @TOOO : Better to do ask and approve
-                    }); 
+                    });
                     RemoveMinionUpgradeServerRpc(unitUpgrade.ID);
                     return true;
                 }
@@ -222,7 +227,7 @@ public class Player : NetworkBehaviour
         {
             RemoveMinionModules(t.ID, upgrade.Modules);
             RemoveMinionPowerUp(t.ID, upgrade.Buff);
-        }); 
+        });
     }
 
 
@@ -272,6 +277,26 @@ public class Player : NetworkBehaviour
             yield return new WaitForEndOfFrame();
         }
         waitToSpendXp = false;
+    }
+    private void LevelUpSync(int level)
+    {
+        shopUi.EnableNewButtons(level);
+        LevelUpSyncServerRpc(level);
+    }
+
+    [ServerRpc]
+    private void LevelUpSyncServerRpc(int level)
+    {
+        LevelUpSyncClientRpc(level);
+        if (IsHost) return;
+        xp.SetLevel(level);
+    }
+
+    [ClientRpc]
+    private void LevelUpSyncClientRpc(int level)
+    {
+        if (IsOwner) return;
+        xp.SetLevel(level);
     }
     #endregion
 }

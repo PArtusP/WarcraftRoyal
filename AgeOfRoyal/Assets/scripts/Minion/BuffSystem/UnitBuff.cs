@@ -50,7 +50,7 @@ public class UnitBuff : INetworkSerializable
 
     public bool IsExpired()
     { 
-        Debug.Log("Checking if buff is expired: " + buffType + " applied at: " + appliedTime + " with duration: " + duration + " current time: " + Time.time);
+        //Debug.Log("Checking if buff is expired: " + buffType + " applied at: " + appliedTime + " with duration: " + duration + " current time: " + Time.time);
         return (buffType == UnitBuffType.Temporary || buffType == UnitBuffType.Refreshable || buffType == UnitBuffType.Stackable) && Time.time - appliedTime >= duration;
     }
 

@@ -29,7 +29,7 @@ public class AoeBuffModule : AoeUnitModule
     public override void Init(MinionCombat owner)
     {
         buff = buff.Clone();
-        buff.Source = owner.Owner;
+        buff.Source = owner.Owner; 
     }
 
     override protected void ApplyEffectInternal(Minion target, MinionCombat owner)
@@ -59,7 +59,7 @@ public class AoeBuffModule : AoeUnitModule
 
     protected override List<Minion> PreApplyChecks(List<Minion> minions, MinionCombat owner)
     {
-        targets.RemoveAll(t => t == null);
+        targets.RemoveAll(t => t == null && t.Dead);
         switch (buff.BuffType)
         {
             case UnitBuffType.Aura:
@@ -67,10 +67,15 @@ public class AoeBuffModule : AoeUnitModule
                 notInRangeAnymore.ForEach(t =>
                 {
                     owner.Owner.PlayVfx(OnTargetVfx, false);
-                    owner.Owner.PlayModuleOnTargetVfxClientRpc(ID, owner.NetworkObjectId, false);
+                    owner.Owner.PlayModuleOnTargetVfxClientRpc(ID, owner.NetworkObjectId, OnTargetVfx.id.ToString(), false);
                     t.RemoveBuff(buff);
                 }); // Remove targets not in the current minions list
-                notInRangeAnymore.ForEach(b => targets.Remove(b)); 
+                notInRangeAnymore.ForEach(b => targets.Remove(b));
+                if (!targets.Any())
+                {
+                    owner.Owner.PlayVfx(OnSelfVfx, false);
+                    owner.Owner.PlayModuleOnSelfVfxClientRpc(ID, owner.NetworkObjectId, OnSelfVfx.id.ToString(), false);
+                }
                 break; 
                 case UnitBuffType.Temporary:
                 case UnitBuffType.Refreshable:

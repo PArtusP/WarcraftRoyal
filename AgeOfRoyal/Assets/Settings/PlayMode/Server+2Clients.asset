@@ -38,7 +38,7 @@ MonoBehaviour:
     m_Nodes:
     - Player 3|2_run
     - Player 3|2_deploy
-    m_PlayerTag: 
+    m_PlayerTag: Antonio
     m_InitialScene: {fileID: 0}
     m_AdvancedConfiguration:
       StreamLogsToMainEditor: 0

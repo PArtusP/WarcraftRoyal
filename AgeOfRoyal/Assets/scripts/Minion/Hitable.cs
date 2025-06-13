@@ -20,7 +20,7 @@ abstract public class Hitable : NetworkBehaviour
             0f,
             NetworkVariableReadPermission.Everyone,
             NetworkVariableWritePermission.Server);
-    protected abstract float MaxHealth { get; set; }
+    public abstract float MaxHealth { get; set; }
     public float Health { get => health.Value; set => health.Value = value; }
     public float HealthPercent => health.Value / MaxHealth;
     public bool Dead => Health == 0f;
@@ -67,7 +67,7 @@ abstract public class Hitable : NetworkBehaviour
             PlayHealLoopVfxClientRpc(true);
         }
     }
-    private void PlayHealLoopVfx(bool play) => healEffect.PlayBase(play, this, false, null, null, transform.position, Quaternion.identity); 
+    private void PlayHealLoopVfx(bool play) => healEffect.PlayBase(play, this, healEffect.id); 
 
     [ClientRpc]
     private void PlayHealLoopVfxClientRpc(bool play) => PlayHealLoopVfx(play);

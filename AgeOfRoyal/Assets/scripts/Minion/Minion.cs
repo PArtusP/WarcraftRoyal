@@ -7,6 +7,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using static Unity.VisualScripting.Member;
 
 public enum MinionState
 {
@@ -28,6 +29,7 @@ public class SerializedMinion
 }
 abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 {
+
     [Header("Shop attributes")]
     [SerializeField] public int ID = -1;
     [SerializeField] protected Class type = Class.Melee;
@@ -65,7 +67,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     public Minion SourcePrefab { get; internal set; } = null;
     public SerializedMinion Serialized => new SerializedMinion() { ID = ID, Health = Health }; // Serialized data for saving/loading purposes
 
-    protected override float MaxHealth { get => Stats.health; set => Stats.health = value; }
+    public override float MaxHealth { get => Stats.health; set => Stats.health = value; }
     public string Name { get => name; set => name = value; }
     public MinionCombat Combat { get => combat; set => combat = value; }
     internal Class Type { get => type; set => type = value; }
@@ -83,14 +85,17 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 
     abstract public bool IsStopped { get; }
     public List<UnitAction> Actions { get => actions; set => actions = value; }
+    public List<TriggerSVFX> ClientVfxs { get; private set; } = new List<TriggerSVFX>();
 
     override protected void AwakeInternal()
     {
         controller = GetComponent<MinionController>();
         combat = GetComponent<MinionCombat>();
         animator = GetComponent<MinionAnimator>();
+        Debug.Log("Init unit 1#: " + string.Join(", ", Combat.Modules.Select(m => m.ID)));
         if (combat.Modules.Any())
             combat.Modules = combat.Modules.Select(m => m.Clone()).ToList(); // Init modules
+        Debug.Log("Init unit 2#: " + string.Join(", ", Combat.Modules.Select(m => m.ID)));
         IsAsset = false;
         combat.Init(this);
         ApplyStatsAndStatus();
@@ -102,7 +107,10 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
         {
             toDelete.ForEach(b => Debug.Log($"Expired buff: '{b}' from {name}"));
             var old = Stats;
-            toDelete.ForEach(b => buffs.Remove(b)); 
+            toDelete.ForEach(b =>
+            {
+                buffs.Remove(b);
+            });
             UpdateStatsEffects(old); // IsServer
             OnDisplayToUpdate.Invoke(this as Minion); // Notify UI to update stats display
         }
@@ -129,7 +137,6 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
         UnitUpgradeDetailUi.Instance.Display(this);
         UnitUpgradeDetailUi.Instance.OnUpdateEvent = OnDisplayToUpdate;
     }
-    public void PlayResurectAnimation() => 
     internal void ApplyStatsAndStatus()
     {
         controller.SetSpeed(Stats.speed);
@@ -254,8 +261,10 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     {
         if (IsHost) return;
         Debug.Log("Adding module with ID: " + moduleID + " to " + name + " from client.");
-        combat.Modules.Add(DbResolver.GetModuleById(moduleID));
+        combat.Modules.Add(DbResolver.GetModuleById(moduleID).Clone());
     }
+
+    
     #endregion
 
     #region Dispel
@@ -274,29 +283,67 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     {
         var toDebuf = GetBuffsDispellable(removeDebuff);
         toDebuf.ForEach(b => Debug.Log($"Dispel '{b}' from {name}"));
-        toDebuf.ForEach(b => buffs.Remove(b));  
+        toDebuf.ForEach(b => buffs.Remove(b));
     }
     #endregion
 
     #region VFX
     internal void PlayVfx(TriggerSVFX vfx, bool value = true) => vfx.PlayBase(value, this);
 
-    [ClientRpc]
-    internal void PlayModuleOnTargetVfxClientRpc(int ID, ulong sourceId, bool value = true)
+/*    internal void PlayModuleClient(TriggerSVFX vfx, ulong sourceId, string id, bool value)
     {
         if (IsHost) return; // Don't play VFX on host, it will be played on server and synced to clients
-        PlayVfx(DbResolver.GetModuleById(ID).OnTargetVfx, value);
+        Debug.Log($"PlayModuleClient: {(value ? "play" : "stop")} '{id}'");
+        if (value)
+        {
+            vfx.id = Guid.Parse(id);
+            PlayVfx(vfx, value);
+        ClientVfxs.Add(vfx);
+    }
+        else
+        {
+            var effects = FindObjectsByType<TriggerSFVXItem>(FindObjectsSortMode.InstanceID).Where(e => e.Id == Guid.Parse(id)).ToList();
+            if (effects.Any())
+            {
+                effects.ForEach(e => Destroy(e.gameObject)); // @TODO should probably stop effect then destroy
+            }
+        }
+    }*/
+
+    [ClientRpc]
+    internal void PlayModuleOnTargetVfxClientRpc(int moduleId, ulong sourceId, string id, bool value = true)
+    {
+        if (IsHost) return; // Don't play VFX on host, it will be played on server and synced to clients
+        var source = GetNetworkObject(sourceId).GetComponent<UnitWithoutState>();
+        //Debug.Log($"From source {source} '{source.NetworkObjectId}': looking for {moduleId}, contains [{string.Join(", ", source.Combat.Modules.Select(m => m.ID))}]");
+        Debug.Log("Effect lenght = " + (source.Combat.Modules.FirstOrDefault(m => m.ID == moduleId).OnTargetVfx.effects[0].Timer));
+        PlayVfx(source.Combat.Modules.FirstOrDefault(m => m.ID == moduleId).OnTargetVfx, value); 
     }
 
     [ClientRpc]
-    internal void PlayModuleOnSelfVfxClientRpc(int ID, ulong sourceId, bool value = true)
+    internal void PlayModuleOnSelfVfxClientRpc(int moduleId, ulong sourceId, string id, bool value = true)
     {
         if (IsHost) return; // Don't play VFX on host, it will be played on server and synced to clients
-        PlayVfx(DbResolver.GetModuleById(ID).OnSelfVfx, value);
+        var source = GetNetworkObject(sourceId).GetComponent<UnitWithoutState>();
+        //Debug.Log($"From source {source} '{source.NetworkObjectId}': looking for {moduleId}, contains [{string.Join(", ", source.Combat.Modules.Select(m => m.ID))}]");
+        Debug.Log("Effect lenght = " + (source.Combat.Modules.FirstOrDefault(m => m.ID == moduleId).OnTargetVfx.effects[0].Timer));
+        PlayVfx(source.Combat.Modules.FirstOrDefault(m => m.ID == moduleId).OnSelfVfx, value);
     }
     #endregion
 
     internal void PlayResurectAnimation() => animator.Resurect();
+
+    internal void SetDead()
+    {
+        gameObject.SetActive(false);
+    }
+
+    [ClientRpc]
+    internal void SetDeadClientRpc()
+    {
+        if (IsHost) return;
+        gameObject.SetActive(false);
+    }
 }
 
 abstract public class UnitBase<T> : UnitWithoutState where T : Enum
@@ -400,7 +447,7 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
                     {
                         controller.Stop(true);
                         combat.StartAction(target, validContition.action);
-                        nextAttackDict[validContition.action] = Time.time + validContition.Condition.cooldown; 
+                        nextAttackDict[validContition.action] = Time.time + validContition.Condition.cooldown;
                     }
                 ),
         };

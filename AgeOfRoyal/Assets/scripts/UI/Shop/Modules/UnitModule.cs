@@ -15,18 +15,21 @@ abstract public class UnitModule : ScriptableObject
     public TriggerSVFX OnSelfVfx => onSelfVfx;
     abstract public float Radius { get; }
     abstract public string Description { get; }
-    abstract public void Init(MinionCombat owner); 
+    public float NextUse { get; protected set; }
+    abstract public void Init(MinionCombat owner);
     /// <summary>
     /// Return the number of targets on which the module has been applied
     /// </summary>
     /// <param name="owner"></param>
     /// <param name="maxTargetOverride"></param>
     /// <returns></returns>
-    abstract public int Use(MinionCombat owner, int maxTargetOverride = -1); 
-    
+    abstract public int Use(MinionCombat owner, int maxTargetOverride = -1);
+
     public virtual UnitModule Clone()
     {
-        return Instantiate(this);
+        var clone = Instantiate(this);
+        clone.ID = this.ID;
+        return clone;
     }
 }
 
@@ -47,18 +50,16 @@ abstract public class AoeUnitModule : UnitModule
     float lastUsed = 0f;
 
     public float Cooldown => cooldown;
-    override public float Radius => radius; 
+
+    override public float Radius => radius;
     public TargetPicking Picking { get => picking; set => picking = value; }
     public abstract bool VfxLoop { get; }
     public override int Use(MinionCombat owner, int maxTargetOverride = -1)
     {
-        if (!owner.IsServer) return 0;
+        if (!owner.IsServer || NextUse > Time.time) return 0;
         var maxTarget = maxTargetOverride == -1 ? picking.MaxTarget : maxTargetOverride;
         List<Minion> minions;
         minions = FindTargets(owner); 
-
-        owner.Owner.PlayVfx(OnSelfVfx);
-        owner.Owner.PlayModuleOnSelfVfxClientRpc(ID, owner.NetworkObjectId);
 
         var nbTouched = 0;
         foreach (var h in minions)
@@ -67,6 +68,13 @@ abstract public class AoeUnitModule : UnitModule
             ApplyEffect(h, owner);
             if (nbTouched >= maxTarget)
                 break; // Stop if we reached the max target limit 
+        }
+        if (nbTouched > 0)
+        {
+            NextUse = Time.time + cooldown;
+            Debug.Log("Effect lenght = " + (OnTargetVfx.effects[0].Timer));
+            owner.Owner.PlayVfx(OnSelfVfx);
+            owner.Owner.PlayModuleOnSelfVfxClientRpc(ID, owner.NetworkObjectId, OnSelfVfx.id.ToString()); 
         }
         DrawCircle(owner.transform.position, radius, 12, nbTouched > 0 ? Color.green : Color.red);
         return nbTouched;
@@ -86,10 +94,10 @@ abstract public class AoeUnitModule : UnitModule
 
     protected void ApplyEffect(Minion target, MinionCombat owner)
     {
-        if(!VfxLoop || !OnTargetVfx.Playing)
+        if (!VfxLoop || !OnTargetVfx.Playing)
         {
             target.PlayVfx(OnTargetVfx);
-            target.PlayModuleOnTargetVfxClientRpc(ID, owner.NetworkObjectId);
+            target.PlayModuleOnTargetVfxClientRpc(ID, owner.NetworkObjectId, OnTargetVfx.id.ToString());
         }
         ApplyEffectInternal(target, owner);
     }
