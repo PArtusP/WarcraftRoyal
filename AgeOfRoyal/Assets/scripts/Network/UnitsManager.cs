@@ -24,28 +24,39 @@ public class UnitsManager : NetworkBehaviour
         units.Clear();
     }
     void StoreAsDead(UnitWithoutState unit) 
-    { 
-        unit.SetDead();
-        unit.SetDeadClientRpc();
+    {
+        if (deads.Contains(unit)) return;
+        unit.SetAlive(false);
+        unit.SetAliveClientRpc(false);
         units.Remove(unit);
         deads.Add(unit);
     }    
-    public void Resurect(UnitWithoutState unit, float healthPercent = 1f, float healthCeiling = 0) 
-    { 
+    public void Resurect(UnitWithoutState unit, float healthPercent = 1f, float healthCeiling = 0, float healthFloor = 0)
+    {
         UnitWithoutState target = null;
         try
         {
             target = deads.First(u => u == unit);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Couldn't find dead unity '{unit.Name} ({unit.NetworkObjectId})' in dead list : [{string.Join(", ", deads.Select(u => $"{unit.Name} ({unit.NetworkObjectId})"))}].");
             throw;
         }
-        target.Health = healthCeiling != 0 ? Mathf.Min(healthCeiling, target.MaxHealth * healthPercent) : target.MaxHealth * healthPercent;
-        target.gameObject.SetActive(true);
+        var res = healthCeiling != 0 ? Mathf.Min(healthCeiling, target.MaxHealth * healthPercent) : target.MaxHealth * healthPercent;
+        res = healthFloor != 0 ? Mathf.Max(res, healthFloor) : res;
+        target.Health = res;
+        Reactivate(target);
         deads.Remove(target);
         units.Add(target);
+        ResurectClientRpc(target.NetworkObjectId);
+    }
+    [ClientRpc]
+    private void ResurectClientRpc(ulong networkObjId) => Reactivate(GetNetworkObject(networkObjId).GetComponent< UnitWithoutState>());
+    private void Reactivate(UnitWithoutState target)
+    {
+        target.SetAlive(true);
+        target.SetAliveClientRpc(true);
         target.PlayResurectAnimation();
-    }    
+    }
 }

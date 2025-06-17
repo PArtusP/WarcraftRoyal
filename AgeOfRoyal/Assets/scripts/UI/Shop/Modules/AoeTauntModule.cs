@@ -17,7 +17,7 @@ public class AoeTauntModule : AoeUnitModule
 
     protected override List<Minion> PreApplyChecks(List<Minion> minions, MinionCombat owner)
     {
-        minions.RemoveAll(m => m.Target == owner.Owner);
+        minions.RemoveAll(m => m.Target == owner.Owner && m.Target is Minion mi && !mi.Taunting);
         return minions;
     }
 }

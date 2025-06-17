@@ -8,9 +8,10 @@ public class SpellMage : Minion
     protected override void SetUpConditionInternal(List<AttackConditions<MinionState>> conditons)
     {
         conditons.Clear();
+        var startTime = Time.time;
 
         var modAction = (Actions[1] as ModulesAction);
-        var modules = modAction.Modules.Select(m => m as AoeUnitModule);
+        var modules = modAction.Modules.Select(m => m as UnitModule);
         conditons.Add(new AttackConditions<MinionState>
         {
             action = Actions[1],
@@ -20,8 +21,11 @@ public class SpellMage : Minion
                 Check = (owner, target) =>
                 {
                     List<Minion> minions = new List<Minion>();
-                    foreach (var item in modules) 
-                        minions.AddRange(item.FindTargets(Combat));
+                    foreach (var item in modules)
+                    {
+                        if (startTime + item.Delay < Time.time)
+                            minions.AddRange(item.FindTargets(Combat));
+                    }
                     Debug.Log("Check: " + (minions.Count > 0));
                     var res = minions.Count > 0; // Check if there are any targets in range 
 

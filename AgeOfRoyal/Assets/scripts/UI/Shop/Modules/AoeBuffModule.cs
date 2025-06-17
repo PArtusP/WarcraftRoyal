@@ -8,7 +8,7 @@ using UnityEngine;
 public class AoeBuffModule : AoeUnitModule
 {
     [SerializeField] private UnitBuff buff = new UnitBuff();
-    [SerializeField] private List<Minion> targets = new List<Minion>();
+     private List<Minion> targets = new List<Minion>();
 
     public override string Description =>
         $"{(picking.SameTeam == Target.Friends ? "Grants" : "Inflicts")} " +

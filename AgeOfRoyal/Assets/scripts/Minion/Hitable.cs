@@ -7,6 +7,7 @@ using UnityEngine.Events;
 
 abstract public class Hitable : NetworkBehaviour
 {
+    [SerializeField]
     protected Base home;
     protected HealthBar healthbar;
     public Transform aimPoint;

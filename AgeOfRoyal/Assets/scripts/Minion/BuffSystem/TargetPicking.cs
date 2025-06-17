@@ -30,12 +30,12 @@ public class TargetPicking
 
     public List<Minion> PickTargets(List<Minion> targets, UnitWithoutState source)
     {
-        targets = targets.Where(t => t != null && t.Health > 0 && CheckTeam(source, t)).ToList(); // @TODO for resurect, change here
+        targets = targets.Where(t => t != null && CheckTeam(source, t)).ToList(); // @TODO Add health filter
 
         foreach (var filter in filters)
             targets = filter.Pick(targets, source);
 
-        for (int i = orders.Count - 1; i > 0; i--)
+        for (int i = orders.Count - 1; i >= 0; i--)
             targets = orders[i].Pick(targets, source);
 
         return targets.Any() ? targets.Where(t => targets.IndexOf(t) < maxTarget).ToList() : new List<Minion>();
