@@ -10,6 +10,7 @@ public class MinionController : NetworkBehaviour
     NavMeshAgent agent;
     MinionAnimator animator;
     Coroutine chargeRoutine;
+    [SerializedField] float rotationSpeed = 10f;
 
     public Vector3 Destination { get => agent ? agent.destination : transform.position; }
     public NavMeshAgent Agent
@@ -28,7 +29,19 @@ public class MinionController : NetworkBehaviour
     }
     private void Update()
     { 
-        if(IsServer) animator.SetSpeed(agent.velocity); 
+        if(!IsServer) return; 
+        
+        animator.SetSpeed(agent.velocity); 
+
+        if(agent.destination == null) return;
+        
+        Vector3 dir = agent.Target.transform.position - agent.transform.position;
+        dir.y = 0;
+        if (dir.sqrMagnitude > 0.1f)
+        {
+            Quaternion lookRot = Quaternion.LookRotation(dir.normalized);
+            controller.transform.rotation = Quaternion.RotateToward(controller.transform.rotation, lookRot, rotationSpeed * Time.deltaTime);
+        }
     }  
 
     public void SetDestination(Vector3 destination)
@@ -95,7 +108,7 @@ public class MinionController : NetworkBehaviour
             chargeRoutine = null;
             animator.Action("ChargeStopped");
         }
-    }
+    } 
     
     private void OnDrawGizmos()
     {
