@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using static Unity.VisualScripting.Member;
+using static UnityEngine.GraphicsBuffer;
 
 public enum MinionState
 {
@@ -56,7 +57,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     /// </summary>
     [SerializeField] private List<UnitAction> actions;
 
-    protected Hitable target;
+    [SerializeField] protected Hitable target;
     public bool IsAsset { get; set; } = true;
     public UnitStats Stats => baseStats + TotalBuff;
     public List<UnitBuff> Buffs => buffs;
@@ -64,6 +65,14 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     List<UnitBuff> StatDebuffs => buffs.Where(b => !UnitPowerUp.Identity.Equals(b.PowerUp) && !b.PowerUp.IsBuff).ToList();
     public UnitPowerUp TotalBuff => buffs.Select(b => b.PowerUp).SumPowerUps();
     public List<UnitModule> Modules => combat.Modules;
+    public List<UnitModule> AllModules { 
+        get {
+            var res = new List<UnitModule>();
+            res.AddRange(combat.Modules);
+            res.AddRange(actions.Where(a => a is ModulesAction m).Select(m => m as ModulesAction).SelectMany(m => m.Modules));
+            return res;
+        }
+    }
     public Minion SourcePrefab { get; internal set; } = null;
     public SerializedMinion Serialized => new SerializedMinion() { ID = ID, Health = Health }; // Serialized data for saving/loading purposes
 
@@ -73,7 +82,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     internal Class Type { get => type; set => type = value; }
     public LayerMask HitableLayer { get => hitableLayer; set => hitableLayer = value; }
 
-    public Hitable Target
+    virtual public Hitable Target
     {
         get => target; set
         {
@@ -155,7 +164,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
         return base.GetHit(damage, opponent);
     }
 
-    internal void SetTarget(Hitable unit) => target = unit;
+    internal void SetTarget(Hitable unit) => Target = unit;
 
     #region Modules & Buffs
     internal void AddBuff(UnitBuff unitBuff, float duration = 0, Hitable source = null)
@@ -264,7 +273,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
         combat.Modules.Add(DbResolver.GetModuleById(moduleID).Clone());
     }
 
-    
+
     #endregion
 
     #region Dispel
@@ -290,73 +299,95 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     #region VFX
     internal void PlayVfx(TriggerSVFX vfx, bool value = true) => vfx.PlayBase(value, this);
 
-/*    internal void PlayModuleClient(TriggerSVFX vfx, ulong sourceId, string id, bool value)
-    {
-        if (IsHost) return; // Don't play VFX on host, it will be played on server and synced to clients
-        Debug.Log($"PlayModuleClient: {(value ? "play" : "stop")} '{id}'");
-        if (value)
+    /*    internal void PlayModuleClient(TriggerSVFX vfx, ulong sourceId, string id, bool value)
         {
-            vfx.id = Guid.Parse(id);
-            PlayVfx(vfx, value);
-        ClientVfxs.Add(vfx);
-    }
-        else
-        {
-            var effects = FindObjectsByType<TriggerSFVXItem>(FindObjectsSortMode.InstanceID).Where(e => e.Id == Guid.Parse(id)).ToList();
-            if (effects.Any())
+            if (IsHost) return; // Don't play VFX on host, it will be played on server and synced to clients
+            Debug.Log($"PlayModuleClient: {(value ? "play" : "stop")} '{id}'");
+            if (value)
             {
-                effects.ForEach(e => Destroy(e.gameObject)); // @TODO should probably stop effect then destroy
-            }
+                vfx.id = Guid.Parse(id);
+                PlayVfx(vfx, value);
+            ClientVfxs.Add(vfx);
         }
-    }*/
+            else
+            {
+                var effects = FindObjectsByType<TriggerSFVXItem>(FindObjectsSortMode.InstanceID).Where(e => e.Id == Guid.Parse(id)).ToList();
+                if (effects.Any())
+                {
+                    effects.ForEach(e => Destroy(e.gameObject)); // @TODO should probably stop effect then destroy
+                }
+            }
+        }*/
 
     [ClientRpc]
     internal void PlayModuleOnTargetVfxClientRpc(int moduleId, ulong sourceId, string id, bool value = true)
     {
         if (IsHost) return; // Don't play VFX on host, it will be played on server and synced to clients
-        var source = GetNetworkObject(sourceId).GetComponent<UnitWithoutState>();
-        //Debug.Log($"From source {source} '{source.NetworkObjectId}': looking for {moduleId}, contains [{string.Join(", ", source.Combat.Modules.Select(m => m.ID))}]");
-        Debug.Log("Effect lenght = " + (source.Combat.Modules.FirstOrDefault(m => m.ID == moduleId).OnTargetVfx.effects[0].Timer));
-        PlayVfx(source.Combat.Modules.FirstOrDefault(m => m.ID == moduleId).OnTargetVfx, value); 
+        var source = GetNetworkObject(sourceId).GetComponent<UnitWithoutState>(); 
+        PlayVfx(source.AllModules.FirstOrDefault(m => m.ID == moduleId).OnTargetVfx, value);
     }
-
     [ClientRpc]
     internal void PlayModuleOnSelfVfxClientRpc(int moduleId, ulong sourceId, string id, bool value = true)
     {
         if (IsHost) return; // Don't play VFX on host, it will be played on server and synced to clients
         var source = GetNetworkObject(sourceId).GetComponent<UnitWithoutState>();
-        //Debug.Log($"From source {source} '{source.NetworkObjectId}': looking for {moduleId}, contains [{string.Join(", ", source.Combat.Modules.Select(m => m.ID))}]");
-        Debug.Log("Effect lenght = " + (source.Combat.Modules.FirstOrDefault(m => m.ID == moduleId).OnTargetVfx.effects[0].Timer));
-        PlayVfx(source.Combat.Modules.FirstOrDefault(m => m.ID == moduleId).OnSelfVfx, value);
-    }
+        PlayVfx(source.AllModules.FirstOrDefault(m => m.ID == moduleId).OnSelfVfx, value);
+    } 
+
     #endregion
 
     internal void PlayResurectAnimation() => animator.Resurect();
 
-    internal void SetDead()
+    virtual internal void SetAlive(bool value)
     {
-        gameObject.SetActive(false);
+        gameObject.SetActive(value);
     }
 
     [ClientRpc]
-    internal void SetDeadClientRpc()
+    internal void SetAliveClientRpc(bool value)
     {
         if (IsHost) return;
-        gameObject.SetActive(false);
+        SetAlive(value);
     }
 }
 
 abstract public class UnitBase<T> : UnitWithoutState where T : Enum
 {
     protected Dictionary<UnitAction, float> nextAttackDict = new Dictionary<UnitAction, float>();
-    protected FSM<T> fsm = new FSM<T>();
+    [SerializeField] protected FSM<T> fsm = new FSM<T>();
     private AttackConditions<T> validContition;
     private List<AttackConditions<T>> conditons = new List<AttackConditions<T>>();
+    public bool Taunting => combat.Modules.Any(m => m.GetType() == typeof(AoeTauntModule));
 
     abstract public T Stop { get; }
     abstract public T Walk { get; }
     abstract public T Follow { get; }
     abstract public T InCombat { get; }
+    override public Hitable Target
+    {
+        get => target; set
+        {
+            if (value != null && target != null && target != value && !Equals(fsm.CurrentState, InCombat))
+            {
+                target = value;
+                fsm.SwitchState(Follow);
+            }
+            else
+                target = value;
+            if (target == null)
+            {
+                try
+                {
+                    controller.SetDestination(new Vector3(home.transform.position.x, home.transform.position.y, -home.transform.position.z));
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
+        }
+    }
 
     protected override void UpdateInternal()
     {
@@ -423,13 +454,13 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
                     validContition = success;
                     Debug.Log("Set valid condition: " + validContition.action.name);
                     return !success.NextStage.Equals(Walk) ? success.NextStage : InCombat;
-                }
-
-
+                } 
                 else if ((transform.position - target.transform.position).magnitude < Actions.Min(a => a.MinRadius))
+                {
                     if(!controller.Agent.isStopped)
                         controller.Stop(true);
-                else if((transform.position - controller.Destination).magnitude > .2f)
+                }
+                else if((transform.position - controller.Destination).magnitude > .1f)
                     controller.SetDestination(target.transform.position);
 
                 return Follow;
@@ -541,6 +572,14 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
     internal void SetState(T state) => fsm.SwitchState(state);
 
     #endregion
+
+    internal override void SetAlive(bool value)
+    {
+        base.SetAlive(value);
+        if (!IsServer) return;
+        if (value) fsm.SwitchState(Walk);
+        else fsm.SwitchState(Stop);
+    }
 
 }
 

@@ -155,7 +155,8 @@ public class MatchManager : NetworkBehaviour
         var despawnSurvivors = true;
         playerManager.Players.ForEach(p =>
         {
-            var moneyReward = 5 + roundCount * 2;
+            var moneyReward = 50 + roundCount * 2;
+            //var moneyReward = 5 + roundCount * 2;
             switch (rewardType)
             {
                 case RewardType.KeepSurvivor: // Stop survivors, respawn them next time

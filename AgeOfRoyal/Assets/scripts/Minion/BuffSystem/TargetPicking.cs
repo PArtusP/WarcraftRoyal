@@ -30,7 +30,7 @@ public class TargetPicking
 
     public List<Minion> PickTargets(List<Minion> targets, UnitWithoutState source)
     {
-        targets = targets.Where(t => t != null && t.Health > 0 && CheckTeam(source, t)).ToList(); // @TODO for resurect, change here
+        targets = targets.Where(t => t != null && CheckTeam(source, t)).ToList(); // @TODO Add health filter
 
         foreach (var filter in filters)
             targets = filter.Pick(targets, source);

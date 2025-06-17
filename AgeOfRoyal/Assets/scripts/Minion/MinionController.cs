@@ -8,8 +8,7 @@ using UnityEngine.AI;
 public class MinionController : NetworkBehaviour
 {
     NavMeshAgent agent;
-    MinionAnimator animator;
-    Coroutine chargeRoutine;
+    MinionAnimator animator; 
     [SerializeField] float rotationSpeed = 10f;
 
     public Vector3 Destination { get => agent ? agent.destination : transform.position; }
@@ -42,8 +41,8 @@ public class MinionController : NetworkBehaviour
         {
             Quaternion lookRot = Quaternion.LookRotation(dir.normalized);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRot, rotationSpeed * Time.deltaTime);
-        }
-    }  
+        } 
+    }    
 
     public void SetDestination(Vector3 destination)
     {

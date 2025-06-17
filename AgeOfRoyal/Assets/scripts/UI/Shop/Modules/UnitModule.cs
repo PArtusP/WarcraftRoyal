@@ -14,6 +14,8 @@ abstract public class UnitModule : ScriptableObject
     public TriggerSVFX OnTargetVfx => onTargetVfx;
     public TriggerSVFX OnSelfVfx => onSelfVfx;
     abstract public float Radius { get; }
+    abstract public float Cooldown { get; }
+    abstract public float Delay { get; }
     abstract public string Description { get; }
     public float NextUse { get; protected set; }
     abstract public void Init(MinionCombat owner);
@@ -31,6 +33,8 @@ abstract public class UnitModule : ScriptableObject
         clone.ID = this.ID;
         return clone;
     }
+    abstract public List<Minion> FindTargets(MinionCombat owner);
+
 }
 
 public enum Target
@@ -43,13 +47,15 @@ public enum Target
 [System.Serializable]
 abstract public class AoeUnitModule : UnitModule
 {
-    [SerializeField] protected float cooldown = 5f;
+    [SerializeField] protected float cooldown = 5f; 
+    [SerializeField] private float delay = 0f;
     [SerializeField] protected float radius = 8f;
     [SerializeField] protected TargetPicking picking;
 
     float lastUsed = 0f;
 
-    public float Cooldown => cooldown;
+    public override float Cooldown => cooldown;
+    public override float Delay => delay;
 
     override public float Radius => radius;
     public TargetPicking Picking { get => picking; set => picking = value; }
@@ -71,8 +77,7 @@ abstract public class AoeUnitModule : UnitModule
         }
         if (nbTouched > 0)
         {
-            NextUse = Time.time + cooldown;
-            Debug.Log("Effect lenght = " + (OnTargetVfx.effects[0].Timer));
+            NextUse = Time.time + cooldown; 
             owner.Owner.PlayVfx(OnSelfVfx);
             owner.Owner.PlayModuleOnSelfVfxClientRpc(ID, owner.NetworkObjectId, OnSelfVfx.id.ToString()); 
         }
@@ -82,7 +87,7 @@ abstract public class AoeUnitModule : UnitModule
 
     protected abstract List<Minion> PreApplyChecks(List<Minion> minions, MinionCombat owner);
 
-    public List<Minion> FindTargets(MinionCombat owner)
+    override public List<Minion> FindTargets(MinionCombat owner)
     {
         List<Minion> minions;
         var cols = Physics.OverlapSphere(owner.HitPoint.position, radius, GameLayers.Hitable.Mask);
