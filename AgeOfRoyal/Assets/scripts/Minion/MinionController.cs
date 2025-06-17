@@ -87,6 +87,16 @@ public class MinionController : NetworkBehaviour
         onArrival?.Invoke();
     }
     
+    public void CancelCharge()
+    {
+        if (chargeRoutine != null)
+        {
+            StopCoroutine(chargeRoutine);
+            chargeRoutine = null;
+            animator.Action("ChargeStopped");
+        }
+    }
+    
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.blue;
