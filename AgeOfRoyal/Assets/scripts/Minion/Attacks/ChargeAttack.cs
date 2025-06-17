@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "___ - Melee attack", menuName = "Unit Actions/Unit Attacks/Melee Attack", order = 5)]
+[CreateAssetMenu(fileName = "___ - Charge attack", menuName = "Unit Actions/Unit Attacks/Charge Attack", order = 5)]
 public class ChargeAttack : UnitAttack
 {
     [SerializeField] private TargetPicking targetPicking;
@@ -29,6 +29,9 @@ public class ChargeAttack : UnitAttack
 
         controller.StartCharge(targetTransform, chargeSpeed, stopDistance, () =>
         {
+            // Play impact animation
+            controller.Animator.Action("ChargeImpact");
+            
             // Deal damage
             combat.DealDamage(target, damage);
 
