@@ -52,6 +52,9 @@ public class MinionController : NetworkBehaviour
 
     public void StartCharge(Transform targetTransform, float speed, float stopDistance, System.Action onArrival)
     {
+        // Play impact animation
+        animator.Action("Charge"); //@TODO should be a loop, how do i get out of it ? On Action "chargeImpact" and/or on action "ChargeStopped"
+        
         if (chargeRoutine != null)
             StopCoroutine(chargeRoutine);
 
