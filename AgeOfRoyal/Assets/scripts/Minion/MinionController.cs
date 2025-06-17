@@ -9,6 +9,7 @@ public class MinionController : NetworkBehaviour
 {
     NavMeshAgent agent;
     MinionAnimator animator;
+    Coroutine chargeRoutine;
 
     public Vector3 Destination { get => agent ? agent.destination : transform.position; }
     public NavMeshAgent Agent
@@ -47,11 +48,46 @@ public class MinionController : NetworkBehaviour
         animator.SetSpeed(agent.velocity);
     }
 
+    internal void SetSpeed(float speed) => Agent.speed = speed;
+
+    public void StartCharge(Transform targetTransform, float speed, float stopDistance, System.Action onArrival)
+    {
+        if (chargeRoutine != null)
+            StopCoroutine(chargeRoutine);
+
+        agent.SetDestination(targetTransform.position);
+        agent.speed = speed;
+    
+        chargeRoutine = StartCoroutine(ChargeRoutine(targetTransform, speed, stopDistance, onArrival));
+    }
+
+    private IEnumerator ChargeRoutine(Transform targetTransform, float speed, float stopDistance, System.Action onArrival)
+    {
+        while (targetTransform != null)
+        {
+            Vector3 direction = (targetTransform.position - transform.position);
+            float distance = direction.magnitude;
+    
+            if (distance <= stopDistance)
+                break;
+    
+            direction.Normalize();
+            Vector3 movement = direction * speed * Time.deltaTime;
+    
+            // Move
+            controller.Move(movement);
+    
+            yield return null;
+        }
+    
+        chargeRoutine = null;
+        onArrival?.Invoke();
+    }
+    
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.blue;
         Gizmos.DrawCube(Destination, Vector3.one * .2f);
     }
 
-    internal void SetSpeed(float speed) => Agent.speed = speed;
 }
