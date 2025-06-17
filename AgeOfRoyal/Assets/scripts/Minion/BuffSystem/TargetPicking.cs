@@ -35,7 +35,7 @@ public class TargetPicking
         foreach (var filter in filters)
             targets = filter.Pick(targets, source);
 
-        for (int i = orders.Count - 1; i > 0; i--)
+        for (int i = orders.Count - 1; i >= 0; i--)
             targets = orders[i].Pick(targets, source);
 
         return targets.Any() ? targets.Where(t => targets.IndexOf(t) < maxTarget).ToList() : new List<Minion>();
