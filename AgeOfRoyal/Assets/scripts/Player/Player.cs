@@ -280,7 +280,7 @@ public class Player : NetworkBehaviour
     }
     private void LevelUpSync(int level)
     {
-        shopUi.EnableNewButtons(level);
+        shopUi.EnableNextLevel(level);
         LevelUpSyncServerRpc(level);
     }
 

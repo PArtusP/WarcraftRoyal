@@ -31,7 +31,8 @@ MonoBehaviour:
     renderers: []
     animations: []
     sounds: []
-  cooldown: 0.2
+  cooldown: 5
+  delay: 0
   radius: 10
   picking:
     maxTarget: 1
@@ -44,7 +45,7 @@ MonoBehaviour:
     filters: []
   buff:
     buffType: 5
-    duration: 20
+    duration: 7
     maxStack: 3
     canBeDispelled: 1
     powerup:
@@ -68,4 +69,3 @@ MonoBehaviour:
         armorMelee: 1
     heal: 0
     dispel: 0
-  targets: []

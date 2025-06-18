@@ -37,11 +37,16 @@ public class ResurectModule : UnitModule
         if (!owner.IsServer) return 0;
         var maxTarget = maxTargetOverride == -1 ? picking.MaxTarget : maxTargetOverride;
         var minions = FindTargets(owner).Take(maxTarget).ToList();
+
+
+        return UseOnTarget(owner, minions);
+    }
+
+    public override int UseOnTarget(MinionCombat owner, List<Minion> targets)
+    {
         var unitsManager = Object.FindFirstObjectByType<UnitsManager>();
-
-
         var nbTouched = 0;
-        foreach (var h in minions)
+        foreach (var h in targets)
         {
             unitsManager.Resurect(h, healthPercent, maxHealthFlat, minHealthFlat);
             if (OnTargetVfx != null)

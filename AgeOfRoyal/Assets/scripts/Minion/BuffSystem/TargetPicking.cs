@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnityEngine.UI.GridLayoutGroup;
 
 public enum PickingFields
 {
@@ -28,6 +29,12 @@ public class TargetPicking
 
     public int MaxTarget => maxTarget;
 
+    public List<Minion> PickTargets(float radius, UnitWithoutState source)
+    { 
+        List<Minion> minions = Physics.OverlapSphere(source.Combat.HitPoint.position, radius, GameLayers.Hitable.Mask).Select(m => m.GetComponent<Minion>()).Where(m => m!= null).ToList();
+
+        return PickTargets(minions, source);
+    }
     public List<Minion> PickTargets(List<Minion> targets, UnitWithoutState source)
     {
         targets = targets.Where(t => t != null && CheckTeam(source, t)).ToList(); // @TODO Add health filter

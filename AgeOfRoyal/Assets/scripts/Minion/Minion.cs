@@ -95,6 +95,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     abstract public bool IsStopped { get; }
     public List<UnitAction> Actions { get => actions; set => actions = value; }
     public List<TriggerSVFX> ClientVfxs { get; private set; } = new List<TriggerSVFX>();
+    public MinionController Controller  => controller; 
 
     override protected void AwakeInternal()
     {
@@ -337,6 +338,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     #endregion
 
     internal void PlayResurectAnimation() => animator.Resurect();
+    internal void PlayAnimation(string trigger) => animator.Play(trigger);
 
     virtual internal void SetAlive(bool value)
     {

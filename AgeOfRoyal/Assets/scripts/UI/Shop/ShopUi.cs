@@ -3,18 +3,47 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
 
-[System.Serializable]
+[Serializable]
 public class ListWrapper<T>
 {
     public List<T> List;
+}
+[Serializable]
+public class AgeChoices
+{
+    [SerializeField] List<AgeChoiceUi> choices;
+
+    internal void Enable(bool v)
+    {
+        if (v)
+        {
+            if (choices.Count == 0) return;
+            choices[0].transform.parent.gameObject.SetActive(true); // Activate the parent of the first choice
+            foreach (var choice in choices)
+            {
+                choice.gameObject.SetActive(true);
+                choice.button.onClick.AddListener(delegate ()
+                {
+                    Enable(false); // Disable choices after selection
+                    choice.toActivate.ForEach(go => go.SetActive(v));
+                    choices[0].transform.parent.gameObject.SetActive(false); // Deactivate the parent of the first choice
+                });
+            }
+        }
+        else
+            foreach (var choice in choices)
+            {
+                choice.gameObject.SetActive(false); 
+            }
+    }
 }
 
 public class ShopUi : MonoBehaviour
 {
     Player player;
     [SerializeField] UnitUpgradeDetailUi detailUi;
+    [SerializeField] List<AgeChoices> choices = new List<AgeChoices>();
     [SerializeField] List<ListWrapper<UnitButton>> unitButtons = new List<ListWrapper<UnitButton>>();
     [SerializeField] List<ListWrapper<UnitUpgradeButton>> unitUpradeButtons = new List<ListWrapper<UnitUpgradeButton>>();
     private int lastLevelUnlocked = 0;
@@ -76,12 +105,13 @@ public class ShopUi : MonoBehaviour
         }
     }
 
-    public void EnableNewButtons(int level)
+    public void EnableNextLevel(int level)
     {
+        choices[level].Enable(true);
         lastLevelUnlocked = level;
         unitButtons[level].List.ForEach(b => b.Button.interactable = true);
         unitUpradeButtons[level].List.ForEach(b => b.Button.interactable = true);
-    }
+    } 
 
     internal void EnableButtons(bool value)
     {

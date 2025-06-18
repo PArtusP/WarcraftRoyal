@@ -26,6 +26,7 @@ abstract public class UnitModule : ScriptableObject
     /// <param name="maxTargetOverride"></param>
     /// <returns></returns>
     abstract public int Use(MinionCombat owner, int maxTargetOverride = -1);
+    abstract public int UseOnTarget(MinionCombat owner, List<Minion> targets);
 
     public virtual UnitModule Clone()
     {
@@ -65,21 +66,23 @@ abstract public class AoeUnitModule : UnitModule
         if (!owner.IsServer || NextUse > Time.time) return 0;
         var maxTarget = maxTargetOverride == -1 ? picking.MaxTarget : maxTargetOverride;
         List<Minion> minions;
-        minions = FindTargets(owner); 
+        minions = FindTargets(owner).Take(maxTarget).ToList(); 
+        return UseOnTarget(owner, minions);
+    }
+    public override int UseOnTarget(MinionCombat owner, List<Minion> targets)
+    {
 
         var nbTouched = 0;
-        foreach (var h in minions)
+        foreach (var h in targets)
         {
             nbTouched++;
-            ApplyEffect(h, owner);
-            if (nbTouched >= maxTarget)
-                break; // Stop if we reached the max target limit 
+            ApplyEffect(h, owner); 
         }
         if (nbTouched > 0)
         {
-            NextUse = Time.time + cooldown; 
+            NextUse = Time.time + cooldown;
             owner.Owner.PlayVfx(OnSelfVfx);
-            owner.Owner.PlayModuleOnSelfVfxClientRpc(ID, owner.NetworkObjectId, OnSelfVfx.id.ToString()); 
+            owner.Owner.PlayModuleOnSelfVfxClientRpc(ID, owner.NetworkObjectId, OnSelfVfx.id.ToString());
         }
         DrawCircle(owner.transform.position, radius, 12, nbTouched > 0 ? Color.green : Color.red);
         return nbTouched;

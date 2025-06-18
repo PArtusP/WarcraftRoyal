@@ -14,4 +14,5 @@ public class MinionAnimator : MonoBehaviour
     internal void Action(string animation) => animator.SetTrigger(animation);  
     internal void SetSpeed(Vector3 velocity) => animator.SetFloat("Speed", velocity.magnitude); 
     internal void Resurect() => animator.SetTrigger("Resurect"); 
+    internal void Play(string trigger) => animator.SetTrigger("trigger"); 
 }

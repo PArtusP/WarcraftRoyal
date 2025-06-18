@@ -10,6 +10,7 @@ public class MinionController : NetworkBehaviour
     NavMeshAgent agent;
     MinionAnimator animator; 
     [SerializeField] float rotationSpeed = 10f;
+    private Coroutine chargeRoutine;
 
     public Vector3 Destination { get => agent ? agent.destination : transform.position; }
     public NavMeshAgent Agent
@@ -79,6 +80,7 @@ public class MinionController : NetworkBehaviour
 
     private IEnumerator ChargeRoutine(Transform targetTransform, float speed, float stopDistance, System.Action onArrival)
     {
+        Stop(true);
         while (targetTransform != null)
         {
             Vector3 direction = (targetTransform.position - transform.position);
@@ -89,13 +91,14 @@ public class MinionController : NetworkBehaviour
     
             direction.Normalize();
             Vector3 movement = direction * speed * Time.deltaTime;
-    
+
             // Move
-            controller.Move(movement);
-    
+            agent.Move(movement);
+
             yield return null;
         }
-    
+        Stop(false);
+
         chargeRoutine = null;
         onArrival?.Invoke();
     }

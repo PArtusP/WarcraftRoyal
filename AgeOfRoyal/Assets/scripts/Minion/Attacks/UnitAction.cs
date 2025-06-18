@@ -35,7 +35,12 @@ abstract public class UnitAttack : UnitAction
     override public string AnimationTrigger => "Attack"; 
     public override UnitAction Clone()
     {
-        return Instantiate(this);
+        var res = Instantiate(this);
+        res.radius = this.radius;
+        res.bonusMultiplier = this.bonusMultiplier;
+        res.bonusAgainst = this.bonusAgainst;
+        return res;
+        
     }
 }
 

@@ -13,10 +13,26 @@ MonoBehaviour:
   m_Name: Royal Guard - base - MOD AER Taunt
   m_EditorClassIdentifier: 
   ID: 4
-  cooldown: 5
+  onTargetVfx:
+    effects: []
+    gameObjects: []
+    particles: []
+    renderers: []
+    animations: []
+    sounds: []
+  onSelfVfx:
+    effects: []
+    gameObjects: []
+    particles: []
+    renderers: []
+    animations: []
+    sounds: []
+  cooldown: 0
+  delay: 0
   radius: 8
   picking:
     maxTarget: 2147483647
     sameTeam: 1
     orders: []
     filters: []
+  vfxLoop: 0
