@@ -10425,6 +10425,7 @@ GameObject:
   - component: {fileID: 3145842647908052294}
   - component: {fileID: 1690488512901725200}
   - component: {fileID: 7321369906547869067}
+  - component: {fileID: 6626096492310926752}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -10524,6 +10525,18 @@ MonoBehaviour:
     m_RotationOrder: 4
   selectedSprite: {fileID: 21300000, guid: 1193bcba482f0a94eb29c6b903e8b2c8, type: 3}
   iconSprite: {fileID: 21300000, guid: 1193bcba482f0a94eb29c6b903e8b2c8, type: 3}
+--- !u!114 &6626096492310926752
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7039023371585765590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4949a11b7d6bb81459f865bb442331ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7105467146055482854
 GameObject:
   m_ObjectHideFlags: 0
@@ -12656,7 +12669,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
       propertyPath: m_Interactable
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -12769,7 +12782,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4029742017307555177, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: m_Interactable
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4029742017307555178, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: prefab
@@ -13016,7 +13029,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4029742017307555177, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: m_Interactable
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4029742017307555178, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: prefab
@@ -13689,6 +13702,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UnitUpgradeButton
       objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -13934,7 +13951,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
       propertyPath: m_Interactable
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14077,6 +14094,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UnitUpgradeButton
       objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -14217,6 +14238,10 @@ PrefabInstance:
     - target: {fileID: 9195485462684794593, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
       propertyPath: m_Name
       value: UnitUpgradeButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14359,6 +14384,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UnitUpgradeButton
       objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -14499,6 +14528,10 @@ PrefabInstance:
     - target: {fileID: 9195485462684794593, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
       propertyPath: m_Name
       value: UnitUpgradeButton (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14743,6 +14776,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UnitUpgradeButton
       objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -14883,6 +14920,10 @@ PrefabInstance:
     - target: {fileID: 9195485462684794593, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
       propertyPath: m_Name
       value: UnitUpgradeButton (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15025,6 +15066,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UnitUpgradeButton
       objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -15136,7 +15181,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4029742017307555177, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: m_Interactable
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4029742017307555178, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: prefab
@@ -15315,6 +15360,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UnitUpgradeButton
       objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -15456,6 +15505,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UnitUpgradeButton
       objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -15567,7 +15620,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4029742017307555177, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: m_Interactable
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4029742017307555178, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: prefab
@@ -15746,6 +15799,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UnitUpgradeButton
       objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -15850,6 +15907,10 @@ PrefabInstance:
     - target: {fileID: 4029742017307555175, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: m_Name
       value: UnitButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029742017307555177, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
+      propertyPath: m_Interactable
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4029742017307555178, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: prefab
@@ -16024,6 +16085,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UnitUpgradeButton
       objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -16128,6 +16193,10 @@ PrefabInstance:
     - target: {fileID: 4029742017307555175, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: m_Name
       value: UnitButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029742017307555177, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
+      propertyPath: m_Interactable
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4029742017653655311, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: m_AnchorMax.y
@@ -16302,6 +16371,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UnitUpgradeButton
       objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -16442,6 +16515,10 @@ PrefabInstance:
     - target: {fileID: 9195485462684794593, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
       propertyPath: m_Name
       value: UnitUpgradeButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -17061,7 +17138,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4029742017307555177, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: m_Interactable
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4029742017307555178, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: prefab
@@ -17203,6 +17280,10 @@ PrefabInstance:
     - target: {fileID: 4029742017307555175, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: m_Name
       value: UnitButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029742017307555177, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
+      propertyPath: m_Interactable
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4029742017307555178, guid: 35e8f05c116658b4fa97819620002bf0, type: 3}
       propertyPath: prefab
@@ -17380,6 +17461,10 @@ PrefabInstance:
     - target: {fileID: 9195485462684794593, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
       propertyPath: m_Name
       value: UnitUpgradeButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 9195485462684794607, guid: d7f87373470dcae48b242a0f931257b2, type: 3}
+      propertyPath: m_Interactable
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

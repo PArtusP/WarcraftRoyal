@@ -5,7 +5,7 @@ using UnityEngine.Events;
 [Serializable]
 public class PlayerExperience
 {
-    private static readonly float[] thresholds = { 2f, 5f, 10f };
+    private static readonly float[] thresholds = { 5f, 10f, 20f };
     private static readonly string[] romanLevel = { "I", "II", "III" };
 
     public static float GetThreshold(int level)
@@ -26,6 +26,8 @@ public class PlayerExperience
         }
         return sum;
     }
+
+
 
     [SerializeField] private HealthBar healthBar;
     [SerializeField] private TMPro.TextMeshProUGUI currentLevel;

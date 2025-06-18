@@ -26,6 +26,7 @@ public class Player : NetworkBehaviour
 
     [SerializeField] PlayerExperience xp = new PlayerExperience();
     [SerializeField] PlayerStats stats = new PlayerStats();
+    PlayerInterest interest;
     PlayerWallet wallet = new PlayerWallet(0);
 
     PlayerScore walletUi;
@@ -51,12 +52,14 @@ public class Player : NetworkBehaviour
     public ShopUi ShopUi => shopUi;
 
     public PlayerExperience Xp { get => xp; set => xp = value; }
+    public PlayerInterest Interest => interest;
 
     #region Init & Awake
     private void Awake()
     {
         shopUi = GetComponentInChildren<ShopUi>();
         walletUi = GetComponentInChildren<PlayerScore>();
+        interest = GetComponent<PlayerInterest>();
         ShowPreparationUi(false);
 
         xpPlusButton.onClick.AddListener(TryAddXp);
@@ -74,6 +77,7 @@ public class Player : NetworkBehaviour
         {
             Home.OnDieEvent.AddListener(OnDieEvent.Invoke);
             wallet.OnChange.AddListener(walletUi.Set);
+            wallet.OnChange.AddListener(SyncWalletServerRpc);
             walletUi.Set(wallet.Value);
 
             startButton.onClick.AddListener(WaitToStartRound);
@@ -238,7 +242,11 @@ public class Player : NetworkBehaviour
         startButton.gameObject.SetActive(v);
         shopUi.gameObject.SetActive(v);
     }
+    [ServerRpc]
+    private void SyncWalletServerRpc(int value) => Wallet.Set(value);
+
     #endregion
+
 
     #region XP
 
@@ -330,4 +338,5 @@ internal class PlayerWallet
     }
 
     internal void Reset() => Spend(value);
+    internal void Set(int v) => value = v;
 }
