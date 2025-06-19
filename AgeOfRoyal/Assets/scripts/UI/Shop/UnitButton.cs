@@ -45,11 +45,11 @@ abstract public class RightClickButton : MonoBehaviour, IPointerClickHandler, IP
 public class UnitButton : RightClickButton
 {
 
-    [SerializeField] Minion prefab;
+    [SerializeField] UnitWithoutState prefab;
     [SerializeField] TMPro.TextMeshProUGUI buyCounter;
     [SerializeField] TMPro.TextMeshProUGUI currentCounter; // Not used now
 
-    public Minion Prefab { get => prefab; set => prefab = value; }
+    public UnitWithoutState Prefab { get => prefab; set => prefab = value; }
 
     override public void Buy() => buyCounter.text = (buyCounter.text == string.Empty ? 1 : int.Parse(buyCounter.text) + 1).ToString();
 

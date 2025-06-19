@@ -20,7 +20,7 @@ public class SpellMage : Minion
             {
                 Check = (owner, target) =>
                 {
-                    List<Minion> minions = new List<Minion>();
+                    List<UnitWithoutState> minions = new List<UnitWithoutState>();
                     foreach (var item in modules)
                     {
                         if (startTime + item.Delay < Time.time)

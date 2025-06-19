@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 
-[CustomEditor(typeof(Minion))]
+[CustomEditor(typeof(Minion))] 
 public class MinionEditor : Editor
 {
     public override void OnInspectorGUI()

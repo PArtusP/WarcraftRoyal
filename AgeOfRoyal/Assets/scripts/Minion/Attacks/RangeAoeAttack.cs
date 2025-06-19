@@ -22,7 +22,7 @@ public class RangeAoeAttack : UnitAttack
             if (hitable != null && hitable != owner && hitable.Health > 0 && hitable.Home != owner.Home)
             {
                 var finalDamage = owner.Stats.damage;
-                if (owner.Target is Minion m && m.Type == bonusAgainst)
+                if (owner.Target is UnitWithoutState m && m.Type == bonusAgainst)
                     finalDamage *= bonusMultiplier;
                 totalDamage += finalDamage;
                 hitable.GetHit(finalDamage, owner);

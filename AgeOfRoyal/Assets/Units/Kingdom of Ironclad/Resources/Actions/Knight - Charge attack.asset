@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1308ff0f1f16d1949b5c88c7471994bf, type: 3}
+  m_Name: Knight - Charge attack
+  m_EditorClassIdentifier: 
+  ID: 9
+  vfx:
+    effects: []
+    gameObjects: []
+    particles: []
+    renderers: []
+    animations: []
+    sounds: []
+  radius: 12
+  bonusMultiplier: 1
+  bonusAgainst: 1
+  targetPicking:
+    maxTarget: 1
+    sameTeam: 1
+    orders:
+    - field: 2
+      ascending: 1
+    - field: 6
+      ascending: 0
+    filters: []
+  onHitModules:
+  - {fileID: 11400000, guid: 05adaf380837cf14da7ec0a7c201b677, type: 2}
+  chargeSpeed: 12
+  damage: 20
+  stopDistance: 1.5
+  minRadius: 4

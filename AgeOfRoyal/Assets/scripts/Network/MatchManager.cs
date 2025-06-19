@@ -154,15 +154,15 @@ public class MatchManager : NetworkBehaviour
         yield return new WaitForSeconds(1f);    
         var despawnSurvivors = true;
         playerManager.Players.ForEach(p =>
-        {
+        { 
             //var moneyReward = 50 + roundCount * 2;
-            var moneyReward = p.Interest.Use(+5 + roundCount * 2,p);
+            var moneyReward = p.Interest.Use(+5 + roundCount * 2,p); 
             switch (rewardType)
             {
                 case RewardType.KeepSurvivor: // Stop survivors, respawn them next time
                     if (p.Home.SpawnedUnits.Any())
                     {
-                        p.Home.SpawnedUnits.ForEach(u => u.SetState(MinionState.Stop));
+                        //p.Home.SpawnedUnits.ForEach(u => u.SetState(MinionState.Stop)); @TODO if used: need to do a abstract Stop or smth
                         p.Home.SpawnList.AddRange(p.Home.SpawnedUnits);
                         p.Home.SpawnedUnits.Clear();
                         despawnSurvivors = false;

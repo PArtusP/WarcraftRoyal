@@ -13,11 +13,11 @@ public class AoeTauntModule : AoeUnitModule
 
     public override void Init(MinionCombat owner) {    }
 
-    override protected void ApplyEffectInternal(Minion target, MinionCombat owner) => target.SetTarget(owner.Owner); 
+    override protected void ApplyEffectInternal(UnitWithoutState target, MinionCombat owner) => target.SetTarget(owner.Owner); 
 
-    protected override List<Minion> PreApplyChecks(List<Minion> minions, MinionCombat owner)
+    protected override List<UnitWithoutState> PreApplyChecks(List<UnitWithoutState> minions, MinionCombat owner)
     {
-        minions.RemoveAll(m => m.Target == owner.Owner && m.Target is Minion mi && !mi.Taunting);
+        minions.RemoveAll(m => m.Target == owner.Owner && m.Target is UnitWithoutState mi && !mi.Taunting);
         return minions;
     }
 }

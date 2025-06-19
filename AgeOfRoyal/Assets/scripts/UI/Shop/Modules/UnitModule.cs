@@ -26,7 +26,7 @@ abstract public class UnitModule : ScriptableObject
     /// <param name="maxTargetOverride"></param>
     /// <returns></returns>
     abstract public int Use(MinionCombat owner, int maxTargetOverride = -1);
-    abstract public int UseOnTarget(MinionCombat owner, List<Minion> targets);
+    abstract public int UseOnTarget(MinionCombat owner, List<UnitWithoutState> targets);
 
     public virtual UnitModule Clone()
     {
@@ -34,7 +34,7 @@ abstract public class UnitModule : ScriptableObject
         clone.ID = this.ID;
         return clone;
     }
-    abstract public List<Minion> FindTargets(MinionCombat owner);
+    abstract public List<UnitWithoutState> FindTargets(MinionCombat owner);
 
 }
 
@@ -65,11 +65,11 @@ abstract public class AoeUnitModule : UnitModule
     {
         if (!owner.IsServer || NextUse > Time.time) return 0;
         var maxTarget = maxTargetOverride == -1 ? picking.MaxTarget : maxTargetOverride;
-        List<Minion> minions;
+        List<UnitWithoutState> minions;
         minions = FindTargets(owner).Take(maxTarget).ToList(); 
         return UseOnTarget(owner, minions);
     }
-    public override int UseOnTarget(MinionCombat owner, List<Minion> targets)
+    public override int UseOnTarget(MinionCombat owner, List<UnitWithoutState> targets)
     {
 
         var nbTouched = 0;
@@ -88,19 +88,19 @@ abstract public class AoeUnitModule : UnitModule
         return nbTouched;
     }
 
-    protected abstract List<Minion> PreApplyChecks(List<Minion> minions, MinionCombat owner);
+    protected abstract List<UnitWithoutState> PreApplyChecks(List<UnitWithoutState> minions, MinionCombat owner);
 
-    override public List<Minion> FindTargets(MinionCombat owner)
+    override public List<UnitWithoutState> FindTargets(MinionCombat owner)
     {
-        List<Minion> minions;
+        List<UnitWithoutState> minions;
         var cols = Physics.OverlapSphere(owner.HitPoint.position, radius, GameLayers.Hitable.Mask);
         minions = picking.PickTargets(cols
-            .Where(col => col.GetComponent<Minion>() != null && col.GetComponent<Minion>() != owner.Owner)
-            .Select(col => col.GetComponent<Minion>()).ToList(), owner.Owner); // @TODO on self to change here 
+            .Where(col => col.GetComponent<UnitWithoutState>() != null && col.GetComponent<UnitWithoutState>() != owner.Owner)
+            .Select(col => col.GetComponent<UnitWithoutState>()).ToList(), owner.Owner); // @TODO on self to change here 
         return PreApplyChecks(minions, owner);
     }
 
-    protected void ApplyEffect(Minion target, MinionCombat owner)
+    protected void ApplyEffect(UnitWithoutState target, MinionCombat owner)
     {
         if (!VfxLoop || !OnTargetVfx.Playing)
         {
@@ -109,7 +109,7 @@ abstract public class AoeUnitModule : UnitModule
         }
         ApplyEffectInternal(target, owner);
     }
-    protected abstract void ApplyEffectInternal(Minion target, MinionCombat owner);
+    protected abstract void ApplyEffectInternal(UnitWithoutState target, MinionCombat owner);
 
     void DrawCircle(Vector3 center, float radius, int segments, Color color)
     {

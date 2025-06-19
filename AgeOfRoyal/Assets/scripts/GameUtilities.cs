@@ -9,16 +9,16 @@ using UnityEngine.VFX;
 
 static public class DbResolver
 {
-    static List<Minion> minions = null; 
+    static List<UnitWithoutState> minions = null; 
     static List<UnitUpgrade> upgrades = null; 
     static List<UnitModule> modules = null; 
     static List<UnitAction> actions = null; 
-    public static List<Minion> Minions
+    public static List<UnitWithoutState> Minions
     {
         get
         {
             if (minions == null)
-                minions = Resources.LoadAll<Minion>("").ToList();
+                minions = Resources.LoadAll<UnitWithoutState>("").ToList();
             return minions;
         }
     } 
@@ -50,7 +50,7 @@ static public class DbResolver
         }
     } 
 
-    public static Minion GetMinionById(int id)
+    public static UnitWithoutState GetMinionById(int id)
         => Minions.FirstOrDefault(m => m.ID == id) ?? throw new Exception($"Minion with ID {id} not found in resources.");
     public static UnitUpgrade GetUpgradeById(int id)
         => Upgrades.FirstOrDefault(m => m.ID == id) ?? throw new Exception($"Upgrade with ID {id} not found in resources.");

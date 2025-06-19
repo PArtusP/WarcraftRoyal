@@ -392,6 +392,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  home: {fileID: 0}
   aimPoint: {fileID: 3383851419365497673}
   healEffect:
     effects:
@@ -413,9 +414,9 @@ MonoBehaviour:
   rendererToColor: []
   baseStats:
     health: 260
-    damage: 1
+    damage: 10
     speed: 1.8
-    cooldown: 3
+    cooldown: 1.7
     sightRadius: 8
     hitRadius: 2
     armorRange: 0
@@ -426,6 +427,11 @@ MonoBehaviour:
   buffs: []
   actions:
   - {fileID: 11400000, guid: 01959bffcfcac184ab0458bf716e2990, type: 2}
+  target: {fileID: 0}
+  fsm:
+    currentState:
+      type: 0
+    states: []
 --- !u!114 &1131981131516414845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -479,6 +485,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  rotationSpeed: 10
 --- !u!195 &3291631439931743043
 NavMeshAgent:
   m_ObjectHideFlags: 0

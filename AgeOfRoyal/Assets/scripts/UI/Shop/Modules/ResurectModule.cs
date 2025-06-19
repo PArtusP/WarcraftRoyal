@@ -42,7 +42,7 @@ public class ResurectModule : UnitModule
         return UseOnTarget(owner, minions);
     }
 
-    public override int UseOnTarget(MinionCombat owner, List<Minion> targets)
+    public override int UseOnTarget(MinionCombat owner, List<UnitWithoutState> targets)
     {
         var unitsManager = Object.FindFirstObjectByType<UnitsManager>();
         var nbTouched = 0;
@@ -82,9 +82,9 @@ public class ResurectModule : UnitModule
     { 
     }
 
-    public override List<Minion> FindTargets(MinionCombat owner)
+    public override List<UnitWithoutState> FindTargets(MinionCombat owner)
     { 
         var unitsManager = Object.FindFirstObjectByType<UnitsManager>();
-        return picking.PickTargets(unitsManager.Deads.Select(m => m as Minion).Where(m => m != null).ToList(), owner.Owner).ToList();
+        return picking.PickTargets(unitsManager.Deads.Select(m => m as UnitWithoutState).Where(m => m != null).ToList(), owner.Owner).ToList();
     }
 }

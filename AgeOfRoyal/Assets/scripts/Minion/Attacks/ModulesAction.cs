@@ -14,6 +14,7 @@ public class ModulesAction : UnitAction
 
     public override float MaxRadius => modules.Max(m => m.Radius);
     public override float MinRadius => modules.Min(m => m.Radius);
+    public override float Cooldown => modules.Min(m => m.Cooldown);
 
     public override bool Use(UnitWithoutState owner)
     {

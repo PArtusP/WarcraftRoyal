@@ -8,7 +8,7 @@ using UnityEngine;
 public class AoeBuffModule : AoeUnitModule
 {
     [SerializeField] private UnitBuff buff = new UnitBuff();
-     private List<Minion> targets = new List<Minion>();
+    private List<UnitWithoutState> targets = new List<UnitWithoutState>();
 
     public override string Description =>
         $"{(picking.SameTeam == Target.Friends ? "Grants" : "Inflicts")} " +
@@ -29,10 +29,10 @@ public class AoeBuffModule : AoeUnitModule
     public override void Init(MinionCombat owner)
     {
         buff = buff.Clone();
-        buff.Source = owner.Owner; 
+        buff.Source = owner.Owner;
     }
 
-    override protected void ApplyEffectInternal(Minion target, MinionCombat owner)
+    override protected void ApplyEffectInternal(UnitWithoutState target, MinionCombat owner)
     {
         if (buff.Source == null) buff.Source = owner.Owner;
         if (!targets.Contains(target))
@@ -45,10 +45,10 @@ public class AoeBuffModule : AoeUnitModule
         }
     }
 
-    public IEnumerator RemoveBlacklist(Minion victim)
+    public IEnumerator RemoveBlacklist(UnitWithoutState victim)
     {
-        yield return buff.BuffType == UnitBuffType.Temporary 
-            || buff.BuffType == UnitBuffType.Stackable 
+        yield return buff.BuffType == UnitBuffType.Temporary
+            || buff.BuffType == UnitBuffType.Stackable
             || buff.BuffType == UnitBuffType.Refreshable ?
             new WaitForEndOfFrame()
             : new WaitForSeconds(buff.Duration); //maybe not for OneShot and permanent ?
@@ -57,7 +57,7 @@ public class AoeBuffModule : AoeUnitModule
             targets.Remove(victim);
     }
 
-    protected override List<Minion> PreApplyChecks(List<Minion> minions, MinionCombat owner)
+    protected override List<UnitWithoutState> PreApplyChecks(List<UnitWithoutState> minions, MinionCombat owner)
     {
         targets.RemoveAll(t => t == null && t.Dead);
         switch (buff.BuffType)
@@ -76,12 +76,12 @@ public class AoeBuffModule : AoeUnitModule
                     owner.Owner.PlayVfx(OnSelfVfx, false);
                     owner.Owner.PlayModuleOnSelfVfxClientRpc(ID, owner.NetworkObjectId, OnSelfVfx.id.ToString(), false);
                 }
-                break; 
-                case UnitBuffType.Temporary:
-                case UnitBuffType.Refreshable:
+                break;
+            case UnitBuffType.Temporary:
+            case UnitBuffType.Refreshable:
                 minions.RemoveAll(m => m.Buffs.Count(b => b.SourceId == buff.SourceId) >= buff.MaxStack); // Remove already buffed targets
                 break;
-                case UnitBuffType.Stackable:
+            case UnitBuffType.Stackable:
                 minions.RemoveAll(m => m.Buffs.Count(b => b.SourceId == buff.SourceId && b.Source == buff.Source) >= buff.MaxStack); // Remove already buffed targets
                 break;
         }

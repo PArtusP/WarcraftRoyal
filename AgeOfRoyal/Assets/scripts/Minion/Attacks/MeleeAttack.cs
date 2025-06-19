@@ -11,7 +11,7 @@ public class MeleeAttack : UnitAttack
         if ((owner.Combat.HitPoint.position - owner.Target.transform.position).magnitude > owner.Stats.hitRadius) return false;
 
         var finalDamage = owner.Stats.damage;
-        if (owner.Target is Minion m && m.Type == bonusAgainst)
+        if (owner.Target is UnitWithoutState m && m.Type == bonusAgainst)
             finalDamage *= bonusMultiplier;
 
         return owner.Target.GetHit(finalDamage, owner);

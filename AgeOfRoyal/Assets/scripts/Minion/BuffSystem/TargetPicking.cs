@@ -16,6 +16,16 @@ public enum PickingFields
     ToDispel = 8,
     Furthest = 9,
 }
+public enum PickingFilters
+{ 
+    Alive = 1,  
+    Dead = 2,  
+    Melee = 5,
+    Range = 6,
+    Mage = 7,
+    ToDispel = 8,
+    Furthest = 9,
+}
 
 [Serializable]
 public class TargetPicking
@@ -29,13 +39,13 @@ public class TargetPicking
 
     public int MaxTarget => maxTarget;
 
-    public List<Minion> PickTargets(float radius, UnitWithoutState source)
+    public List<UnitWithoutState> PickTargets(float radius, UnitWithoutState source)
     { 
-        List<Minion> minions = Physics.OverlapSphere(source.Combat.HitPoint.position, radius, GameLayers.Hitable.Mask).Select(m => m.GetComponent<Minion>()).Where(m => m!= null).ToList();
+        List<UnitWithoutState> minions = Physics.OverlapSphere(source.Combat.HitPoint.position, radius, GameLayers.Hitable.Mask).Select(m => m.GetComponent<UnitWithoutState>()).Where(m => m!= null).ToList();
 
         return PickTargets(minions, source);
     }
-    public List<Minion> PickTargets(List<Minion> targets, UnitWithoutState source)
+    public List<UnitWithoutState> PickTargets(List<UnitWithoutState> targets, UnitWithoutState source)
     {
         targets = targets.Where(t => t != null && CheckTeam(source, t)).ToList(); // @TODO Add health filter
 
@@ -45,9 +55,9 @@ public class TargetPicking
         for (int i = orders.Count - 1; i >= 0; i--)
             targets = orders[i].Pick(targets, source);
 
-        return targets.Any() ? targets.Where(t => targets.IndexOf(t) < maxTarget).ToList() : new List<Minion>();
+        return targets.Any() ? targets.Where(t => targets.IndexOf(t) < maxTarget).ToList() : new List<UnitWithoutState>();
     }
-    private bool CheckTeam(UnitWithoutState owner, Minion target)
+    private bool CheckTeam(UnitWithoutState owner, UnitWithoutState target)
     {
         switch (sameTeam)
         {
@@ -84,7 +94,7 @@ public class TargetingOrderBy
     /// </summary>
     [SerializeField] bool ascending;
 
-    public List<Minion> Pick(List<Minion> targets, Hitable source)
+    public List<UnitWithoutState> Pick(List<UnitWithoutState> targets, Hitable source)
     {
         switch (field)
         {
@@ -115,7 +125,7 @@ public class TargetingOrderBy
         }
     }
 
-    private List<Minion> ReorderByMatch(List<Minion> input, Func<Minion, bool> predicate)
+    private List<UnitWithoutState> ReorderByMatch(List<UnitWithoutState> input, Func<UnitWithoutState, bool> predicate)
     {
         var matched = input.Where(predicate);
         var unmatched = input.Where(t => !predicate(t));
@@ -134,29 +144,31 @@ public class TargetingOrderBy
 [Serializable]
 public class TargetingFilter
 {
-    [SerializeField] PickingFields field;
+    [SerializeField] PickingFilters field;
 
-    public List<Minion> Pick(List<Minion> targets, Hitable source)
+    public List<UnitWithoutState> Pick(List<UnitWithoutState> targets, Hitable source)
     {
         switch (field)
         {
             /*            case PickingFields.Cost:
                             return targets.OrderBy(t => t.cost).ToList();
-                        case PickingFields.Health:
-                            return targets.OrderBy(t => t.Health).ToList();
                         case PickingFields.Damage:
                             return targets.OrderBy(t => t.Stats.damage).ToList();
                         case PickingFields.Rate:
                             return targets.OrderBy(t => t.Stats.cooldown).ToList();*/
 
-            case PickingFields.Melee:
+            case PickingFilters.Alive:
+                return targets.Where(t => !t.Dead).ToList();
+            case PickingFilters.Dead:
+                return targets.Where(t => t.Dead).ToList();
+            case PickingFilters.Melee:
                 return targets.Where(t => t.Type == Class.Melee).ToList();
-            case PickingFields.Range:
+            case PickingFilters.Range:
                 return targets.Where(t => t.Type == Class.Range).ToList();
-            case PickingFields.Mage:
+            case PickingFilters.Mage:
                 return targets.Where(t => t.Type == Class.Mage).ToList();
 
-            case PickingFields.ToDispel:
+            case PickingFilters.ToDispel:
                 return targets.Where(t => t.CanBeDispelled(t.Home == source.Home)).ToList();
 
             /* case PickingFields.Furthest:

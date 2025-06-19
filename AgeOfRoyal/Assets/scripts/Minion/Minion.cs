@@ -9,6 +9,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using static Unity.VisualScripting.Member;
 using static UnityEngine.GraphicsBuffer;
+using static UnityEngine.UI.CanvasScaler;
 
 public enum MinionState
 {
@@ -44,11 +45,10 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     protected MinionController controller;
     protected MinionCombat combat;
     protected MinionAnimator animator;
-    protected UnityEvent<Minion> OnDisplayToUpdate { get; } = new UnityEvent<Minion>();
+    protected UnityEvent<UnitWithoutState> OnDisplayToUpdate { get; } = new UnityEvent<UnitWithoutState>();
 
     [Header("Stats")]
     [SerializeField] protected UnitStats baseStats;
-    [SerializeField] protected LayerMask hitableLayer;
     [SerializeField] protected List<UnitBuff> buffs = new List<UnitBuff>();
 
     [Header("Actions")]
@@ -65,22 +65,26 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     List<UnitBuff> StatDebuffs => buffs.Where(b => !UnitPowerUp.Identity.Equals(b.PowerUp) && !b.PowerUp.IsBuff).ToList();
     public UnitPowerUp TotalBuff => buffs.Select(b => b.PowerUp).SumPowerUps();
     public List<UnitModule> Modules => combat.Modules;
-    public List<UnitModule> AllModules { 
-        get {
+    public List<UnitModule> AllModules
+    {
+        get
+        {
             var res = new List<UnitModule>();
             res.AddRange(combat.Modules);
             res.AddRange(actions.Where(a => a is ModulesAction m).Select(m => m as ModulesAction).SelectMany(m => m.Modules));
+            res.AddRange(actions.Where(a => a is ChargeAttack m).Select(m => m as ChargeAttack).SelectMany(m => m.OnHitModules));
             return res;
         }
     }
-    public Minion SourcePrefab { get; internal set; } = null;
+    public bool Taunting => combat.Modules.Any(m => m.GetType() == typeof(AoeTauntModule));
+    public UnitWithoutState SourcePrefab { get; internal set; } = null;
     public SerializedMinion Serialized => new SerializedMinion() { ID = ID, Health = Health }; // Serialized data for saving/loading purposes
 
     public override float MaxHealth { get => Stats.health; set => Stats.health = value; }
     public string Name { get => name; set => name = value; }
     public MinionCombat Combat { get => combat; set => combat = value; }
     internal Class Type { get => type; set => type = value; }
-    public LayerMask HitableLayer { get => hitableLayer; set => hitableLayer = value; }
+    public LayerMask HitableLayer => GameLayers.Hitable.Mask;
 
     virtual public Hitable Target
     {
@@ -95,7 +99,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     abstract public bool IsStopped { get; }
     public List<UnitAction> Actions { get => actions; set => actions = value; }
     public List<TriggerSVFX> ClientVfxs { get; private set; } = new List<TriggerSVFX>();
-    public MinionController Controller  => controller; 
+    public MinionController Controller => controller;
 
     override protected void AwakeInternal()
     {
@@ -122,7 +126,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
                 buffs.Remove(b);
             });
             UpdateStatsEffects(old); // IsServer
-            OnDisplayToUpdate.Invoke(this as Minion); // Notify UI to update stats display
+            OnDisplayToUpdate.Invoke(this as UnitWithoutState); // Notify UI to update stats display
         }
         if (!IsServer) return;
 
@@ -156,7 +160,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 
     public override bool GetHit(float damage, Hitable opponent)
     {
-        if (opponent is Minion m)
+        if (opponent is UnitWithoutState m)
         {
             if (m.Type == Class.Mage) damage *= 1f - Stats.armorRange;
             if (m.Type == Class.Range) damage *= 1f - Stats.armorRange;
@@ -198,7 +202,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
             // TODO : add heal
 
             UpdateStatsEffects(old);
-            OnDisplayToUpdate.Invoke(this as Minion); // Notify UI to update stats display
+            OnDisplayToUpdate.Invoke(this as UnitWithoutState); // Notify UI to update stats display
 
             if (IsServer)
                 AddBuffClientRpc(unitBuff, duration, unitBuff.Source.NetworkObjectId);
@@ -241,7 +245,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
             buffs.Remove(buffs.First(buffs => buffs.SourceId == unitBuff.SourceId && buffs.Source == unitBuff.Source));
             RemoveBuffClientRpc(unitBuff, unitBuff.Source.NetworkObjectId);
             UpdateStatsEffects(old);
-            OnDisplayToUpdate.Invoke(this as Minion); // Notify UI to update stats display
+            OnDisplayToUpdate.Invoke(this as UnitWithoutState); // Notify UI to update stats display
         }
         catch (Exception e)
         {
@@ -324,16 +328,20 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     internal void PlayModuleOnTargetVfxClientRpc(int moduleId, ulong sourceId, string id, bool value = true)
     {
         if (IsHost) return; // Don't play VFX on host, it will be played on server and synced to clients
-        var source = GetNetworkObject(sourceId).GetComponent<UnitWithoutState>(); 
-        PlayVfx(source.AllModules.FirstOrDefault(m => m.ID == moduleId).OnTargetVfx, value);
+        var source = GetNetworkObject(sourceId).GetComponent<UnitWithoutState>();
+        var mod = source.AllModules.FirstOrDefault(m => m.ID == moduleId);
+        if (mod.OnTargetVfx != null)
+            PlayVfx(mod.OnTargetVfx, value);
     }
     [ClientRpc]
     internal void PlayModuleOnSelfVfxClientRpc(int moduleId, ulong sourceId, string id, bool value = true)
     {
         if (IsHost) return; // Don't play VFX on host, it will be played on server and synced to clients
         var source = GetNetworkObject(sourceId).GetComponent<UnitWithoutState>();
-        PlayVfx(source.AllModules.FirstOrDefault(m => m.ID == moduleId).OnSelfVfx, value);
-    } 
+        var mod = source.AllModules.FirstOrDefault(m => m.ID == moduleId);
+        if (mod.OnTargetVfx != null)
+            PlayVfx(mod.OnSelfVfx, value);
+    }
 
     #endregion
 
@@ -351,15 +359,16 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
         if (IsHost) return;
         SetAlive(value);
     }
+
+    internal abstract void StartFSM();
 }
 
 abstract public class UnitBase<T> : UnitWithoutState where T : Enum
 {
     protected Dictionary<UnitAction, float> nextAttackDict = new Dictionary<UnitAction, float>();
     [SerializeField] protected FSM<T> fsm = new FSM<T>();
-    private AttackConditions<T> validContition;
+    protected AttackConditions<T> validContition;
     private List<AttackConditions<T>> conditons = new List<AttackConditions<T>>();
-    public bool Taunting => combat.Modules.Any(m => m.GetType() == typeof(AoeTauntModule));
 
     abstract public T Stop { get; }
     abstract public T Walk { get; }
@@ -429,6 +438,7 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
     protected abstract void SetUpConditionInternal(List<AttackConditions<T>> conditons);
 
     #region FSM
+    internal override void StartFSM() => fsm.SwitchState(Walk);
     virtual protected void SetUpFSM()
     {
         fsm.states = new List<State<T>>() {
@@ -456,7 +466,7 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
                     validContition = success;
                     Debug.Log("Set valid condition: " + validContition.action.name);
                     return !success.NextStage.Equals(Walk) ? success.NextStage : InCombat;
-                } 
+                }
                 else if ((transform.position - target.transform.position).magnitude < Actions.Min(a => a.MinRadius))
                 {
                     if(!controller.Agent.isStopped)
@@ -530,7 +540,7 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
 
     protected T CheckForTarget()
     {
-        var cols = Physics.OverlapSphere(transform.position, Stats.sightRadius, hitableLayer);
+        var cols = Physics.OverlapSphere(transform.position, Stats.sightRadius, HitableLayer);
         List<Hitable> targets = new List<Hitable>();
         if (cols.Length > 0)
         {

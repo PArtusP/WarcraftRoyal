@@ -55,44 +55,44 @@ public class UnitUpgradeDetailUi : MonoBehaviour
         PowerUp = button.Buff.PowerUp;
         Modules = button.Modules;
     }
-    internal void Display(UnitWithoutState Minion) => Display(Minion, null);
-    internal void Display(UnitWithoutState Minion, UnitPowerUp buffs)
+    internal void Display(UnitWithoutState unit) => Display(unit, null);
+    internal void Display(UnitWithoutState unit, UnitPowerUp buffs)
     {
-        buffs = buffs != null ? buffs : Minion.TotalBuff;
+        buffs = buffs != null ? buffs : unit.TotalBuff;
         gameObject.SetActive(true);
         ClearChildren();
-        Name = Minion.Name;
-        Image = Minion.icon;
+        Name = unit.Name;
+        Image = unit.icon;
 
 
-        AddDoubleStatLine("HP", Minion.Stats.health,
+        AddDoubleStatLine("HP", unit.Stats.health,
             buffs != null ? buffs.addStats.health : 0,
             buffs != null ? buffs.multStats.health : 1,
-            "damage", Minion.Stats.damage,
+            "damage", unit.Stats.damage,
             buffs != null ? buffs.addStats.damage : 0,
             buffs != null ? buffs.multStats.damage : 1);
 
-        AddDoubleStatLine("speed", Minion.Stats.speed,
+        AddDoubleStatLine("speed", unit.Stats.speed,
             buffs != null ? buffs.addStats.speed : 0,
             buffs != null ? buffs.multStats.speed : 1,
-            "rate", 1f / Minion.Stats.cooldown,
+            "rate", 1f / unit.Stats.cooldown,
             buffs != null && buffs.addStats.cooldown != 0 ? 1f / buffs.addStats.cooldown : 0, // @TODO hmm
             buffs != null && buffs.multStats.cooldown != 1f ? 2f - buffs.multStats.cooldown : 1); // @TODO hmm
 
-        AddDoubleStatLine("range", Minion.Stats.hitRadius,
+        AddDoubleStatLine("range", unit.Stats.hitRadius,
             buffs != null ? buffs.addStats.hitRadius : 0,
             buffs != null ? buffs.multStats.hitRadius : 1,
-            "range DEF", Minion.Stats.armorRange,
+            "range DEF", unit.Stats.armorRange,
             buffs != null ? buffs.addStats.armorRange : 0,
             buffs != null ? buffs.multStats.armorRange : 1);
 
-        AddStatLine("melee DEF", Minion.Stats.armorMelee,
+        AddStatLine("melee DEF", unit.Stats.armorMelee,
             buffs != null ? buffs.addStats.armorMelee : 0,
             buffs != null ? buffs.multStats.armorMelee : 1);
 
-        Modules = Minion.Modules;
+        Modules = unit.Modules;
     }
-    public UnityEvent<Minion> OnUpdateEvent { get; internal set; } = new UnityEvent<Minion>();
+    public UnityEvent<UnitWithoutState> OnUpdateEvent { get; internal set; } = new UnityEvent<UnitWithoutState>();
 
     virtual protected UnitPowerUp PowerUp
     {

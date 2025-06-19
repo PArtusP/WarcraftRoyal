@@ -1,13 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Unity.Netcode;
-using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class MinionCombat : NetworkBehaviour
-{  
+{
     [Header("Components")]
     [SerializeField] TriggerSVFX attackFx; //To remove
     [SerializeField] protected Transform hitPoint;
@@ -20,7 +17,7 @@ public class MinionCombat : NetworkBehaviour
     [SerializeField] private ProjectileMove vfx;
 
     public UnitWithoutState Owner { get; private set; }
-    public Transform HitPoint { get => hitPoint; set => hitPoint = value; } 
+    public Transform HitPoint { get => hitPoint; set => hitPoint = value; }
 
     public UnityEvent OnEndActionEvent { get; } = new UnityEvent();
     public List<UnitModule> Modules { get => modules; set => modules = value; }
@@ -28,7 +25,7 @@ public class MinionCombat : NetworkBehaviour
     private void Awake()
     {
         animator = GetComponent<MinionAnimator>();
-        owner = GetComponent<Minion>();
+        owner = GetComponent<UnitWithoutState>();
     }
     private void Update()
     {
@@ -39,7 +36,7 @@ public class MinionCombat : NetworkBehaviour
     {
         if (action == null)
         {
-            UnityEngine.Debug.LogError("Action is null in StartAction"); 
+            UnityEngine.Debug.LogError("Action is null in StartAction");
         }
         this.action = action;
         UnityEngine.Debug.Log("StartAction: " + action.name + " on " + target.name);
@@ -49,9 +46,17 @@ public class MinionCombat : NetworkBehaviour
     public void Action()
     {
         if (!IsServer) return;
-        if (!owner.IsStopped && action.Use(owner))
-            owner.Target = null; 
-        if(action.Vfx != null)
+        try
+        {
+            if (!owner.IsStopped && action.Use(owner))
+                owner.Target = null;
+        }
+        catch (System.Exception)
+        {
+
+            throw;
+        }
+        if (action.Vfx != null)
         {
             PlayAttackVfx();
             PlayAttackVfxClientRpc(Owner.Actions.IndexOf(action));

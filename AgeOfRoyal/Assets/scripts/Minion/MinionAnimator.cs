@@ -1,18 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MinionAnimator : MonoBehaviour
 {
 
-    Animator animator;
+    List<Animator> animators;
     private void Awake()
     {
-        animator = GetComponentInChildren<Animator>();
+        animators = GetComponentsInChildren<Animator>().ToList();
     }
-    internal void Action(string animation) => animator.SetTrigger(animation);  
-    internal void SetSpeed(Vector3 velocity) => animator.SetFloat("Speed", velocity.magnitude); 
-    internal void Resurect() => animator.SetTrigger("Resurect"); 
-    internal void Play(string trigger) => animator.SetTrigger("trigger"); 
+    internal void Action(string animation) => animators.ForEach(a => a.SetTrigger(animation));  
+    internal void SetSpeed(Vector3 velocity) => animators.ForEach(a => a.SetFloat("Speed", velocity.magnitude)); 
+    internal void Resurect() => animators.ForEach(a => a.SetTrigger("Resurect")); 
+    internal void Play(string trigger) => animators.ForEach(a => a.SetTrigger(trigger)); 
 }

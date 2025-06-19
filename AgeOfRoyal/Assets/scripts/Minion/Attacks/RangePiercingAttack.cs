@@ -34,7 +34,7 @@ public class RangePiercingAttack : UnitAttack
                 damaged.Add(hitable);
 
                 float finalDamage = damage;
-                if (hitable is Minion m && m.Type == bonusAgainst)
+                if (hitable is UnitWithoutState m && m.Type == bonusAgainst)
                     finalDamage *= bonusMultiplier;
 
                 totalDamage += finalDamage;
