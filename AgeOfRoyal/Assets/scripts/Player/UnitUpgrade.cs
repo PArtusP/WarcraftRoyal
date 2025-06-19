@@ -1,6 +1,16 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class UpgradeDescription
+{
+    [SerializeField, TextArea(1, 3)]
+    public string description;
+    [SerializeField]
+    public Sprite icon; 
+}
+
+
 [CreateAssetMenu(fileName = "Unit Upgrade", menuName = "Buttons/Unit Upgrade", order = 1)]
 public class UnitUpgrade : ScriptableObject
 {
@@ -9,16 +19,16 @@ public class UnitUpgrade : ScriptableObject
     [SerializeField] UnitBuff buff = new UnitBuff();  
     [SerializeField] List<UnitModule> modules;
     [SerializeField] int cost;
-    [SerializeField] string description;
-    [SerializeField] List<Minion> target;
+    [SerializeField] List<UpgradeDescription> descriptions;
+    [SerializeField] List<UnitWithoutState> target;
     [SerializeField] Sprite image;
 
     public string Name => perkName; 
     public UnitBuff Buff => buff;  
     public List<UnitModule> Modules => modules;
     public int Cost => cost;
-    public string Description => description;
-    public List<Minion> Target => target; 
+    public List<UpgradeDescription> Descriptions => descriptions;
+    public List<UnitWithoutState> Target => target; 
     public Sprite Image => image; 
 }
 

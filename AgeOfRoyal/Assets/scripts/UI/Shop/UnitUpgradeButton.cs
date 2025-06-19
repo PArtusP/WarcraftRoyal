@@ -11,9 +11,10 @@ public class UnitUpgradeButton : RightClickButton
     [SerializeField] UnitUpgrade upgrade;
 
     public int ID => upgrade.ID;
-    public List<Minion> Target => upgrade.Target;
+    public List<UnitWithoutState> Target => upgrade.Target;
     public UnitBuff Buff => upgrade.Buff;
     public List<UnitModule> Modules => upgrade.Modules;
+    public List<UpgradeDescription> Descriptions => upgrade.Descriptions;
     public int Cost => upgrade.Cost; 
     public string Name => upgrade.Name; 
     public bool IsOwned => status.text == "Sold !";

@@ -44,7 +44,11 @@ public class UnitUpgradeDetailUi : MonoBehaviour
     private Sprite Image { get => image.sprite; set => image.sprite = value; }
     private List<UnitModule> Modules
     {
-        set => value.ForEach(v => AddModuleLine(v.Description));
+        set => value.ForEach(v => AddModuleLine(v.Description, v.Icon));
+    }
+    private List<UpgradeDescription> Descriptions
+    {
+        set => value.ForEach(v => AddModuleLine(v.description, v.icon));
     }
     internal void Display(UnitUpgradeButton button)
     {
@@ -53,12 +57,13 @@ public class UnitUpgradeDetailUi : MonoBehaviour
         Name = button.Name;
         Image = button.Image;
         PowerUp = button.Buff.PowerUp;
+        Descriptions = button.Descriptions;
         Modules = button.Modules;
     }
     internal void Display(UnitWithoutState unit) => Display(unit, null);
     internal void Display(UnitWithoutState unit, UnitPowerUp buffs)
     {
-        buffs = buffs != null ? buffs : unit.TotalBuff;
+        buffs = buffs != null ? buffs : unit.TotalBuffNoFilter;
         gameObject.SetActive(true);
         ClearChildren();
         Name = unit.Name;
@@ -119,7 +124,7 @@ public class UnitUpgradeDetailUi : MonoBehaviour
 
     private void AddStatLineAdd(string label, float value) => Instantiate(statelinePrefab, statsContainer).SetLineAdd(null, label, value);
     private void AddStatLineMult(string label, float value) => Instantiate(statelinePrefab, statsContainer).SetLineMult(null, label, value);
-    private void AddModuleLine(string label) => Instantiate(statelinePrefab, statsContainer).SetLine(null, label);
+    private void AddModuleLine(string label, Sprite image = null) => Instantiate(statelinePrefab, statsContainer).SetLine(image, label);
     private void AddStatLine(string label, float stats, float addBuff, float multBuff) => Instantiate(statelineSmallPrefab, statsContainer).SetStatLineWithBuff(null, label, stats, (stats + addBuff) * multBuff - stats);
     private void AddDoubleStatLine(string label1, float stats1, float addBuff1, float multBuff1,
         string label2, float stats2, float addBuff2, float multBuff2) =>

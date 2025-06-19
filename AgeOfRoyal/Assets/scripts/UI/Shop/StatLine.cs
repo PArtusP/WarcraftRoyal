@@ -33,7 +33,7 @@ internal class StatLine : MonoBehaviour
     internal void SetStatLineWithBuff(Sprite sprite, string label, float value, float buffs) =>
         ui.text = $"{label}: {FormatSigned(value).Substring(1)}{(buffs != 0 ? $" ({FormatSigned(buffs)})" : string.Empty)}"; 
 
-    static internal string FormatSigned(float value) => value > 0 ? $"+{value:0.#}" : $"{value:0.#}"; 
+    static internal string FormatSigned(float value) => value >= 0 ? $"+{value:0.#}" : $"{value:0.#}"; 
 
     static internal string FormatPercent(float multiplier)
     {

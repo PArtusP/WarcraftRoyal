@@ -10,7 +10,31 @@ public class UnitsManager : NetworkBehaviour
     List<UnitWithoutState> units = new List<UnitWithoutState>();
     List<UnitWithoutState> deads = new List<UnitWithoutState>();
 
+    public List<UnitWithoutState> Units => units;
     public List<UnitWithoutState> Deads => deads;
+    public List<UnitWithoutState> All
+    {
+        get
+        {
+            var res = new List<UnitWithoutState>(deads);
+            res.AddRange(units);
+            return res;
+        }
+    }
+    public List<UnitWithoutState> GetUnits(Target target, Base home)
+    {
+        switch (target)
+        {
+            case Target.Friends:
+                return All.Where(u => u.Home == home).ToList();
+            case Target.Foes:
+                return All.Where(u => u.Home != home).ToList();
+            case Target.All:
+                return All;
+            default:
+                return null;
+        }
+    }
 
     public void AddRange(IEnumerable<UnitWithoutState> units)
     { 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+
 public enum UnitBuffType
 {
     OneShot,    // Instant effect, no duration (e.g., +50 HP heal now)
@@ -17,6 +18,7 @@ public class UnitBuff : INetworkSerializable
 {
     [Header("Buff settings")]
     [SerializeField] private UnitBuffType buffType = UnitBuffType.Temporary;
+    [SerializeField] private BuffApplyFilter filters;
     [SerializeField] private float duration = 1f;
     [SerializeField] private int maxStack = 1;
     [SerializeField] private bool canBeDispelled = true;
@@ -45,11 +47,12 @@ public class UnitBuff : INetworkSerializable
     public UnitBuffType BuffType { get => buffType; set => buffType = value; }
     public Hitable Source { get => source; set => source = value; }
     public bool Dispel { get => dispel; set => dispel = value; }
+    public BuffApplyFilter Filters { get => filters; set => filters = value; }
 
     public void Apply() => appliedTime = Time.time;
 
     public bool IsExpired()
-    { 
+    {
         //Debug.Log("Checking if buff is expired: " + buffType + " applied at: " + appliedTime + " with duration: " + duration + " current time: " + Time.time);
         return (buffType == UnitBuffType.Temporary || buffType == UnitBuffType.Refreshable || buffType == UnitBuffType.Stackable) && Time.time - appliedTime >= duration;
     }
@@ -147,4 +150,28 @@ public class UnitBuff : INetworkSerializable
         return string.Join(", ", parts);
     }
 
+}
+
+[Serializable]
+public class BuffApplyFilter
+{
+    [Header("Minion filter")]
+    [SerializeField] protected Target targetTeam = Target.All;
+    [SerializeField] List<TargetingFilter> filters = new List<TargetingFilter>();
+
+    public bool ApplyFilter(UnitsManager units, UnitWithoutState owner)
+    {
+        if (filters.Count == 0)
+            return true;
+
+        List<UnitWithoutState> targets = units.GetUnits(targetTeam, owner.Home);
+        foreach (var filter in filters)
+        {
+            targets = filter.Pick(targets, null); // Assuming filter.Pick can handle null source
+            if (targets.Count == 0)
+                return false; // If any filter results in no targets, we can't apply the buff
+        }
+
+        return targets.Count > 0; // If we have any valid targets after all filters
+    }
 }

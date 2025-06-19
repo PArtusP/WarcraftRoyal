@@ -42,6 +42,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 
     [Header("Visuals")]
     [SerializeField] public List<RendererToColor> rendererToColor = new List<RendererToColor>();
+    private UnitsManager unitManager;
     protected MinionController controller;
     protected MinionCombat combat;
     protected MinionAnimator animator;
@@ -63,7 +64,10 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     public List<UnitBuff> Buffs => buffs;
     List<UnitBuff> StatBuffs => buffs.Where(b => !UnitPowerUp.Identity.Equals(b.PowerUp) && b.PowerUp.IsBuff).ToList();
     List<UnitBuff> StatDebuffs => buffs.Where(b => !UnitPowerUp.Identity.Equals(b.PowerUp) && !b.PowerUp.IsBuff).ToList();
-    public UnitPowerUp TotalBuff => buffs.Select(b => b.PowerUp).SumPowerUps();
+    public UnitPowerUp TotalBuffNoFilter => buffs.Select(b => b.PowerUp).SumPowerUps();
+    public UnitPowerUp TotalBuff => 
+        buffs.Where(b => b.Filters.ApplyFilter(unitManager, this) && !b.PowerUp.Equals(UnitPowerUp.Identity))
+        .Select(b => b.PowerUp).SumPowerUps();
     public List<UnitModule> Modules => combat.Modules;
     public List<UnitModule> AllModules
     {
@@ -103,6 +107,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 
     override protected void AwakeInternal()
     {
+        unitManager = GetComponent<UnitsManager>();
         controller = GetComponent<MinionController>();
         combat = GetComponent<MinionCombat>();
         animator = GetComponent<MinionAnimator>();
@@ -162,11 +167,11 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     {
         if (opponent is UnitWithoutState m)
         {
-            if (m.Type == Class.Mage) damage *= 1f - Stats.armorRange;
-            if (m.Type == Class.Range) damage *= 1f - Stats.armorRange;
-            if (m.Type == Class.Melee) damage *= 1f - Stats.armorMelee;
+            if (m.Type == Class.Mage) damage -= Stats.armorRange;
+            if (m.Type == Class.Range) damage -= Stats.armorRange;
+            if (m.Type == Class.Melee) damage -= Stats.armorMelee;
         }
-        return base.GetHit(damage, opponent);
+        return base.GetHit(damage <= 0 ? 1f : damage, opponent);
     }
 
     internal void SetTarget(Hitable unit) => Target = unit;

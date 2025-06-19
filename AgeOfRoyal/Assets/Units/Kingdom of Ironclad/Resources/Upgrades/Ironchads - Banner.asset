@@ -10,12 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9e55978e6f73aa044b3ecc27af034b96, type: 3}
-  m_Name: Priest - Potioneering
+  m_Name: Ironchads - Banner
   m_EditorClassIdentifier: 
-  ID: 6
-  perkName: Potioneering
+  ID: 13
+  perkName: Banner
   buff:
-    buffType: 4
+    buffType: 2
+    filters:
+      targetTeam: 0
+      filters:
+      - field: 1
+      - field: 5
     duration: 0
     maxStack: 1
     canBeDispelled: 0
@@ -33,17 +38,19 @@ MonoBehaviour:
         health: 1
         damage: 1
         speed: 1
-        cooldown: 1
+        cooldown: 0.9
         sightRadius: 1
         hitRadius: 1
         armorRange: 1
         armorMelee: 1
     heal: 0
     dispel: 0
-  modules:
-  - {fileID: 11400000, guid: 03a9ae95e3a6f2a4aa9eada32abee3df, type: 2}
-  cost: 2
-  description: Priests can heal units around them
+  modules: []
+  cost: 4
+  descriptions:
+  - description: Apply to every range units
+    icon: {fileID: 21300000, guid: 313131c603f5bf9449704f776ff0a16e, type: 3}
   target:
-  - {fileID: 1982330210055623403, guid: 552bbd209987f3140979951a8671225a, type: 3}
-  image: {fileID: 1485440672, guid: 5b01f6ffc7d8783479c995daa9331b72, type: 3}
+  - {fileID: 1982330210055623403, guid: b49aa7bc639280c4e9acb8e6f663dd53, type: 3}
+  - {fileID: 1982330210055623403, guid: fb56c214a14d3a34c8e30e3dd8d455e5, type: 3}
+  image: {fileID: 21300000, guid: 9352276cd285b8f41bc00ef21ff28b5f, type: 3}

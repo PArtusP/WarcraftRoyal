@@ -9,6 +9,8 @@ using static UnityEngine.GraphicsBuffer;
 abstract public class UnitModule : ScriptableObject
 {
     public int ID = -1;
+    private Sprite icon;
+
     [SerializeField] TriggerSVFX onTargetVfx;
     [SerializeField] TriggerSVFX onSelfVfx;
     public TriggerSVFX OnTargetVfx => onTargetVfx;
@@ -18,6 +20,8 @@ abstract public class UnitModule : ScriptableObject
     abstract public float Delay { get; }
     abstract public string Description { get; }
     public float NextUse { get; protected set; }
+    public Sprite Icon => icon;
+
     abstract public void Init(MinionCombat owner);
     /// <summary>
     /// Return the number of targets on which the module has been applied
@@ -48,7 +52,7 @@ public enum Target
 [System.Serializable]
 abstract public class AoeUnitModule : UnitModule
 {
-    [SerializeField] protected float cooldown = 5f; 
+    [SerializeField] protected float cooldown = 5f;
     [SerializeField] private float delay = 0f;
     [SerializeField] protected float radius = 8f;
     [SerializeField] protected TargetPicking picking;
@@ -66,7 +70,7 @@ abstract public class AoeUnitModule : UnitModule
         if (!owner.IsServer || NextUse > Time.time) return 0;
         var maxTarget = maxTargetOverride == -1 ? picking.MaxTarget : maxTargetOverride;
         List<UnitWithoutState> minions;
-        minions = FindTargets(owner).Take(maxTarget).ToList(); 
+        minions = FindTargets(owner).Take(maxTarget).ToList();
         return UseOnTarget(owner, minions);
     }
     public override int UseOnTarget(MinionCombat owner, List<UnitWithoutState> targets)
@@ -76,7 +80,7 @@ abstract public class AoeUnitModule : UnitModule
         foreach (var h in targets)
         {
             nbTouched++;
-            ApplyEffect(h, owner); 
+            ApplyEffect(h, owner);
         }
         if (nbTouched > 0)
         {
