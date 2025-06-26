@@ -58,13 +58,21 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     /// </summary>
     [SerializeField] private List<UnitAction> actions;
 
-    [SerializeField] protected Hitable target;
+
+    // Trigger system
+    private UnitTriggers unitTriggers = new UnitTriggers();
+    private Dictionary<Trigger, List<UnitBuff>> triggerBuffs = new Dictionary<Trigger, List<UnitBuff>>();
+    private Dictionary<Trigger, List<UnitModule>> triggerModules = new Dictionary<Trigger, List<UnitModule>>();
+    private Dictionary<Trigger, List<UnitAction>> triggerActions = new Dictionary<Trigger, List<UnitAction>>();
+    protected Dictionary<UnitAction, float> nextAttackDict = new Dictionary<UnitAction, float>();
+
+    // System
+    protected Hitable target;
+
+    #region Properties
     public bool IsAsset { get; set; } = true;
     public UnitStats Stats => baseStats + TotalBuff;
     public List<UnitBuff> Buffs => buffs;
-    private Dictionary<Trigger, List<UnitBuff>> triggerBuffs = new Dictionary<Trigger, List<UnitBuff>>();
-    private UnitTriggers unitTriggers = new UnitTriggers();
-    protected Dictionary<UnitAction, float> nextAttackDict = new Dictionary<UnitAction, float>();
 
     List<UnitBuff> StatBuffs => buffs.Where(b => !UnitPowerUp.Identity.Equals(b.PowerUp) && b.PowerUp.IsBuff).ToList();
     List<UnitBuff> StatDebuffs => buffs.Where(b => !UnitPowerUp.Identity.Equals(b.PowerUp) && !b.PowerUp.IsBuff).ToList();
@@ -109,6 +117,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     public List<UnitAction> Actions { get => actions; set => actions = value; }
     public List<TriggerSVFX> ClientVfxs { get; private set; } = new List<TriggerSVFX>();
     public MinionController Controller => controller;
+    #endregion
 
     override protected void AwakeInternal()
     {
@@ -135,12 +144,16 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
                     unitTriggers.OnHealEvent.AddListener(delegate
                     {
                         triggerBuffs[key].ForEach(b => AddBuff(b));
+                        combat.Modules.Where(m => m.Triggers != null && m.Triggers.Contains(t => t == key)).ForEach(m => m.Use(combat));
+                        combat.Actions.Where(m => m.Triggers != null && m.Triggers.Contains(t => t == key)).ForEach(m => m.Use(this));
                     });
                     break; 
                 case Trigger.Die:
                     unitTriggers.OnDieEvent.AddListener(delegate
                     {
                         triggerBuffs[key].ForEach(b => AddBuff(b));
+                        combat.Modules.Where(m => m.Triggers != null && m.Triggers.Contains(t => t == key)).ForEach(m => m.Use(combat));
+                        combat.Actions.Where(m => m.Triggers != null && m.Triggers.Contains(t => t == key)).ForEach(m => m.Use(this));
                     });
                     break;
             }
@@ -311,8 +324,17 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 
     internal void AddModules(List<UnitModule> modules)
     {
-        // @TODO check if exiting same modules, compare, take best stats
-        combat.Modules.AddRange(modules);
+        // @TODO check if exiting same modules, compare, take best stats 
+        
+        combat.Modules.AddRange(modules.Where(m => !M.Triggers.Any()));
+        if (unitBuff.Triggers != null && unitBuff.Triggers.Any())
+        {
+            unitBuff.Triggers.ForEach(t =>
+            {
+                triggerBuffs[t.Type].Add(t.ActionBuff);
+            });
+        }
+        combat.Modules.AddRange(modules.Where(m => !M.Triggers.Any()));
         modules.ForEach(m => AddModuleClientRpc(m.ID)); // @TODO pas opti
     }
     [ClientRpc]
