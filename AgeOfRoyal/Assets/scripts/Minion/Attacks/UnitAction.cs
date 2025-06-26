@@ -5,13 +5,20 @@ using UnityEngine;
 [System.Serializable]
 abstract public class UnitAction : ScriptableObject
 {
-    public int ID = -1;
+    [Header("Global")]
+    public int ID = -1; 
+    
+    [Header("Triggers")]
+    [SerializeField] List<Trigger> triggers;
+
+    [Header("SVFX")]
+    [SerializeField] TriggerSVFX vfx;
+    
     abstract public string AnimationTrigger { get; }
     abstract public float MaxRadius { get; }
     abstract public float MinRadius { get; }
     abstract public float Cooldown { get; }
-
-    [SerializeField] TriggerSVFX vfx;
+    
     public TriggerSVFX Vfx => vfx;  
 
     abstract public bool Use(UnitWithoutState owner);
