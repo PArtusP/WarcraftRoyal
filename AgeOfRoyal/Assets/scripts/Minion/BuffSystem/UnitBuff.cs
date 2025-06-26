@@ -189,7 +189,8 @@ public class BuffApplyFilter
 
 public enum Trigger
 {
-    Heal
+    Heal,
+    Die
 }
 [Serializable]
 public class BuffApplyTrigger
