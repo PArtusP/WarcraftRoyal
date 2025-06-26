@@ -8,19 +8,25 @@ using static UnityEngine.GraphicsBuffer;
 [System.Serializable]
 abstract public class UnitModule : ScriptableObject
 {
+    [Header("Global")]
     public int ID = -1;
     private Sprite icon;
+    
+    [Header("Triggers")]
+    [SerializeField] List<Trigger> triggers;
 
+    [Header("SVFX")]
     [SerializeField] TriggerSVFX onTargetVfx;
     [SerializeField] TriggerSVFX onSelfVfx;
-    public TriggerSVFX OnTargetVfx => onTargetVfx;
-    public TriggerSVFX OnSelfVfx => onSelfVfx;
+    
     abstract public float Radius { get; }
     abstract public float Cooldown { get; }
     abstract public float Delay { get; }
     abstract public string Description { get; }
-    public float NextUse { get; protected set; }
+    public TriggerSVFX OnTargetVfx => onTargetVfx;
+    public TriggerSVFX OnSelfVfx => onSelfVfx;
     public Sprite Icon => icon;
+    public float NextUse { get; protected set; }
 
     abstract public void Init(MinionCombat owner);
     /// <summary>
