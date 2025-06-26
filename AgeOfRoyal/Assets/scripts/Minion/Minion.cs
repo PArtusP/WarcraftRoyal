@@ -123,6 +123,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
         IsAsset = false;
         combat.Init(this);
         ApplyStatsAndStatus();
+        OnDieEvent.AddListener(delegate {unitTriggers.OnDieEvent.Invoke()});
 
         foreach (Trigger trigger in Enum.GetValues(typeof(Trigger)))
             triggerBuffs[trigger] = new List<UnitBuff>();
@@ -132,6 +133,12 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
             {
                 case Trigger.Heal:
                     unitTriggers.OnHealEvent.AddListener(delegate
+                    {
+                        triggerBuffs[key].ForEach(b => AddBuff(b));
+                    });
+                    break; 
+                case Trigger.Die:
+                    unitTriggers.OnDieEvent.AddListener(delegate
                     {
                         triggerBuffs[key].ForEach(b => AddBuff(b));
                     });
@@ -434,6 +441,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 internal class UnitTriggers
 {
     public UnityEvent OnHealEvent { get; internal set; } = new UnityEvent();
+    public UnityEvent OnDieEvent { get; internal set; } = new UnityEvent();
 }
 
 abstract public class UnitBase<T> : UnitWithoutState where T : Enum
