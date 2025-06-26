@@ -21,9 +21,9 @@ public class Player : NetworkBehaviour
 
     [SerializeField] Button xpPlusButton;
 
-    Dictionary<int, List<UnitBuff>> minionPowerUps = new Dictionary<int, List<UnitBuff>>();
-    Dictionary<int, List<UnitModule>> minionModules = new Dictionary<int, List<UnitModule>>();
-    Dictionary<int, List<UnitAction>> minionActions = new Dictionary<int, List<UnitAction>>(); 
+    // Dictionary<int, List<UnitBuff>> minionPowerUps = new Dictionary<int, List<UnitBuff>>();
+    // Dictionary<int, List<UnitModule>> minionModules = new Dictionary<int, List<UnitModule>>();
+    // Dictionary<int, List<UnitAction>> minionActions = new Dictionary<int, List<UnitAction>>(); 
 
     [SerializeField] PlayerExperience xp = new PlayerExperience();
     [SerializeField] PlayerStats stats = new PlayerStats();
@@ -47,8 +47,8 @@ public class Player : NetworkBehaviour
     public Base Home { get; set; }
     public UnityEvent OnReadyEvent { get; } = new UnityEvent();
     public UnityEvent OnDieEvent { get; } = new UnityEvent();
-    public Dictionary<int, List<UnitBuff>> MinionPowerUps => minionPowerUps;
-    public Dictionary<int, List<UnitModule>> MinionModules => minionModules;
+    // public Dictionary<int, List<UnitBuff>> MinionPowerUps => minionPowerUps;
+    // public Dictionary<int, List<UnitModule>> MinionModules => minionModules;
 
     public ShopUi ShopUi => shopUi;
 
@@ -139,12 +139,12 @@ public class Player : NetworkBehaviour
                 if (!unitUpgrade.IsOwned && wallet.Spend(unitUpgrade.Cost))
                 {
                     upgrades.Add(DbResolver.GetUpgradeById(unitUpgrade.ID));
-                    unitUpgrade.Target.ForEach(t =>
-                    {
-                        AddMinionActions(t.ID, unitUpgrade.Actions);// @TOOO : Better to do ask and approve
-                        AddMinionModules(t.ID, unitUpgrade.Modules);// @TOOO : Better to do ask and approve
-                        AddMinionPowerUp(t.ID, unitUpgrade.Buff);// @TOOO : Better to do ask and approve
-                    });
+                    // unitUpgrade.Target.ForEach(t =>
+                    // {
+                    //     AddMinionActions(t.ID, unitUpgrade.Actions);// @TOOO : Better to do ask and approve
+                    //     AddMinionModules(t.ID, unitUpgrade.Modules);// @TOOO : Better to do ask and approve
+                    //     AddMinionPowerUp(t.ID, unitUpgrade.Buff);// @TOOO : Better to do ask and approve
+                    // });
                     AddMinionUpgradeServerRpc(unitUpgrade.ID);
                     return true;
                 }
@@ -171,12 +171,12 @@ public class Player : NetworkBehaviour
                 {
                     wallet.Earn(unitUpgrade.Cost);
                     upgrades.Remove(DbResolver.GetUpgradeById(unitUpgrade.ID));
-                    unitUpgrade.Target.ForEach(t =>
-                    {
-                        RemoveMinionActions(t.ID, unitUpgrade.Actions);// @TOOO : Better to do ask and approve
-                        RemoveMinionModules(t.ID, unitUpgrade.Modules);// @TOOO : Better to do ask and approve
-                        RemoveMinionPowerUp(t.ID, unitUpgrade.Buff);// @TOOO : Better to do ask and approve
-                    });
+                    // unitUpgrade.Target.ForEach(t =>
+                    // {
+                    //     RemoveMinionActions(t.ID, unitUpgrade.Actions);// @TOOO : Better to do ask and approve
+                    //     RemoveMinionModules(t.ID, unitUpgrade.Modules);// @TOOO : Better to do ask and approve
+                    //     RemoveMinionPowerUp(t.ID, unitUpgrade.Buff);// @TOOO : Better to do ask and approve
+                    // });
                     RemoveMinionUpgradeServerRpc(unitUpgrade.ID);
                     return true;
                 }
@@ -186,60 +186,60 @@ public class Player : NetworkBehaviour
         }
     }
 
-    private void AddMinionPowerUp(int prefabID, UnitBuff powerUp)
-    {
-        if (minionPowerUps.TryGetValue(prefabID, out List<UnitBuff> existingPowerUp))
-            existingPowerUp.Add(powerUp);
-        else
-            minionPowerUps.Add(prefabID, new List<UnitBuff>() { powerUp });
-    }
-    private void RemoveMinionPowerUp(int prefabID, UnitBuff powerUp)
-    {
-        if (minionPowerUps.TryGetValue(prefabID, out List<UnitBuff> existingPowerUp))
-            existingPowerUp.Remove(powerUp);
-    }
-    private void AddMinionModules(int prefabID, List<UnitModule> modules)
-    {
-        if (minionModules.TryGetValue(prefabID, out List<UnitModule> existingModules))
-            existingModules.AddRange(modules);
-        else
-            minionModules.Add(prefabID, new List<UnitModule>(modules));
-    }
-    private void RemoveMinionModules(int prefabID, List<UnitModule> modules)
-    {
-        modules.ForEach(m =>
-        {
-            if (minionModules.TryGetValue(prefabID, out List<UnitModule> existingModules))
-                existingModules.Remove(m);
-        });
-    } 
-    private void AddMinionActions(int prefabID, List<UnitAction> actions)
-    {
-        if (minionActions.TryGetValue(prefabID, out List<UnitAction> existingModules))
-            existingModules.AddRange(actions);
-        else
-            minionActions.Add(prefabID, new List<UnitAction>(actions));
-    }
-    private void RemoveMinionActions(int prefabID, List<UnitAction> actions)
-    {
-        actions.ForEach(m =>
-        {
-            if (minionActions.TryGetValue(prefabID, out List<UnitAction> existingModules))
-                existingModules.Remove(m);
-        });
-    }
+    // private void AddMinionPowerUp(int prefabID, UnitBuff powerUp)
+    // {
+    //     if (minionPowerUps.TryGetValue(prefabID, out List<UnitBuff> existingPowerUp))
+    //         existingPowerUp.Add(powerUp);
+    //     else
+    //         minionPowerUps.Add(prefabID, new List<UnitBuff>() { powerUp });
+    // }
+    // private void RemoveMinionPowerUp(int prefabID, UnitBuff powerUp)
+    // {
+    //     if (minionPowerUps.TryGetValue(prefabID, out List<UnitBuff> existingPowerUp))
+    //         existingPowerUp.Remove(powerUp);
+    // }
+    // private void AddMinionModules(int prefabID, List<UnitModule> modules)
+    // {
+    //     if (minionModules.TryGetValue(prefabID, out List<UnitModule> existingModules))
+    //         existingModules.AddRange(modules);
+    //     else
+    //         minionModules.Add(prefabID, new List<UnitModule>(modules));
+    // }
+    // private void RemoveMinionModules(int prefabID, List<UnitModule> modules)
+    // {
+    //     modules.ForEach(m =>
+    //     {
+    //         if (minionModules.TryGetValue(prefabID, out List<UnitModule> existingModules))
+    //             existingModules.Remove(m);
+    //     });
+    // } 
+    // private void AddMinionActions(int prefabID, List<UnitAction> actions)
+    // {
+    //     if (minionActions.TryGetValue(prefabID, out List<UnitAction> existingModules))
+    //         existingModules.AddRange(actions);
+    //     else
+    //         minionActions.Add(prefabID, new List<UnitAction>(actions));
+    // }
+    // private void RemoveMinionActions(int prefabID, List<UnitAction> actions)
+    // {
+    //     actions.ForEach(m =>
+    //     {
+    //         if (minionActions.TryGetValue(prefabID, out List<UnitAction> existingModules))
+    //             existingModules.Remove(m);
+    //     });
+    // }
 
     [ServerRpc]
     private void AddMinionUpgradeServerRpc(int iD)
     {
         var upgrade = DbResolver.GetUpgradeById(iD);
         upgrades.Add(upgrade);
-        upgrade.Target.ForEach(t =>
-        {
-            AddMinionActions(t.ID, upgrade.Actions);
-            AddMinionModules(t.ID, upgrade.Modules);
-            AddMinionPowerUp(t.ID, upgrade.Buff);
-        });
+        // upgrade.Target.ForEach(t =>
+        // {
+        //     AddMinionActions(t.ID, upgrade.Actions);
+        //     AddMinionModules(t.ID, upgrade.Modules);
+        //     AddMinionPowerUp(t.ID, upgrade.Buff);
+        // });
     }
 
     [ServerRpc]
@@ -247,12 +247,12 @@ public class Player : NetworkBehaviour
     {
         var upgrade = DbResolver.GetUpgradeById(iD);
         upgrades.Remove(upgrade);
-        upgrade.Target.ForEach(t =>
-        {
-            RemoveMinionActions(t.ID, upgrade.Actions);
-            RemoveMinionModules(t.ID, upgrade.Modules);
-            RemoveMinionPowerUp(t.ID, upgrade.Buff);
-        });
+        // upgrade.Target.ForEach(t =>
+        // {
+        //     RemoveMinionActions(t.ID, upgrade.Actions);
+        //     RemoveMinionModules(t.ID, upgrade.Modules);
+        //     RemoveMinionPowerUp(t.ID, upgrade.Buff);
+        // });
     }
 
 
