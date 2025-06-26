@@ -193,14 +193,26 @@ public enum Trigger
     Die
 }
 [Serializable]
-public class BuffApplyTrigger
+public class ApplyTrigger<T>
 {
     [SerializeField] protected Trigger type;
-    [SerializeField] protected UnitBuff buff; 
+    [SerializeField] protected T item; 
 
     public Trigger Type { get => type; }
-    public UnitBuff ActionBuff { get => buff; }
+    public T Item { get => item; }
 
     public override string ToString() =>
-        $"On {type}: {buff?.ToString() ?? "<null>"}";
+        $"On {type}: {item?.ToString() ?? "<null>"}";
+} 
+[Serializable]
+public class BuffApplyTrigger : ApplyTrigger<UnitBuff>
+{ 
+} 
+[Serializable]
+public class ModuleApplyTrigger : ApplyTrigger<UnitModule>
+{ 
+} 
+[Serializable]
+public class ActionApplyTrigger : ApplyTrigger<UnitAction>
+{ 
 } 
