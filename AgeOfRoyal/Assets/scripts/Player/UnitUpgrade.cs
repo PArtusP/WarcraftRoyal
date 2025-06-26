@@ -19,6 +19,7 @@ public class UnitUpgrade : ScriptableObject
     [SerializeField] UnitBuff buff = new UnitBuff();  
     [SerializeField] List<UnitModule> modules;
     [SerializeField] List<UnitAction> actions;
+    [SerializeField] List<BuffApplyTrigger> triggers = null;
     [SerializeField] int cost;
     [SerializeField] List<UpgradeDescription> descriptions;
     [SerializeField] List<UnitWithoutState> target;
@@ -28,6 +29,7 @@ public class UnitUpgrade : ScriptableObject
     public UnitBuff Buff => buff;  
     public List<UnitModule> Modules => modules;
     public List<UnitAction> Actions => actions;
+    public List<BuffApplyTrigger> Triggers => triggers;
     public int Cost => cost;
     public List<UpgradeDescription> Descriptions => descriptions;
     public List<UnitWithoutState> Target => target; 
