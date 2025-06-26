@@ -11,15 +11,10 @@ public enum UnitBuffType
     Refreshable, // Like Temporary, but refreshes/extends on re-application
     Aura,       // Active as long as the source is nearby/active
     Stackable, // Like Temporary, but can be stacked from the same source hitable
-}
-
-public interface ITriggerable<T>
-{
-    public abstract List<ApplyTrigger<T>> Triggers { get; set; }
-}
+} 
 
 [Serializable]
-public class UnitBuff : INetworkSerializable, ITriggerable<UnitBuff>
+public class UnitBuff : INetworkSerializable 
 {
     [Header("Buff settings")]
     [SerializeField] private UnitBuffType buffType = UnitBuffType.Temporary;
@@ -54,7 +49,7 @@ public class UnitBuff : INetworkSerializable, ITriggerable<UnitBuff>
     public Hitable Source { get => source; set => source = value; }
     public bool Dispel { get => dispel; set => dispel = value; }
     public BuffApplyFilter Filters { get => filters; set => filters = value; }
-    public override List<ApplyTrigger<UnitBuff>> Triggers { get => triggers; set => triggers = value; }
+    public List<BuffApplyTrigger> Triggers { get => triggers; set => triggers = value; }
 
     public void Apply() => appliedTime = Time.time;
 
