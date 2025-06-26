@@ -77,6 +77,8 @@ public class Base : Hitable
                 basePos.z + zOffset - direction.z * row * rowSpacing
             );
 
+            SpawnUnit(units[i], spawnPos, Quaternion.LookRotation(direction, Vector3.up), transform);
+
             UnitWithoutState unit = null;
             if (!units[i].IsAsset)
             {
