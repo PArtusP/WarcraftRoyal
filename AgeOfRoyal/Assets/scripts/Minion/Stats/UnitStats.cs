@@ -13,18 +13,21 @@ public class UnitStats : INetworkSerializable
     [SerializeField] public float hitRadius = .4f;
     [SerializeField] public float armorRange = 0f;
     [SerializeField] public float armorMelee = 0f;
+    [SerializeField] public float healModifier = 1f;
+
     public override bool Equals(object obj)
     {
         if (obj is UnitStats s)
         {
             return health == s.health &&
-                damage == s.damage && 
-                speed == s.speed &&
-                cooldown == s.cooldown &&
-                sightRadius == s.sightRadius &&
-                hitRadius == s.hitRadius &&
-                armorRange == s.armorRange &&
-                armorMelee == s.armorMelee;
+                   damage == s.damage &&
+                   speed == s.speed &&
+                   cooldown == s.cooldown &&
+                   sightRadius == s.sightRadius &&
+                   hitRadius == s.hitRadius &&
+                   armorRange == s.armorRange &&
+                   armorMelee == s.armorMelee &&
+                   healModifier == s.healModifier;
         }
 
         return false;
@@ -40,7 +43,9 @@ public class UnitStats : INetworkSerializable
         hitRadius = 0f,
         armorRange = 0f,
         armorMelee = 0f,
+        healModifier = 0f,
     };
+
     public static UnitStats One => new UnitStats()
     {
         health = 1f,
@@ -51,7 +56,9 @@ public class UnitStats : INetworkSerializable
         hitRadius = 1f,
         armorRange = 1f,
         armorMelee = 1f,
-    };  
+        healModifier = 1f,
+    };
+
     public static UnitStats operator +(UnitStats a, UnitStats b) => new UnitStats()
     {
         health = a.health + b.health,
@@ -62,6 +69,7 @@ public class UnitStats : INetworkSerializable
         hitRadius = a.hitRadius + b.hitRadius,
         armorRange = a.armorRange + b.armorRange,
         armorMelee = a.armorMelee + b.armorMelee,
+        healModifier = a.healModifier + b.healModifier,
     };
 
     public static UnitStats operator -(UnitStats a) => new UnitStats()
@@ -74,8 +82,11 @@ public class UnitStats : INetworkSerializable
         hitRadius = -a.hitRadius,
         armorRange = -a.armorRange,
         armorMelee = -a.armorMelee,
+        healModifier = -a.healModifier,
     };
+
     public static UnitStats operator -(UnitStats a, UnitStats b) => a + (-b);
+
     public static UnitStats operator *(UnitStats a, UnitStats b) => new UnitStats()
     {
         health = a.health * b.health,
@@ -86,7 +97,9 @@ public class UnitStats : INetworkSerializable
         hitRadius = a.hitRadius * b.hitRadius,
         armorRange = a.armorRange * b.armorRange,
         armorMelee = a.armorMelee * b.armorMelee,
+        healModifier = a.healModifier * b.healModifier,
     };
+
     public static UnitStats operator /(UnitStats a, UnitStats b) => new UnitStats()
     {
         health = a.health / b.health,
@@ -97,14 +110,17 @@ public class UnitStats : INetworkSerializable
         hitRadius = a.hitRadius / b.hitRadius,
         armorRange = a.armorRange / b.armorRange,
         armorMelee = a.armorMelee / b.armorMelee,
+        healModifier = a.healModifier / b.healModifier,
     };
+
     public static UnitStats operator *(float a, UnitStats b) => One * b;
     public static UnitStats operator /(float a, UnitStats b) => a * (One / b);
 
     public override string ToString()
     {
-        return $"Health: {health}, Damage: {damage}, Speed: {speed}, Cooldown: {cooldown}, SightRadius: {sightRadius}, HitRadius: {hitRadius}, ArmorRange: {armorRange}, ArmorMelee: {armorMelee}";
+        return $"Health: {health}, Damage: {damage}, Speed: {speed}, Cooldown: {cooldown}, SightRadius: {sightRadius}, HitRadius: {hitRadius}, ArmorRange: {armorRange}, ArmorMelee: {armorMelee}, HealModifier: {healModifier}";
     }
+
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref health);
@@ -115,5 +131,6 @@ public class UnitStats : INetworkSerializable
         serializer.SerializeValue(ref hitRadius);
         serializer.SerializeValue(ref armorRange);
         serializer.SerializeValue(ref armorMelee);
-    } 
+        serializer.SerializeValue(ref healModifier);
+    }
 }

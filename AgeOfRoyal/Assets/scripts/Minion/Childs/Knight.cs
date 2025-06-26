@@ -65,5 +65,5 @@ public class Knight : UnitBase<KnightState>
             null,
             () => validContition.action.Use(this)
         ));
-    }
+    } 
 }

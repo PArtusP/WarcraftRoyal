@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8cedb2030692a4c4680aae9d83ff901c, type: 3}
-  m_Name: Inquisitor - base - Dispel
+  m_Name: Base - Dispel
   m_EditorClassIdentifier: 
   ID: 2
   onTargetVfx:
@@ -31,7 +31,8 @@ MonoBehaviour:
     renderers: []
     animations: []
     sounds: []
-  cooldown: 0.2
+  cooldown: 5
+  delay: 0
   radius: 8
   picking:
     maxTarget: 1
@@ -43,6 +44,10 @@ MonoBehaviour:
     - field: 8
   buff:
     buffType: 0
+    filters:
+      targetTeam: 2
+      filters: []
+    triggers: []
     duration: 0
     maxStack: 1
     canBeDispelled: 0
@@ -56,6 +61,7 @@ MonoBehaviour:
         hitRadius: 0
         armorRange: 0
         armorMelee: 0
+        healModifier: 0
       multStats:
         health: 1
         damage: 1
@@ -65,6 +71,6 @@ MonoBehaviour:
         hitRadius: 1
         armorRange: 1
         armorMelee: 1
+        healModifier: 1
     heal: 0
     dispel: 1
-  targets: []

@@ -14,6 +14,7 @@ public class UnitUpgradeButton : RightClickButton
     public List<UnitWithoutState> Target => upgrade.Target;
     public UnitBuff Buff => upgrade.Buff;
     public List<UnitModule> Modules => upgrade.Modules;
+    public List<UnitAction> Actions => upgrade.Actions;
     public List<UpgradeDescription> Descriptions => upgrade.Descriptions;
     public int Cost => upgrade.Cost; 
     public string Name => upgrade.Name; 

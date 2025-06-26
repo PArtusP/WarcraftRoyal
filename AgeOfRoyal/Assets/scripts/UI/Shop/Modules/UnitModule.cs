@@ -42,12 +42,6 @@ abstract public class UnitModule : ScriptableObject
 
 }
 
-public enum Target
-{
-    Friends,
-    Foes,
-    All
-}
 
 [System.Serializable]
 abstract public class AoeUnitModule : UnitModule

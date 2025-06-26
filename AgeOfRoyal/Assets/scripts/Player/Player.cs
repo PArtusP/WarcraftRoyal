@@ -23,6 +23,7 @@ public class Player : NetworkBehaviour
 
     Dictionary<int, List<UnitBuff>> minionPowerUps = new Dictionary<int, List<UnitBuff>>();
     Dictionary<int, List<UnitModule>> minionModules = new Dictionary<int, List<UnitModule>>();
+    Dictionary<int, List<UnitAction>> minionActions = new Dictionary<int, List<UnitAction>>(); 
 
     [SerializeField] PlayerExperience xp = new PlayerExperience();
     [SerializeField] PlayerStats stats = new PlayerStats();
@@ -35,7 +36,7 @@ public class Player : NetworkBehaviour
     [SerializeField] internal Sprite selectedSprite;
     [SerializeField] internal Sprite iconSprite;
     private List<UnitUpgrade> upgrades = new List<UnitUpgrade>();
-    private bool waitToSpendXp;
+   private bool waitToSpendXp;
 
     public NetworkVariable<bool> IsReadyForBattle { get; } = new NetworkVariable<bool>(false,
         NetworkVariableReadPermission.Everyone,
@@ -65,7 +66,7 @@ public class Player : NetworkBehaviour
         xpPlusButton.onClick.AddListener(TryAddXp);
         xpPlusButton.interactable = false;
         startButton.interactable = false;
-        shopUi.EnableButtons(false);
+        shopUi.EnableButtons(false); 
     }
 
     [ClientRpc]
@@ -110,7 +111,7 @@ public class Player : NetworkBehaviour
 
     internal void StartNewCombatRound()
     {
-        Home.SpawnMinion(minionPowerUps, minionModules);
+        Home.SpawnMinion(minionPowerUps, minionModules, minionActions);
         Home.CheckEndRound(null);
         StartNewCombatRoundClientRpc();
     }
@@ -140,6 +141,7 @@ public class Player : NetworkBehaviour
                     upgrades.Add(DbResolver.GetUpgradeById(unitUpgrade.ID));
                     unitUpgrade.Target.ForEach(t =>
                     {
+                        AddMinionActions(t.ID, unitUpgrade.Actions);// @TOOO : Better to do ask and approve
                         AddMinionModules(t.ID, unitUpgrade.Modules);// @TOOO : Better to do ask and approve
                         AddMinionPowerUp(t.ID, unitUpgrade.Buff);// @TOOO : Better to do ask and approve
                     });
@@ -171,6 +173,7 @@ public class Player : NetworkBehaviour
                     upgrades.Remove(DbResolver.GetUpgradeById(unitUpgrade.ID));
                     unitUpgrade.Target.ForEach(t =>
                     {
+                        RemoveMinionActions(t.ID, unitUpgrade.Actions);// @TOOO : Better to do ask and approve
                         RemoveMinionModules(t.ID, unitUpgrade.Modules);// @TOOO : Better to do ask and approve
                         RemoveMinionPowerUp(t.ID, unitUpgrade.Buff);// @TOOO : Better to do ask and approve
                     });
@@ -209,6 +212,21 @@ public class Player : NetworkBehaviour
             if (minionModules.TryGetValue(prefabID, out List<UnitModule> existingModules))
                 existingModules.Remove(m);
         });
+    } 
+    private void AddMinionActions(int prefabID, List<UnitAction> actions)
+    {
+        if (minionActions.TryGetValue(prefabID, out List<UnitAction> existingModules))
+            existingModules.AddRange(actions);
+        else
+            minionActions.Add(prefabID, new List<UnitAction>(actions));
+    }
+    private void RemoveMinionActions(int prefabID, List<UnitAction> actions)
+    {
+        actions.ForEach(m =>
+        {
+            if (minionActions.TryGetValue(prefabID, out List<UnitAction> existingModules))
+                existingModules.Remove(m);
+        });
     }
 
     [ServerRpc]
@@ -218,10 +236,12 @@ public class Player : NetworkBehaviour
         upgrades.Add(upgrade);
         upgrade.Target.ForEach(t =>
         {
+            AddMinionActions(t.ID, upgrade.Actions);
             AddMinionModules(t.ID, upgrade.Modules);
             AddMinionPowerUp(t.ID, upgrade.Buff);
         });
     }
+
     [ServerRpc]
     private void RemoveMinionUpgradeServerRpc(int iD)
     {
@@ -229,6 +249,7 @@ public class Player : NetworkBehaviour
         upgrades.Remove(upgrade);
         upgrade.Target.ForEach(t =>
         {
+            RemoveMinionActions(t.ID, upgrade.Actions);
             RemoveMinionModules(t.ID, upgrade.Modules);
             RemoveMinionPowerUp(t.ID, upgrade.Buff);
         });
@@ -305,7 +326,7 @@ public class Player : NetworkBehaviour
     {
         if (IsOwner) return;
         xp.SetLevel(level);
-    }
+    } 
     #endregion
 }
 

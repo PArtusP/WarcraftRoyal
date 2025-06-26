@@ -57,13 +57,14 @@ public class UnitUpgradeDetailUi : MonoBehaviour
         Name = button.Name;
         Image = button.Image;
         PowerUp = button.Buff.PowerUp;
+        Triggers = button.Buff.Triggers;
         Descriptions = button.Descriptions;
         Modules = button.Modules;
     }
     internal void Display(UnitWithoutState unit) => Display(unit, null);
-    internal void Display(UnitWithoutState unit, UnitPowerUp buffs)
+    internal void Display(UnitWithoutState unit, UnitPowerUp buffs, bool inGame = false)
     {
-        buffs = buffs != null ? buffs : unit.TotalBuffNoFilter;
+        buffs = buffs != null ? buffs : inGame ? unit.TotalBuff : unit.TotalBuffNoFilter;
         gameObject.SetActive(true);
         ClearChildren();
         Name = unit.Name;
@@ -87,13 +88,16 @@ public class UnitUpgradeDetailUi : MonoBehaviour
         AddDoubleStatLine("range", unit.Stats.hitRadius,
             buffs != null ? buffs.addStats.hitRadius : 0,
             buffs != null ? buffs.multStats.hitRadius : 1,
+            "heal MOD", unit.Stats.healModifier,
+            buffs != null ? buffs.addStats.healModifier : 0,
+            buffs != null ? buffs.multStats.healModifier : 1);
+
+        AddDoubleStatLine("melee DEF", unit.Stats.armorMelee,
+            buffs != null ? buffs.addStats.armorMelee : 0,
+            buffs != null ? buffs.multStats.armorMelee : 1,
             "range DEF", unit.Stats.armorRange,
             buffs != null ? buffs.addStats.armorRange : 0,
             buffs != null ? buffs.multStats.armorRange : 1);
-
-        AddStatLine("melee DEF", unit.Stats.armorMelee,
-            buffs != null ? buffs.addStats.armorMelee : 0,
-            buffs != null ? buffs.multStats.armorMelee : 1);
 
         Modules = unit.Modules;
     }
@@ -110,6 +114,7 @@ public class UnitUpgradeDetailUi : MonoBehaviour
             if (value.addStats.hitRadius != 0) AddStatLineAdd("range", value.addStats.hitRadius);
             if (value.addStats.armorRange != 0) AddStatLineAdd("range DEF", value.addStats.armorRange);
             if (value.addStats.armorMelee != 0) AddStatLineAdd("melee DEF", value.addStats.armorMelee);
+            if (value.addStats.armorMelee != 0) AddStatLineAdd("heal MOD", value.addStats.healModifier);
 
             if (value.multStats.health != 1) AddStatLineMult("HP", value.multStats.health);
             if (value.multStats.damage != 1) AddStatLineMult("damage", value.multStats.damage);
@@ -118,9 +123,36 @@ public class UnitUpgradeDetailUi : MonoBehaviour
             if (value.multStats.hitRadius != 1) AddStatLineMult("range", value.multStats.hitRadius);
             if (value.multStats.armorRange != 1) AddStatLineMult("range DEF", value.multStats.armorRange);
             if (value.multStats.armorMelee != 1) AddStatLineMult("melee DEF", value.multStats.armorMelee);
+            if (value.multStats.armorMelee != 1) AddStatLineMult("heal MOD", value.multStats.healModifier);
         }
     }
 
+    public List<BuffApplyTrigger> Triggers
+    {
+        set
+        {
+            value.ForEach(v =>
+            {
+                if (v.ActionBuff.PowerUp.addStats.health != 0) AddStatLineAdd($"On {v.Type}: HP", v.ActionBuff.PowerUp.addStats.health);
+                if (v.ActionBuff.PowerUp.addStats.damage != 0) AddStatLineAdd($"On {v.Type}: damage", v.ActionBuff.PowerUp.addStats.damage);
+                if (v.ActionBuff.PowerUp.addStats.speed != 0) AddStatLineAdd($"On {v.Type}: speed", v.ActionBuff.PowerUp.addStats.speed);
+                if (v.ActionBuff.PowerUp.addStats.cooldown != 0) AddStatLineAdd($"On {v.Type}: rate", 1f / v.ActionBuff.PowerUp.addStats.cooldown); // @TODO hmm
+                if (v.ActionBuff.PowerUp.addStats.hitRadius != 0) AddStatLineAdd($"On {v.Type}: range", v.ActionBuff.PowerUp.addStats.hitRadius);
+                if (v.ActionBuff.PowerUp.addStats.armorRange != 0) AddStatLineAdd($"On {v.Type}: range DEF", v.ActionBuff.PowerUp.addStats.armorRange);
+                if (v.ActionBuff.PowerUp.addStats.armorMelee != 0) AddStatLineAdd($"On {v.Type}: melee DEF", v.ActionBuff.PowerUp.addStats.armorMelee);
+                if (v.ActionBuff.PowerUp.addStats.armorMelee != 0) AddStatLineAdd($"On {v.Type}: heal MOD", v.ActionBuff.PowerUp.addStats.healModifier);
+
+                if (v.ActionBuff.PowerUp.multStats.health != 1) AddStatLineMult($"On {v.Type}: HP", v.ActionBuff.PowerUp.multStats.health);
+                if (v.ActionBuff.PowerUp.multStats.damage != 1) AddStatLineMult($"On {v.Type}: damage", v.ActionBuff.PowerUp.multStats.damage);
+                if (v.ActionBuff.PowerUp.multStats.speed != 1) AddStatLineMult($"On {v.Type}: speed", v.ActionBuff.PowerUp.multStats.speed);
+                if (v.ActionBuff.PowerUp.multStats.cooldown != 1) AddStatLineMult($"On {v.Type}: rate", 2f - v.ActionBuff.PowerUp.multStats.cooldown); // @TODO hmm
+                if (v.ActionBuff.PowerUp.multStats.hitRadius != 1) AddStatLineMult($"On {v.Type}: range", v.ActionBuff.PowerUp.multStats.hitRadius);
+                if (v.ActionBuff.PowerUp.multStats.armorRange != 1) AddStatLineMult($"On {v.Type}: range DEF", v.ActionBuff.PowerUp.multStats.armorRange);
+                if (v.ActionBuff.PowerUp.multStats.armorMelee != 1) AddStatLineMult($"On {v.Type}: melee DEF", v.ActionBuff.PowerUp.multStats.armorMelee);
+                if (v.ActionBuff.PowerUp.multStats.armorMelee != 1) AddStatLineMult($"On {v.Type}: heal MOD", v.ActionBuff.PowerUp.multStats.healModifier);
+            });
+        }
+    }
 
     private void AddStatLineAdd(string label, float value) => Instantiate(statelinePrefab, statsContainer).SetLineAdd(null, label, value);
     private void AddStatLineMult(string label, float value) => Instantiate(statelinePrefab, statsContainer).SetLineMult(null, label, value);

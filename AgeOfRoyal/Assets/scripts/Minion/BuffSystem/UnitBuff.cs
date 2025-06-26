@@ -19,6 +19,7 @@ public class UnitBuff : INetworkSerializable
     [Header("Buff settings")]
     [SerializeField] private UnitBuffType buffType = UnitBuffType.Temporary;
     [SerializeField] private BuffApplyFilter filters;
+    [SerializeField] private List<BuffApplyTrigger> triggers = null;
     [SerializeField] private float duration = 1f;
     [SerializeField] private int maxStack = 1;
     [SerializeField] private bool canBeDispelled = true;
@@ -48,6 +49,7 @@ public class UnitBuff : INetworkSerializable
     public Hitable Source { get => source; set => source = value; }
     public bool Dispel { get => dispel; set => dispel = value; }
     public BuffApplyFilter Filters { get => filters; set => filters = value; }
+    public List<BuffApplyTrigger> Triggers { get => triggers; set => triggers = value; }
 
     public void Apply() => appliedTime = Time.time;
 
@@ -74,19 +76,22 @@ public class UnitBuff : INetworkSerializable
             canBeDispelled = this.canBeDispelled,
             heal = this.heal,
             sourceId = this.sourceId,
-            dispel = this.dispel
+            dispel = this.dispel,
+            filters = this.filters
         };
     }
 
+    // not used anymore
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref buffType);
         serializer.SerializeValue(ref duration);
         serializer.SerializeValue(ref maxStack);
         serializer.SerializeValue(ref canBeDispelled);
-        serializer.SerializeValue(ref powerup); // assuming UnitPowerUp implements INetworkSerializable
+        serializer.SerializeValue(ref powerup);  
         serializer.SerializeValue(ref heal);
         serializer.SerializeValue(ref dispel);
+        // not used anymore
 
         // Serialize Guid manually as bytes
         if (serializer.IsWriter)
@@ -152,6 +157,12 @@ public class UnitBuff : INetworkSerializable
 
 }
 
+public enum Target
+{
+    Friends,
+    Foes,
+    All
+}
 [Serializable]
 public class BuffApplyFilter
 {
@@ -175,3 +186,20 @@ public class BuffApplyFilter
         return targets.Count > 0; // If we have any valid targets after all filters
     }
 }
+
+public enum Trigger
+{
+    Heal
+}
+[Serializable]
+public class BuffApplyTrigger
+{
+    [SerializeField] protected Trigger type;
+    [SerializeField] protected UnitBuff buff; 
+
+    public Trigger Type { get => type; }
+    public UnitBuff ActionBuff { get => buff; }
+
+    public override string ToString() =>
+        $"On {type}: {buff?.ToString() ?? "<null>"}";
+} 

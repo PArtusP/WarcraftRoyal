@@ -10,14 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9e55978e6f73aa044b3ecc27af034b96, type: 3}
-  m_Name: Ballista Crew - PERK...
+  m_Name: Ballista Crew - Well cut
   m_EditorClassIdentifier: 
   ID: 11
-  perkName: Manoeuvre
+  perkName: Well cut
   buff:
     buffType: 2
+    filters:
+      targetTeam: 2
+      filters: []
+    triggers: []
     duration: 0
-    maxStack: 1
+    maxStack: 0
     canBeDispelled: 0
     powerup:
       addStats:
@@ -29,20 +33,24 @@ MonoBehaviour:
         hitRadius: 0
         armorRange: 0
         armorMelee: 0
+        healModifier: 0
       multStats:
         health: 1
         damage: 1
         speed: 1
-        cooldown: 0.9
+        cooldown: 1
         sightRadius: 1
         hitRadius: 1
         armorRange: 1
         armorMelee: 1
+        healModifier: 1
     heal: 0
     dispel: 0
   modules: []
+  actions:
+  - {fileID: 11400000, guid: c46905b539ac9bf4fa70667f7ef99512, type: 2}
   cost: 5
-  description: Shoot faster
+  descriptions: []
   target:
   - {fileID: 1982330210055623403, guid: fb56c214a14d3a34c8e30e3dd8d455e5, type: 3}
   image: {fileID: -382705054, guid: 5b01f6ffc7d8783479c995daa9331b72, type: 3}

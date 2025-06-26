@@ -7,7 +7,9 @@ public class ModulesAction : UnitAction
 {
     [SerializeField] protected string animationTrigger = "Spell";
     [SerializeField] protected List<UnitModule> modules;
-    [SerializeField] protected int maxTargetTotal = 1; 
+    [SerializeField] protected int maxTargetTotal = 1;
+    [SerializeField] private int priority;
+
     override public string AnimationTrigger => animationTrigger;
 
     public List<UnitModule> Modules { get => modules; set => modules = value; }
@@ -15,6 +17,8 @@ public class ModulesAction : UnitAction
     public override float MaxRadius => modules.Max(m => m.Radius);
     public override float MinRadius => modules.Min(m => m.Radius);
     public override float Cooldown => modules.Min(m => m.Cooldown);
+
+    internal int Priority { get => priority; set => priority = value; }
 
     public override bool Use(UnitWithoutState owner)
     {

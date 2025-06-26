@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1a2b75ba7aeeba545955459bcf7ff2e1, type: 3}
-  m_Name: Inquisitor - base - ACTION Dispel or -rate
+  m_Name: Pope - base - ACTION Dispel or heal
   m_EditorClassIdentifier: 
-  ID: 5
+  ID: 11
   vfx:
     effects:
     - instanciate: 1
@@ -27,6 +27,6 @@ MonoBehaviour:
   animationTrigger: Spell
   modules:
   - {fileID: 11400000, guid: d82d2e455bbfd714da5309ed69a24df4, type: 2}
-  - {fileID: 11400000, guid: 46f4bf12294f9b245a13e1d405e099dd, type: 2}
-  maxTargetTotal: 1
+  - {fileID: 11400000, guid: 971047356bc1e0549b5266168188ad0c, type: 2}
+  maxTargetTotal: 2
   priority: 1

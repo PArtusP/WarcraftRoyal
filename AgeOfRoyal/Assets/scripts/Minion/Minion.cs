@@ -62,11 +62,16 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     public bool IsAsset { get; set; } = true;
     public UnitStats Stats => baseStats + TotalBuff;
     public List<UnitBuff> Buffs => buffs;
+    private Dictionary<Trigger, List<UnitBuff>> triggerBuffs = new Dictionary<Trigger, List<UnitBuff>>();
+    private UnitTriggers unitTriggers = new UnitTriggers();
+    protected Dictionary<UnitAction, float> nextAttackDict = new Dictionary<UnitAction, float>();
+
     List<UnitBuff> StatBuffs => buffs.Where(b => !UnitPowerUp.Identity.Equals(b.PowerUp) && b.PowerUp.IsBuff).ToList();
     List<UnitBuff> StatDebuffs => buffs.Where(b => !UnitPowerUp.Identity.Equals(b.PowerUp) && !b.PowerUp.IsBuff).ToList();
     public UnitPowerUp TotalBuffNoFilter => buffs.Select(b => b.PowerUp).SumPowerUps();
-    public UnitPowerUp TotalBuff => 
-        buffs.Where(b => b.Filters.ApplyFilter(unitManager, this) && !b.PowerUp.Equals(UnitPowerUp.Identity))
+    public UnitPowerUp TotalBuff =>
+        buffs.Where(b => (b.Filters == null || (unitManager && b.Filters.ApplyFilter(unitManager, this)))
+        && !b.PowerUp.Equals(UnitPowerUp.Identity))
         .Select(b => b.PowerUp).SumPowerUps();
     public List<UnitModule> Modules => combat.Modules;
     public List<UnitModule> AllModules
@@ -107,7 +112,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 
     override protected void AwakeInternal()
     {
-        unitManager = GetComponent<UnitsManager>();
+        unitManager = FindFirstObjectByType<UnitsManager>();
         controller = GetComponent<MinionController>();
         combat = GetComponent<MinionCombat>();
         animator = GetComponent<MinionAnimator>();
@@ -118,6 +123,22 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
         IsAsset = false;
         combat.Init(this);
         ApplyStatsAndStatus();
+
+        foreach (Trigger trigger in Enum.GetValues(typeof(Trigger)))
+            triggerBuffs[trigger] = new List<UnitBuff>();
+        foreach (var key in triggerBuffs.Keys)
+        {
+            switch (key)
+            {
+                case Trigger.Heal:
+                    unitTriggers.OnHealEvent.AddListener(delegate
+                    {
+                        triggerBuffs[key].ForEach(b => AddBuff(b));
+                    });
+                    break;
+            }
+        }
+
     }
     private void Update()
     {
@@ -153,7 +174,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (IsServer) return;
-        UnitUpgradeDetailUi.Instance.Display(this);
+        UnitUpgradeDetailUi.Instance.Display(this, null, true);
         UnitUpgradeDetailUi.Instance.OnUpdateEvent = OnDisplayToUpdate;
     }
     internal void ApplyStatsAndStatus()
@@ -162,7 +183,11 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
         healthbar.SetMaxHealth(Stats.health);
         Health = Stats.health;
     }
-
+    internal override void Heal(float v)
+    {
+        unitTriggers.OnHealEvent.Invoke();
+        base.Heal(v * Stats.healModifier);
+    }
     public override bool GetHit(float damage, Hitable opponent)
     {
         if (opponent is UnitWithoutState m)
@@ -191,6 +216,14 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
         if ((unitBuff.BuffType == UnitBuffType.Stackable && buffs.Count(b => b.SourceId == unitBuff.SourceId && b.Source == unitBuff.Source) >= unitBuff.MaxStack)
             || (unitBuff.BuffType != UnitBuffType.Stackable && buffs.Count(b => b.SourceId == unitBuff.SourceId) >= unitBuff.MaxStack))
             return;
+
+        if (unitBuff.Triggers != null && unitBuff.Triggers.Any())
+        {
+            unitBuff.Triggers.ForEach(t =>
+            {
+                triggerBuffs[t.Type].Add(t.ActionBuff);
+            });
+        }
 
         if (unitBuff.BuffType == UnitBuffType.OneShot)
         { // Add other OneShot effect here, like dispel, heal, etc.
@@ -282,7 +315,36 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
         Debug.Log("Adding module with ID: " + moduleID + " to " + name + " from client.");
         combat.Modules.Add(DbResolver.GetModuleById(moduleID).Clone());
     }
+    internal void AddActions(List<UnitAction> actions)
+    {
+        // @TODO check if exiting same action, compare, take best stats  
+        AddActionsInternal(actions);
+        actions.ForEach(m => AddActionClientRpc(m.ID)); // @TODO pas optic
+    }
 
+    [ClientRpc]
+    private void AddActionClientRpc(int actionId)
+    {
+        if (IsHost) return;
+        Debug.Log("Adding action with ID: " + actionId + " to " + name + " from client.");
+        AddActionsInternal(actions);
+        var action = DbResolver.GetActionById(actionId).Clone();
+    }
+
+    protected virtual void AddActionsInternal(List<UnitAction> actions)
+    {
+        if(actions.Any(a => a is UnitAttack))
+        {
+            nextAttackDict.Remove(Actions[0]);
+            Actions[0] = actions.First(a => a is UnitAttack);
+            ResetAttackCondition();
+            nextAttackDict.Add(Actions[0], 0f);
+            return;
+        }
+        actions.ForEach(a => nextAttackDict.Add(a, 0f));
+    }
+
+    protected abstract void ResetAttackCondition();
 
     #endregion
 
@@ -366,14 +428,19 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     }
 
     internal abstract void StartFSM();
+
+}
+
+internal class UnitTriggers
+{
+    public UnityEvent OnHealEvent { get; internal set; } = new UnityEvent();
 }
 
 abstract public class UnitBase<T> : UnitWithoutState where T : Enum
 {
-    protected Dictionary<UnitAction, float> nextAttackDict = new Dictionary<UnitAction, float>();
     [SerializeField] protected FSM<T> fsm = new FSM<T>();
     protected AttackConditions<T> validContition;
-    private List<AttackConditions<T>> conditons = new List<AttackConditions<T>>();
+    protected List<AttackConditions<T>> conditons = new List<AttackConditions<T>>();
 
     abstract public T Stop { get; }
     abstract public T Walk { get; }
@@ -430,6 +497,7 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
         conditons.Add(new AttackConditions<T>
         {
             action = Actions[0],
+            priority = 99,
             NextStage = InCombat,
             Condition = new AttackCondition<T>
             {
@@ -438,6 +506,10 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
             }
         });
         SetUpConditionInternal(conditons);
+    }
+    protected override void ResetAttackCondition()
+    {
+        conditons[0].action = Actions[0]; 
     }
 
     protected abstract void SetUpConditionInternal(List<AttackConditions<T>> conditons);
@@ -463,9 +535,9 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
             new State<T>(Follow,
             () => {
                 if (target == null)
-                    return Walk;
+                    return Walk; 
 
-                AttackConditions<T> success = conditons.Where(c => TryCondition(c)).FirstOrDefault();
+                AttackConditions<T> success = conditons.OrderBy(c => c.priority).Where(c => TryCondition(c)).FirstOrDefault();
                 if (success != null)
                 {
                     validContition = success;
@@ -500,12 +572,50 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
                 ),
         };
     }
+    protected override void AddActionsInternal(List<UnitAction> actions)
+    {
+        base.AddActionsInternal(actions);
+        if (actions.Any(a => a is UnitAttack)) 
+            return; 
+
+        var startTime = Time.time;
+        var moduleActions = actions.Select(m => m as ModulesAction).ToList();
+        moduleActions.ForEach(m =>
+        {
+            var modules = m.Modules.Select(m => m as UnitModule);
+            conditons.Add(new AttackConditions<T>
+            {
+                action = m,
+                priority = m.Priority,
+                NextStage = InCombat,
+                Condition = new AttackCondition<T>
+                {
+                    Check = (owner, target) =>
+                    {
+                        List<UnitWithoutState> minions = new List<UnitWithoutState>();
+                        foreach (var item in modules)
+                        {
+                            if (startTime + item.Delay < Time.time)
+                                minions.AddRange(item.FindTargets(Combat));
+                        }
+                        Debug.Log("Check: " + (minions.Count > 0));
+                        var res = minions.Count > 0; // Check if there are any targets in range 
+
+                        return res;
+                    },
+                    outRadius = m.MinRadius,
+                    inRadius = 0f,
+                    cooldown = modules.Min(m => m.Cooldown),
+                }
+            });
+        });
+    }
 
     protected bool TryCondition(AttackConditions<T> c)
     {
         try
-        {
-            Debug.Log("Try valid condition: " + c.action.name);
+        { 
+
             return (transform.position - Target.transform.position).magnitude <= c.Condition.outRadius
                     && (transform.position - Target.transform.position).magnitude >= c.Condition.inRadius
                     && (c.Condition.Check == null || c.Condition.Check(this, Target))
@@ -598,6 +708,7 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
         else fsm.SwitchState(Stop);
     }
 
+
 }
 
 public class Minion : UnitBase<MinionState>
@@ -614,7 +725,7 @@ public class Minion : UnitBase<MinionState>
 
     protected override void SetUpConditionInternal(List<AttackConditions<MinionState>> conditons)
     {
-    }
+    } 
 }
 [Serializable]
 public class RendererToColor
@@ -683,6 +794,8 @@ public class AttackConditions<T> where T : Enum
 {
     internal UnitAction action = null;
     internal T NextStage = default;
+    internal int priority;
+
     internal AttackCondition<T> Condition { get; set; }
 }
 public class AttackCondition<T> where T : Enum

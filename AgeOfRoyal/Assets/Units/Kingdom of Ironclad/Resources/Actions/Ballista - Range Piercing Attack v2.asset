@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a2b75ba7aeeba545955459bcf7ff2e1, type: 3}
-  m_Name: Pope - Resurect Action
+  m_Script: {fileID: 11500000, guid: 3a1989a7ef18c0344827203cf2d10200, type: 3}
+  m_Name: Ballista - Range Piercing Attack v2
   m_EditorClassIdentifier: 
-  ID: 8
+  ID: 2
   vfx:
     effects: []
     gameObjects: []
@@ -20,8 +20,9 @@ MonoBehaviour:
     renderers: []
     animations: []
     sounds: []
-  animationTrigger: Spell
-  modules:
-  - {fileID: 11400000, guid: 30706d3eeb793f640a06010b980f8a44, type: 2}
-  maxTargetTotal: 1
-  priority: 1
+  radius: 10
+  cooldown: 0
+  bonusMultiplier: 1.5
+  bonusAgainst: 2
+  touchUnitMultiplier: 0.9
+  detectionRadius: 0.5

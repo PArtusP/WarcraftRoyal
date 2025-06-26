@@ -31,7 +31,9 @@ public class UnitPowerUp : INetworkSerializable
                    addStats.armorRange >= 0 && addStats.armorMelee >= 0 &&
                    multStats.health >= 1 && multStats.damage >= 1 && multStats.speed >= 1 &&
                    multStats.cooldown <= 1 && multStats.sightRadius >= 1 && multStats.hitRadius >= 1 &&
-                   multStats.armorRange >= 1 && multStats.armorMelee >= 1;
+                   multStats.armorRange >= 1 && multStats.armorMelee >= 1 &&
+                   addStats.healModifier >= 0 || multStats.healModifier >= 1;
+;
         }
     }
     public string Short
@@ -57,6 +59,9 @@ public class UnitPowerUp : INetworkSerializable
             if (multStats.hitRadius != 1) parts.Add($"{StatLine.FormatPercent(multStats.hitRadius)} range");
             if (multStats.armorRange != 1) parts.Add($"{StatLine.FormatPercent(multStats.armorRange)} range DEF");
             if (multStats.armorMelee != 1) parts.Add($"{StatLine.FormatPercent(multStats.armorMelee)} melee DEF");
+            if (addStats.healModifier != 0) parts.Add($"{StatLine.FormatSigned(addStats.healModifier)} heal mod");
+            if (multStats.healModifier != 1) parts.Add($"{StatLine.FormatPercent(multStats.healModifier)} heal mod");
+
 
             string result = string.Join(", ", parts);
             int lastComma = result.LastIndexOf(", ");
@@ -107,6 +112,7 @@ public class UnitPowerUp : INetworkSerializable
             hitRadius = a.multStats.hitRadius * b.multStats.hitRadius,
             armorRange = a.multStats.armorRange * b.multStats.armorRange,
             armorMelee = a.multStats.armorMelee * b.multStats.armorMelee,
+            healModifier = a.multStats.healModifier * b.multStats.healModifier, 
         };
 
         // Calculate difference from `a`

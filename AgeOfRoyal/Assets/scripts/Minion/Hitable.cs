@@ -51,7 +51,7 @@ abstract public class Hitable : NetworkBehaviour
         }
         return false;
     }
-    internal void Heal(float v)
+    internal virtual void Heal(float v)
     {
         Health = Mathf.Min(Health + v, MaxHealth);
         if (healVfxEnd > Time.time)

@@ -6,46 +6,11 @@ using UnityEngine;
 public class SpellMage : Minion
 {
     protected override void SetUpConditionInternal(List<AttackConditions<MinionState>> conditons)
-    {
-        conditons.Clear();
-        var startTime = Time.time;
-
+    { 
+        var startTime = Time.time; 
         var modAction = (Actions[1] as ModulesAction);
         var modules = modAction.Modules.Select(m => m as UnitModule);
-        conditons.Add(new AttackConditions<MinionState>
-        {
-            action = Actions[1],
-            NextStage = InCombat,
-            Condition = new AttackCondition<MinionState>
-            {
-                Check = (owner, target) =>
-                {
-                    List<UnitWithoutState> minions = new List<UnitWithoutState>();
-                    foreach (var item in modules)
-                    {
-                        if (startTime + item.Delay < Time.time)
-                            minions.AddRange(item.FindTargets(Combat));
-                    }
-                    Debug.Log("Check: " + (minions.Count > 0));
-                    var res = minions.Count > 0; // Check if there are any targets in range 
-
-                    return res;
-                },
-                outRadius = modAction.MinRadius,
-                inRadius = 0f,
-                cooldown = modules.Min(m => m.Cooldown),
-            }
-        });
-        conditons.Add(new AttackConditions<MinionState>
-        {
-            action = Actions[0],
-            NextStage = InCombat,
-            Condition = new AttackCondition<MinionState>
-            {
-                outRadius = Stats.hitRadius,
-                cooldown = Stats.cooldown,
-            }
-        });
+        AddActionsInternal(new List<UnitAction>() { modAction }); 
         base.SetUpConditionInternal(conditons);
-    }
+    } 
 }

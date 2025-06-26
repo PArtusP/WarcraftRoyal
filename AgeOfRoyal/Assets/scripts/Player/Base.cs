@@ -29,7 +29,7 @@ public class Base : Hitable
         Health = MaxHealth;
     }
     #region Spawn minions
-    public void SpawnMinion(Dictionary<int, List<UnitBuff>> minionPowerUps, Dictionary<int, List<UnitModule>> minionModules)
+    public void SpawnMinion(Dictionary<int, List<UnitBuff>> minionPowerUps, Dictionary<int, List<UnitModule>> minionModules, Dictionary<int, List<UnitAction>> minionActions)
     {
         float laneSpacing = 1.5f;
         float rowSpacing = 1.5f;
@@ -48,14 +48,14 @@ public class Base : Hitable
         Vector3 basePos = transform.position;
 
         float zOffset = Mathf.Sign(direction.z) * 3f;
-        zOffset += SpawnLine(melees, basePos, zOffset, laneSpacing, minionPowerUps, minionModules) * -direction.z * rowSpacing;
-        zOffset += SpawnLine(mages, basePos, zOffset, laneSpacing, minionPowerUps, minionModules) * -direction.z * rowSpacing;
-        zOffset += SpawnLine(archers, basePos, zOffset, laneSpacing, minionPowerUps, minionModules) * -direction.z * rowSpacing;
+        zOffset += SpawnLine(melees, basePos, zOffset, laneSpacing, minionPowerUps, minionModules, minionActions) * -direction.z * rowSpacing;
+        zOffset += SpawnLine(mages, basePos, zOffset, laneSpacing, minionPowerUps, minionModules, minionActions) * -direction.z * rowSpacing;
+        zOffset += SpawnLine(archers, basePos, zOffset, laneSpacing, minionPowerUps, minionModules, minionActions) * -direction.z * rowSpacing;
 
         spawnList.Clear();
     }
 
-    int SpawnLine(List<UnitWithoutState> units, Vector3 basePos, float zOffset, float laneSpacing, Dictionary<int, List<UnitBuff>> minionPowerUps, Dictionary<int, List<UnitModule>> minionModules)
+    int SpawnLine(List<UnitWithoutState> units, Vector3 basePos, float zOffset, float laneSpacing, Dictionary<int, List<UnitBuff>> minionPowerUps, Dictionary<int, List<UnitModule>> minionModules, Dictionary<int, List<UnitAction>> minionActions)
     {
         const int maxPerRow = 10;
         float rowSpacing = 1.5f;
@@ -108,6 +108,12 @@ public class Base : Hitable
             {
                 unit.AddModules(modules);
                 Debug.Log($"Adding modules to {unit.name}:  Total: {modules.Count})");
+            } 
+
+            if (minionActions.TryGetValue(unit.ID, out List<UnitAction> actions))
+            {
+                unit.AddActions(actions);
+                Debug.Log($"Adding actions to {unit.name}:  Total: {actions.Count})");
             } 
             unit.StartFSM();
             unit.name = unit.name + " " + Guid.NewGuid().ToString();

@@ -421,9 +421,7 @@ MonoBehaviour:
     hitRadius: 2
     armorRange: 0
     armorMelee: 0
-  hitableLayer:
-    serializedVersion: 2
-    m_Bits: 8
+    healModifier: 1
   buffs: []
   actions:
   - {fileID: 11400000, guid: 01959bffcfcac184ab0458bf716e2990, type: 2}
@@ -873,7 +871,7 @@ Animator:
   m_GameObject: {fileID: 3928599794180866547}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: c670a529f5fde9c419703c75cf262704, type: 3}
-  m_Controller: {fileID: 9100000, guid: 60d1588d547988949a96ad1ec385bbe6, type: 2}
+  m_Controller: {fileID: 9100000, guid: 0e98b091cc85c41468969103376d9476, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
