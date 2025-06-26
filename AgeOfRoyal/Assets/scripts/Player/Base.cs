@@ -29,7 +29,7 @@ public class Base : Hitable
         Health = MaxHealth;
     }
     #region Spawn minions
-    public void SpawnMinion(Dictionary<int, List<UnitBuff>> minionPowerUps, Dictionary<int, List<UnitModule>> minionModules, Dictionary<int, List<UnitAction>> minionActions)
+    public void SpawnMinion(List<UnitUpgrade> unitUpgrades)
     {
         float laneSpacing = 1.5f;
         float rowSpacing = 1.5f;
@@ -48,14 +48,14 @@ public class Base : Hitable
         Vector3 basePos = transform.position;
 
         float zOffset = Mathf.Sign(direction.z) * 3f;
-        zOffset += SpawnLine(melees, basePos, zOffset, laneSpacing, minionPowerUps, minionModules, minionActions) * -direction.z * rowSpacing;
-        zOffset += SpawnLine(mages, basePos, zOffset, laneSpacing, minionPowerUps, minionModules, minionActions) * -direction.z * rowSpacing;
-        zOffset += SpawnLine(archers, basePos, zOffset, laneSpacing, minionPowerUps, minionModules, minionActions) * -direction.z * rowSpacing;
+        zOffset += SpawnLine(melees, basePos, zOffset, laneSpacing, unitUpgrades) * -direction.z * rowSpacing;
+        zOffset += SpawnLine(mages, basePos, zOffset, laneSpacing, unitUpgrades) * -direction.z * rowSpacing;
+        zOffset += SpawnLine(archers, basePos, zOffset, laneSpacing, unitUpgrades) * -direction.z * rowSpacing;
 
         spawnList.Clear();
     }
 
-    int SpawnLine(List<UnitWithoutState> units, Vector3 basePos, float zOffset, float laneSpacing, Dictionary<int, List<UnitBuff>> minionPowerUps, Dictionary<int, List<UnitModule>> minionModules, Dictionary<int, List<UnitAction>> minionActions)
+    int SpawnLine(List<UnitWithoutState> units, Vector3 basePos, float zOffset, float laneSpacing, List<UnitUpgrade> unitUpgrades)
     {
         const int maxPerRow = 10;
         float rowSpacing = 1.5f;
@@ -98,19 +98,23 @@ public class Base : Hitable
                 unit.Home = this;
                 unit.OnDieEvent.AddListener(delegate { CheckEndRound(unit); });
             }
-            if (minionPowerUps.TryGetValue(unit.ID, out List<UnitBuff> powerUp))
+            var upgrades = unitUpgrades.Where(u => u.Target.Contains(t => t.ID == unit.ID)).ToList();
+            var buffs = upgrades.Where(u => !u.Buff.PowerUp.Equals(UnitPowerUp.Identity && u.Buff.Heal != 0 && u.Buff.Dispel != false)).Select(u => u.Buff).ToList();
+            if (buffs.Any())
             {
-                powerUp.ForEach(p => unit.AddBuff(p)); 
-                Debug.Log($"Applying power-up to {unit.name}: {powerUp} (Total: {unit.Stats})");
+                buffs.ForEach(p => unit.AddBuff(p)); 
+                Debug.Log($"Applying power-up to {unit.name}: (Total: {unit.Stats})");
             }
 
-            if (minionModules.TryGetValue(unit.ID, out List<UnitModule> modules))
+            var modules = upgrades.SelectMany(u => u.Modules).ToList();
+            if (modules.Any())
             {
                 unit.AddModules(modules);
                 Debug.Log($"Adding modules to {unit.name}:  Total: {modules.Count})");
             } 
 
-            if (minionActions.TryGetValue(unit.ID, out List<UnitAction> actions))
+            var actions = upgrades.SelectMany(u => u.Actions).ToList();
+            if (actions.Any())
             {
                 unit.AddActions(actions);
                 Debug.Log($"Adding actions to {unit.name}:  Total: {actions.Count})");
