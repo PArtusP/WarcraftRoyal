@@ -5,28 +5,26 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class Base : Hitable
+public class Base : NetworkBehaviour
 {
     [SerializeField] List<UnitWithoutState> spawnList;
     [SerializeField] Material material;
     private List<UnitWithoutState> spawnedUnits = new List<UnitWithoutState>();
+    private UnitsManager unitsManager;
 
     public Vector3 direction { get; private set; }
     public UnityEvent EndOfRoundEvent { get; private set; } = new UnityEvent();
-    public List<UnitWithoutState> SpawnList { get => spawnList; set => spawnList = value; }
-    public override float MaxHealth { get; set; } = 1000;
+    public List<UnitWithoutState> SpawnList { get => spawnList; set => spawnList = value; } 
     public List<UnitWithoutState> SpawnedUnits  => spawnedUnits; 
 
     // Start is called before the first frame update
-    override protected void AwakeInternal()
-    {
-        home = this;
+       protected void Awake()
+    { 
         var bases = FindObjectsByType<Base>(FindObjectsSortMode.None).ToList();
         bases.Remove(this);
 
-        direction = (bases[0].transform.position - this.transform.position).normalized;
-        healthbar.SetMaxHealth(MaxHealth);
-        Health = MaxHealth;
+        direction = (bases[0].transform.position - this.transform.position).normalized; 
+        unitsManager = FindAnyObjectByType<UnitsManager>();
     }
     #region Spawn minions
     public void SpawnMinion(List<UnitUpgrade> unitUpgrades)
@@ -77,56 +75,65 @@ public class Base : Hitable
                 basePos.z + zOffset - direction.z * row * rowSpacing
             );
 
-            SpawnUnit(units[i], spawnPos, Quaternion.LookRotation(direction, Vector3.up), transform);
+            
 
-            UnitWithoutState unit = null;
-            if (!units[i].IsAsset)
-            {
-                unit = units[i];
-
-                unit.transform.position = spawnPos;
-                unit.transform.rotation = Quaternion.LookRotation(direction, Vector3.up);
-
-            }
-            else
-            {
-                unit = Instantiate(units[i], spawnPos, Quaternion.LookRotation(direction, Vector3.up), transform);
-                unit.NetworkObject.Spawn();
-                Debug.Log($"{unit} is spwaned ? {unit.NetworkObject.IsSpawned}");
-                unit.ApplyStatsAndStatus();
-                unit.SourcePrefab = units[i];
-                ColoredUnit(unit);
-                ColoredUnitClientRpc(unit.NetworkObjectId);
-                unit.Home = this;
-                unit.OnDieEvent.AddListener(delegate { CheckEndRound(unit); });
-            }
-            var upgrades = unitUpgrades.Where(u => u.Target.Contains(t => t.ID == unit.ID)).ToList();
-            var buffs = upgrades.Where(u => !u.Buff.PowerUp.Equals(UnitPowerUp.Identity && u.Buff.Heal != 0 && u.Buff.Dispel != false)).Select(u => u.Buff).ToList();
-            if (buffs.Any())
-            {
-                buffs.ForEach(p => unit.AddBuff(p)); 
-                Debug.Log($"Applying power-up to {unit.name}: (Total: {unit.Stats})");
-            }
-
-            var modules = upgrades.SelectMany(u => u.Modules).ToList();
-            if (modules.Any())
-            {
-                unit.AddModules(modules);
-                Debug.Log($"Adding modules to {unit.name}:  Total: {modules.Count})");
-            } 
-
-            var actions = upgrades.SelectMany(u => u.Actions).ToList();
-            if (actions.Any())
-            {
-                unit.AddActions(actions);
-                Debug.Log($"Adding actions to {unit.name}:  Total: {actions.Count})");
-            } 
-            unit.StartFSM();
-            unit.name = unit.name + " " + Guid.NewGuid().ToString();
-            spawnedUnits.Add(unit);
+            UnitWithoutState unit = SpawnUnit(units[i], 
+                spawnPos, 
+                Quaternion.LookRotation(direction, Vector3.up), 
+                transform, 
+                unitUpgrades.Where(u => u.Targets.Any(t => t.ID == units[i].ID)).ToList());
+            
         }
 
         return totalRows;
+    }
+
+    internal UnitWithoutState SpawnUnit(UnitWithoutState unit, Vector3 spawnPos, Quaternion quaternion, Transform transform, List<UnitUpgrade> upgrades)
+    {
+        if (!unit.IsAsset)
+        { 
+
+            unit.transform.position = spawnPos;
+            unit.transform.rotation = Quaternion.LookRotation(direction, Vector3.up);
+
+        }
+        else
+        {
+            unit = Instantiate(unit, spawnPos, Quaternion.LookRotation(direction, Vector3.up), transform);
+            unit.NetworkObject.Spawn();
+            Debug.Log($"{unit} is spwaned ? {unit.NetworkObject.IsSpawned}");
+            unit.ApplyStatsAndStatus();
+            unit.SourcePrefab = unit;
+            ColoredUnit(unit);
+            ColoredUnitClientRpc(unit.NetworkObjectId);
+            unit.Home = this;
+            unit.OnDieEvent.AddListener(delegate { CheckEndRound(unit); });
+        } 
+        var buffs = upgrades.Where(u => !u.Buff.PowerUp.Equals(UnitPowerUp.Identity) && u.Buff.Heal != 0 && u.Buff.Dispel != false).Select(u => u.Buff).ToList();
+        if (buffs.Any())
+        {
+            buffs.ForEach(p => unit.AddBuff(p));
+            Debug.Log($"Applying power-up to {unit.name}: (Total: {unit.Stats})");
+        }
+
+        var modules = upgrades.SelectMany(u => u.Modules).ToList();
+        if (modules.Any())
+        {
+            unit.AddModules(modules);
+            Debug.Log($"Adding modules to {unit.name}:  Total: {modules.Count})");
+        }
+
+        var actions = upgrades.SelectMany(u => u.Actions).ToList();
+        if (actions.Any())
+        {
+            unit.AddActions(actions);
+            Debug.Log($"Adding actions to {unit.name}:  Total: {actions.Count})");
+        }
+        unit.StartFSM();
+        unit.name = unit.name + " " + Guid.NewGuid().ToString();
+        spawnedUnits.Add(unit);
+        unitsManager.Add(unit);
+        return unit;
     }
     #endregion
 
@@ -152,21 +159,7 @@ public class Base : Hitable
             return true;
         }
         return false;
-    }
-
-/*    internal void ResetForNextRound()
-    {
-        if (spawnedUnits.Any())
-        {
-            if (IsServer)
-            {
-                Debug.Log($"ResetForNextRound: Stopping {spawnedUnits.Count} mobs");
-                spawnedUnits.ForEach(u => u.SetState(MinionState.Stop));
-            }
-            spawnList.AddRange(spawnedUnits);
-        }
-        spawnedUnits.Clear();
-    }*/
+    } 
     public void CheckEndRound(UnitWithoutState unit)
     {
         if (unit) spawnedUnits.Remove(unit);
