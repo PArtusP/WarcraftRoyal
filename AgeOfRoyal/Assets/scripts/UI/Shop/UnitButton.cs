@@ -60,4 +60,12 @@ public class UnitButton : RightClickButton
     protected override void SetSprite() => Image = prefab.icon;
 
     internal void Reset() => buyCounter.text = string.Empty;
+
+
+    private void OnValidate()
+    {
+        if (!prefab) return;
+        SetSprite();
+        SetCost();
+    }
 }

@@ -9,16 +9,10 @@ public class UnitUpgradeButton : RightClickButton
 { 
     [SerializeField] TMPro.TextMeshProUGUI status;  
     [SerializeField] UnitUpgrade upgrade;
-
-    public int ID => upgrade.ID;
-    public List<UnitWithoutState> Target => upgrade.Target;
-    public UnitBuff Buff => upgrade.Buff;
-    public List<UnitModule> Modules => upgrade.Modules;
-    public List<UnitAction> Actions => upgrade.Actions;
-    public List<UpgradeDescription> Descriptions => upgrade.Descriptions;
-    public int Cost => upgrade.Cost; 
-    public string Name => upgrade.Name; 
+     
     public bool IsOwned => status.text == "Sold !";
+
+    public UnitUpgrade Upgrade { get => upgrade; }
 
     override public void Buy() => status.text = "Sold !"; 
     override public void Sell() => status.text = "";
@@ -26,4 +20,11 @@ public class UnitUpgradeButton : RightClickButton
     protected override void SetSprite() => Image = upgrade.Image;
 
     internal void Reset() => status.text = 0.ToString();
+
+    private void OnValidate()
+    {
+        if (!upgrade) return;
+        SetSprite();
+        SetCost();
+    }
 }

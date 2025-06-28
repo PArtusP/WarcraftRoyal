@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Inquisitor - Range attack
   m_EditorClassIdentifier: 
   ID: 6
+  replacedAction: {fileID: 0}
+  triggers: 
   vfx:
     effects: []
     gameObjects: []
@@ -21,5 +23,7 @@ MonoBehaviour:
     animations: []
     sounds: []
   radius: 8
-  bonusMultiplier: 3
+  cooldown: 0
+  statuses: []
+  bonusMultiplier: 2.2
   bonusAgainst: 0

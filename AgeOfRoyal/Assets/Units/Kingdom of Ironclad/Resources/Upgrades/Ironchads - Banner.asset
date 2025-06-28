@@ -14,6 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 13
   perkName: Banner
+  cost: 4
+  descriptionOverride:
+    description: 
+    icon: {fileID: 0}
+  descriptionLines: []
+  target:
+  - {fileID: 1982330210055623403, guid: b49aa7bc639280c4e9acb8e6f663dd53, type: 3}
+  - {fileID: 1982330210055623403, guid: fb56c214a14d3a34c8e30e3dd8d455e5, type: 3}
+  image: {fileID: 21300000, guid: 9352276cd285b8f41bc00ef21ff28b5f, type: 3}
   buff:
     buffType: 2
     filters:
@@ -21,6 +30,7 @@ MonoBehaviour:
       filters:
       - field: 1
       - field: 5
+    triggers: []
     duration: 0
     maxStack: 1
     canBeDispelled: 0
@@ -34,6 +44,8 @@ MonoBehaviour:
         hitRadius: 0
         armorRange: 0
         armorMelee: 0
+        healModifier: 0
+        ignoreArmor: 0
       multStats:
         health: 1
         damage: 1
@@ -43,14 +55,11 @@ MonoBehaviour:
         hitRadius: 1
         armorRange: 1
         armorMelee: 1
+        healModifier: 1
+        ignoreArmor: 1
     heal: 0
     dispel: 0
+    healthLink: 0
   modules: []
-  cost: 4
-  descriptions:
-  - description: Apply to every range units
-    icon: {fileID: 21300000, guid: 313131c603f5bf9449704f776ff0a16e, type: 3}
-  target:
-  - {fileID: 1982330210055623403, guid: b49aa7bc639280c4e9acb8e6f663dd53, type: 3}
-  - {fileID: 1982330210055623403, guid: fb56c214a14d3a34c8e30e3dd8d455e5, type: 3}
-  image: {fileID: 21300000, guid: 9352276cd285b8f41bc00ef21ff28b5f, type: 3}
+  actions: []
+  triggers: []

@@ -14,6 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 11
   perkName: Well cut
+  cost: 5
+  descriptionOverride:
+    description: 
+    icon: {fileID: 0}
+  descriptionLines: []
+  target:
+  - {fileID: 1982330210055623403, guid: fb56c214a14d3a34c8e30e3dd8d455e5, type: 3}
+  image: {fileID: 21300000, guid: ada32c43bf192564e9d4ad2ff7821f85, type: 3}
   buff:
     buffType: 2
     filters:
@@ -34,6 +42,7 @@ MonoBehaviour:
         armorRange: 0
         armorMelee: 0
         healModifier: 0
+        ignoreArmor: 0
       multStats:
         health: 1
         damage: 1
@@ -44,13 +53,11 @@ MonoBehaviour:
         armorRange: 1
         armorMelee: 1
         healModifier: 1
+        ignoreArmor: 1
     heal: 0
     dispel: 0
+    healthLink: 0
   modules: []
   actions:
   - {fileID: 11400000, guid: c46905b539ac9bf4fa70667f7ef99512, type: 2}
-  cost: 5
-  descriptions: []
-  target:
-  - {fileID: 1982330210055623403, guid: fb56c214a14d3a34c8e30e3dd8d455e5, type: 3}
-  image: {fileID: -382705054, guid: 5b01f6ffc7d8783479c995daa9331b72, type: 3}
+  triggers: []

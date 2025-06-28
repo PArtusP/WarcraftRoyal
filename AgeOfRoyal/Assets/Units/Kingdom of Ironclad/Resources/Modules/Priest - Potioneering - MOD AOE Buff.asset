@@ -13,12 +13,13 @@ MonoBehaviour:
   m_Name: Priest - Potioneering - MOD AOE Buff
   m_EditorClassIdentifier: 
   ID: 3
+  triggers: 
   onTargetVfx:
     effects:
-    - effect: {fileID: 1316529040019751079, guid: 8f952c8aaf4615a45b28b469fdabbb16, type: 3}
-      instanciate: 1
+    - instanciate: 1
       asChild: 1
-      timer: 0
+      timer: 2
+      effect: {fileID: 1316529040019751079, guid: 8f952c8aaf4615a45b28b469fdabbb16, type: 3}
     gameObjects: []
     particles: []
     renderers: []
@@ -31,16 +32,25 @@ MonoBehaviour:
     renderers: []
     animations: []
     sounds: []
-  cooldown: 0
+  cooldown: 6
+  delay: 0
   radius: 8
   picking:
-    maxTarget: 3
+    maxTarget: 1
     sameTeam: 0
-    orders: []
-    filters: []
+    orders:
+    - field: 2
+      ascending: 1
+    filters:
+    - field: 10
   buff:
-    buffType: 4
-    duration: 0
+    buffType: 1
+    filters:
+      targetTeam: 0
+      filters:
+      - field: 10
+    triggers: 
+    duration: 3
     maxStack: 3
     canBeDispelled: 0
     powerup:
@@ -53,6 +63,8 @@ MonoBehaviour:
         hitRadius: 0
         armorRange: 0
         armorMelee: 0
+        healModifier: 0
+        ignoreArmor: 0
       multStats:
         health: 1
         damage: 1
@@ -62,6 +74,8 @@ MonoBehaviour:
         hitRadius: 1
         armorRange: 1
         armorMelee: 1
-    heal: 2
+        healModifier: 1
+        ignoreArmor: 1
+    heal: 10
     dispel: 0
-  targets: []
+    healthLink: 0

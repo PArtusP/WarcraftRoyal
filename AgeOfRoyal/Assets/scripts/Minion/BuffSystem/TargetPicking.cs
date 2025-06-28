@@ -25,6 +25,7 @@ public enum PickingFilters
     Mage = 7,
     ToDispel = 8,
     Furthest = 9,
+    CanBeHeal = 10,
 }
 
 [Serializable]
@@ -170,6 +171,8 @@ public class TargetingFilter
 
             case PickingFilters.ToDispel:
                 return targets.Where(t => t.CanBeDispelled(t.Home == source.Home)).ToList();
+            case PickingFilters.CanBeHeal:
+                return targets.Where(t => t.MaxHealth > t.Health && !t.Dead).ToList();
 
             /* case PickingFields.Furthest:
                 return targets.OrderBy(t => (t.transform.position - source.transform.position).magnitude).ToList();*/

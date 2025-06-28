@@ -13,9 +13,21 @@ MonoBehaviour:
   m_Name: Priest - Potioneering
   m_EditorClassIdentifier: 
   ID: 6
-  perkName: Potioneering
+  perkName: Potionering
+  cost: 2
+  descriptionOverride:
+    description: 
+    icon: {fileID: 0}
+  descriptionLines: []
+  target:
+  - {fileID: 1982330210055623403, guid: 552bbd209987f3140979951a8671225a, type: 3}
+  image: {fileID: 21300000, guid: fd6e1231165e4494c89fa63fc25018cd, type: 3}
   buff:
-    buffType: 4
+    buffType: 0
+    filters:
+      targetTeam: 2
+      filters: []
+    triggers: 
     duration: 0
     maxStack: 1
     canBeDispelled: 0
@@ -29,6 +41,8 @@ MonoBehaviour:
         hitRadius: 0
         armorRange: 0
         armorMelee: 0
+        healModifier: 0
+        ignoreArmor: 0
       multStats:
         health: 1
         damage: 1
@@ -38,12 +52,11 @@ MonoBehaviour:
         hitRadius: 1
         armorRange: 1
         armorMelee: 1
+        healModifier: 1
+        ignoreArmor: 1
     heal: 0
     dispel: 0
-  modules:
-  - {fileID: 11400000, guid: 03a9ae95e3a6f2a4aa9eada32abee3df, type: 2}
-  cost: 2
-  description: Priests can heal units around them
-  target:
-  - {fileID: 1982330210055623403, guid: 552bbd209987f3140979951a8671225a, type: 3}
-  image: {fileID: 1485440672, guid: 5b01f6ffc7d8783479c995daa9331b72, type: 3}
+    healthLink: 0
+  modules: []
+  actions:
+  - {fileID: 11400000, guid: 0600de59370986c48b648f1da3d65478, type: 2}

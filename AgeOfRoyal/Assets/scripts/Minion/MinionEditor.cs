@@ -15,11 +15,15 @@ public class MinionEditor : Editor
                 {*/
         EditorGUILayout.Space(); 
         EditorGUILayout.LabelField("=== Runtime Buff Info ===", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("target link:", minion.TargetHealthLink != null ?  minion.TargetHealthLink.source.ToString() : "none");
+        EditorGUILayout.LabelField("source link:", minion.SourceHealthLink != null ? minion.SourceHealthLink.source.ToString() : "none");
+        EditorGUILayout.LabelField("===----------===", EditorStyles.boldLabel);
 
         try
         {
             UnitPowerUp total = minion.TotalBuff;
             EditorGUILayout.LabelField("Total Power up:", total.Short);
+            EditorGUILayout.LabelField("Cached Power up:", minion.CachedBuff.value.Short);
             minion.Buffs.ForEach(b =>
             { 
                 EditorGUILayout.Space(); 

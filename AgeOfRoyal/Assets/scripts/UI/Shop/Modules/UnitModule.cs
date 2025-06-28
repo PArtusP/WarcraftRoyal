@@ -26,7 +26,8 @@ abstract public class UnitModule : ScriptableObject
     public TriggerSVFX OnTargetVfx => onTargetVfx;
     public TriggerSVFX OnSelfVfx => onSelfVfx;
     public Sprite Icon => icon;
-    public float NextUse { get; protected set; }
+    public float NextUse { get; protected set; } = 0f;
+    public List<Trigger> Triggers { get => triggers; set => triggers = value; }
 
     abstract public void Init(MinionCombat owner);
     /// <summary>
@@ -42,6 +43,7 @@ abstract public class UnitModule : ScriptableObject
     {
         var clone = Instantiate(this);
         clone.ID = this.ID;
+        clone.NextUse = 0f;
         return clone;
     }
     abstract public List<UnitWithoutState> FindTargets(MinionCombat owner);

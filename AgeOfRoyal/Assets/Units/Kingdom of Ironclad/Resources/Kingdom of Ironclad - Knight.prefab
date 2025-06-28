@@ -141,11 +141,11 @@ MonoBehaviour:
     hitRadius: 1.4
     armorRange: 0
     armorMelee: 0
+    healModifier: 1
   buffs: []
   actions:
   - {fileID: 11400000, guid: c3bf47442ddedf0479ecb981bb8ed6b4, type: 2}
   - {fileID: 11400000, guid: c810aff8f24634e448d6239dad3cc453, type: 2}
-  target: {fileID: 0}
   fsm:
     currentState:
       type: 0
@@ -164,11 +164,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   attackFx:
-    effects:
-    - instanciate: 0
-      asChild: 0
-      timer: 0
-      effect: {fileID: 0}
+    effects: []
     gameObjects: []
     particles: []
     renderers: []
@@ -682,6 +678,10 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: 25a54b5507c2fca45ab86616c603f7b6, type: 2}
+    - target: {fileID: 5866666021909216657, guid: 554e12907b1aa8641bb6349bed8d0347, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:

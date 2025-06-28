@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -11,15 +12,15 @@ public enum UnitBuffType
     Refreshable, // Like Temporary, but refreshes/extends on re-application
     Aura,       // Active as long as the source is nearby/active
     Stackable, // Like Temporary, but can be stacked from the same source hitable
-} 
+}
 
 [Serializable]
-public class UnitBuff : INetworkSerializable 
+public class UnitBuff : INetworkSerializable
 {
     [Header("Buff settings")]
-    [SerializeField] private UnitBuffType buffType = UnitBuffType.Temporary;
+    [SerializeField] private UnitBuffType buffType = UnitBuffType.OneShot;
     [SerializeField] private BuffApplyFilter filters;
-    [SerializeField] private List<BuffApplyTrigger> triggers = null;
+    [SerializeField] private List<Trigger> triggers = new List<Trigger>();
     [SerializeField] private float duration = 1f;
     [SerializeField] private int maxStack = 1;
     [SerializeField] private bool canBeDispelled = true;
@@ -28,6 +29,7 @@ public class UnitBuff : INetworkSerializable
     [SerializeField] private UnitPowerUp powerup = new UnitPowerUp();
     [SerializeField] private float heal = 0f;
     [SerializeField] private bool dispel = false;
+    [SerializeField] private float healthLink = 0f;
 
     [NonSerialized] private Guid sourceId = Guid.NewGuid();
     [NonSerialized] private float appliedTime;
@@ -41,6 +43,7 @@ public class UnitBuff : INetworkSerializable
     public int MaxStack => maxStack;
     public bool CanBeDispelled => canBeDispelled;
     public float Heal => heal;
+    public float HealthLink => healthLink;
     public Guid SourceId => sourceId;
     public float AppliedTime => appliedTime;
     public float EndTime => appliedTime + duration;
@@ -49,7 +52,8 @@ public class UnitBuff : INetworkSerializable
     public Hitable Source { get => source; set => source = value; }
     public bool Dispel { get => dispel; set => dispel = value; }
     public BuffApplyFilter Filters { get => filters; set => filters = value; }
-    public List<BuffApplyTrigger> Triggers { get => triggers; set => triggers = value; }
+    public List<Trigger> Triggers { get => triggers; set => triggers = value; }
+    public bool isNull => PowerUp.Equals(UnitPowerUp.Identity) && Heal == 0 && Dispel == false && healthLink == 0f;
 
     public void Apply() => appliedTime = Time.time;
 
@@ -77,7 +81,8 @@ public class UnitBuff : INetworkSerializable
             heal = this.heal,
             sourceId = this.sourceId,
             dispel = this.dispel,
-            filters = this.filters
+            filters = this.filters,
+            healthLink = this.healthLink
         };
     }
 
@@ -88,7 +93,7 @@ public class UnitBuff : INetworkSerializable
         serializer.SerializeValue(ref duration);
         serializer.SerializeValue(ref maxStack);
         serializer.SerializeValue(ref canBeDispelled);
-        serializer.SerializeValue(ref powerup);  
+        serializer.SerializeValue(ref powerup);
         serializer.SerializeValue(ref heal);
         serializer.SerializeValue(ref dispel);
         // not used anymore
@@ -132,8 +137,6 @@ public class UnitBuff : INetworkSerializable
     {
         List<string> parts = new List<string>();
 
-        parts.Add(buffType.ToString());
-
         if (buffType == UnitBuffType.Stackable && maxStack > 1)
             parts.Add($"x{maxStack}");
 
@@ -149,10 +152,13 @@ public class UnitBuff : INetworkSerializable
         if (heal != 0f)
             parts.Add(buffType == UnitBuffType.OneShot ? $"+{heal:0.#} HP" : $"+{heal:0.#} HP/s");
 
+        if (healthLink != 0f)
+            parts.Add($"create {healthLink * 100f:0#%} health link");
+
         if (buffType != UnitBuffType.OneShot && buffType != UnitBuffType.Permanent && buffType != UnitBuffType.Aura && !canBeDispelled)
             parts.Add("undispellable");
 
-        return string.Join(", ", parts);
+        return $"{buffType.ToString()}{(triggers.Any() ? $"on {string.Join(" or ", triggers.Select(t => t.ToString().ToLower()))}" : string.Empty)}: " + string.Join(", ", parts);
     }
 
 }
@@ -196,23 +202,11 @@ public enum Trigger
 public class ApplyTrigger<T>
 {
     [SerializeField] protected Trigger type;
-    [SerializeField] protected T item; 
+    [SerializeField] protected T item;
 
     public Trigger Type { get => type; }
     public T Item { get => item; }
 
     public override string ToString() =>
         $"On {type}: {item?.ToString() ?? "<null>"}";
-} 
-[Serializable]
-public class BuffApplyTrigger : ApplyTrigger<UnitBuff>
-{ 
-} 
-[Serializable]
-public class ModuleApplyTrigger : ApplyTrigger<UnitModule>
-{ 
-} 
-[Serializable]
-public class ActionApplyTrigger : ApplyTrigger<UnitAction>
-{ 
-} 
+}

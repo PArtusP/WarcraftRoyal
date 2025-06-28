@@ -14,6 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 16
   perkName: Paladin
+  cost: 5
+  descriptionOverride:
+    description: 
+    icon: {fileID: 0}
+  descriptionLines: []
+  target:
+  - {fileID: 1982330210055623403, guid: 523657598c0b0024abd97964af12f025, type: 3}
+  image: {fileID: 21300000, guid: 42c0b8de84bc68647b6a062c90251bd6, type: 3}
   buff:
     buffType: 2
     filters:
@@ -34,6 +42,7 @@ MonoBehaviour:
         armorRange: 0
         armorMelee: 0
         healModifier: 0
+        ignoreArmor: 0
       multStats:
         health: 1
         damage: 1
@@ -44,17 +53,11 @@ MonoBehaviour:
         armorRange: 1
         armorMelee: 1
         healModifier: 1
+        ignoreArmor: 1
     heal: 0
     dispel: 0
+    healthLink: 0
   modules: []
   actions:
   - {fileID: 11400000, guid: 17f037f8c24c00c49a2d54ba0f0a48ee, type: 2}
-  cost: 5
-  descriptions:
-  - description: The Royal guard becomes Paladin
-    icon: {fileID: 21300000, guid: 42c0b8de84bc68647b6a062c90251bd6, type: 3}
-  - description: Paladin can heal or dispel every 5 seconds
-    icon: {fileID: 0}
-  target:
-  - {fileID: 1982330210055623403, guid: 523657598c0b0024abd97964af12f025, type: 3}
-  image: {fileID: 21300000, guid: 42c0b8de84bc68647b6a062c90251bd6, type: 3}
+  triggers: []

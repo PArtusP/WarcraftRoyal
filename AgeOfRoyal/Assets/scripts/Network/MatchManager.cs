@@ -203,8 +203,7 @@ public class MatchManager : NetworkBehaviour
     {
         if (phase == Phase.Combat) return;
         phase = Phase.Combat;
-        playerManager.Players.ForEach(p => p.StartNewCombatRound());
-        playerManager.Players.ForEach(p => unitsManager.AddRange(p.Home.SpawnedUnits));
+        playerManager.Players.ForEach(p => p.StartNewCombatRound()); 
     }
 
     private void EndOfCombatRound()

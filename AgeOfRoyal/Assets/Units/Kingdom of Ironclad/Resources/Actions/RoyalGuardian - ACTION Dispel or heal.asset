@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: RoyalGuardian - ACTION Dispel or heal
   m_EditorClassIdentifier: 
   ID: 10
+  replacedAction: {fileID: 0}
+  triggers: 
   vfx:
     effects:
     - instanciate: 1
@@ -30,3 +32,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d82d2e455bbfd714da5309ed69a24df4, type: 2}
   maxTargetTotal: 1
   priority: 1
+  countEachModuleTarget: 1

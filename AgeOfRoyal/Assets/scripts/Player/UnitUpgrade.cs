@@ -18,24 +18,25 @@ public class UnitUpgrade : ScriptableObject
     [SerializeField] public int ID = -1;
     [SerializeField] string perkName; 
     [SerializeField] int cost;
-    [SerializeField] List<UpgradeDescription> descriptions;
+    [SerializeField] UpgradeDescription descriptionOverride;
+    [SerializeField] List<UpgradeDescription> descriptionLines;
     [SerializeField] List<UnitWithoutState> target;
     [SerializeField] Sprite image;
     [Header("Bonuses")]
     [SerializeField] UnitBuff buff = new UnitBuff();  
     [SerializeField] List<UnitModule> modules;
-    [SerializeField] List<UnitAction> actions;
-    [SerializeField] List<BuffApplyTrigger> triggers = null;
+    [SerializeField] List<UnitAction> actions; 
 
     public string Name => perkName; 
     public UnitBuff Buff => buff;  
     public int Cost => cost;
-    public List<UpgradeDescription> Descriptions => descriptions;
-    public List<UnitWithoutState> Target => target; 
+    public List<UpgradeDescription> Descriptions => descriptionLines;
+    public List<UnitWithoutState> Targets => target; 
     public Sprite Image => image; 
     
     public List<UnitModule> Modules => modules;
-    public List<UnitAction> Actions => actions;
-    public List<BuffApplyTrigger> Triggers => triggers;
+    public List<UnitAction> Actions => actions; 
+
+    public UpgradeDescription DescriptionOverride { get => descriptionOverride; set => descriptionOverride = value; }
 }
 

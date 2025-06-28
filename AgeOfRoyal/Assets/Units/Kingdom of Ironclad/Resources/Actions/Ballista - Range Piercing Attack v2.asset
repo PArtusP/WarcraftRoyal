@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a1989a7ef18c0344827203cf2d10200, type: 3}
   m_Name: Ballista - Range Piercing Attack v2
   m_EditorClassIdentifier: 
-  ID: 2
+  ID: 13
+  triggers: 
   vfx:
     effects: []
     gameObjects: []

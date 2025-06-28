@@ -143,6 +143,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  home: {fileID: 0}
   aimPoint: {fileID: 4623872049642623743}
   healEffect:
     effects:
@@ -173,13 +174,15 @@ MonoBehaviour:
     hitRadius: 8
     armorRange: 0
     armorMelee: 0
-  hitableLayer:
-    serializedVersion: 2
-    m_Bits: 8
+    healModifier: 1
   buffs: []
   actions:
   - {fileID: 11400000, guid: 0ba554939cf7c314eb7463c1e7038b3e, type: 2}
   - {fileID: 11400000, guid: fb33a8c7bcff0534cb0162035b4866b7, type: 2}
+  fsm:
+    currentState:
+      type: 0
+    states: []
 --- !u!114 &5795790253762222147
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -228,6 +231,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  rotationSpeed: 10
 --- !u!195 &3291631439931743043
 NavMeshAgent:
   m_ObjectHideFlags: 0

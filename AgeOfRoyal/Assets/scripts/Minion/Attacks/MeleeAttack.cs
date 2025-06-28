@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using Unity.VisualScripting;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "___ - Melee attack", menuName = "Unit Actions/Unit Attacks/Melee Attack", order = 1)]
 public class MeleeAttack : UnitAttack
@@ -13,6 +15,8 @@ public class MeleeAttack : UnitAttack
         var finalDamage = owner.Stats.damage;
         if (owner.Target is UnitWithoutState m && m.Type == bonusAgainst)
             finalDamage *= bonusMultiplier;
+
+        if(Statuses.Any()) Statuses.ForEach(s => owner.Target.AddEffect(s));
 
         return owner.Target.GetHit(finalDamage, owner);
     }

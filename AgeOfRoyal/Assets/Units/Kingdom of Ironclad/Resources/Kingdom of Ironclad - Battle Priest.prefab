@@ -143,12 +143,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  home: {fileID: 0}
   aimPoint: {fileID: 4623872049642623743}
   healEffect:
     effects:
-    - effect: {fileID: 0}
-      instanciate: 0
+    - instanciate: 0
+      asChild: 0
       timer: 0
+      effect: {fileID: 0}
     gameObjects: []
     particles: []
     renderers: []
@@ -172,12 +174,14 @@ MonoBehaviour:
     hitRadius: 5
     armorRange: 0
     armorMelee: 0
-  hitableLayer:
-    serializedVersion: 2
-    m_Bits: 8
+    healModifier: 1
   buffs: []
   actions:
   - {fileID: 11400000, guid: 133a40e0f0b2fb94eaaf0488d2b9243c, type: 2}
+  fsm:
+    currentState:
+      type: 0
+    states: []
 --- !u!114 &7060431445373960657
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -199,8 +203,7 @@ MonoBehaviour:
     animations: []
     sounds: []
   hitPoint: {fileID: 5938653573581385588}
-  modules:
-  - {fileID: 11400000, guid: ec97d4a29b2651f4e96083f90f458029, type: 2}
+  modules: []
   vfx: {fileID: 5938167112633497383, guid: 7aaf2415158176448aaadcff6f2d01f9, type: 3}
 --- !u!114 &114836369411734941
 MonoBehaviour:
@@ -227,6 +230,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  rotationSpeed: 10
 --- !u!195 &3291631439931743043
 NavMeshAgent:
   m_ObjectHideFlags: 0

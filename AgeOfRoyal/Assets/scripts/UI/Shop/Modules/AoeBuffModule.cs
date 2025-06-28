@@ -15,14 +15,16 @@ public class AoeBuffModule : AoeUnitModule
         $"{buff.PowerUp.Short}" +
         $"{(buff.Heal > 0 ? $"{(buff.PowerUp.Short != string.Empty ? " & " : string.Empty)}{buff.Heal}HP/s" : string.Empty)}" +
         $"{(buff.Dispel ? $"{(buff.PowerUp.Short != string.Empty || buff.Heal > 0 ? " & " : string.Empty)}dispel" : string.Empty)} " +
+        $"{(buff.HealthLink != 0f ? $"{(buff.PowerUp.Short != string.Empty || buff.Dispel || buff.Heal > 0 ? " & " : string.Empty)}add a {Mathf.RoundToInt(buff.HealthLink * 100f)}% health link" : string.Empty)}" +
         $"to {picking.MaxTarget} {(picking.SameTeam == Target.Friends ? "allies" : picking.SameTeam == Target.Foes ? "foes" : "unit")} " +
         $"within {radius}m";
 
     public string Short =>
         $"{(picking.SameTeam == Target.Friends ? "Grants" : "Inflicts")} " +
         $"{buff.PowerUp.Short}" +
-        $"{(buff.Heal > 0 ? $"{(buff.PowerUp.Short != string.Empty ? " & " : string.Empty)}{buff.Heal}HP/s" : string.Empty)}" +
-        $"{(buff.Dispel ? $"{(buff.PowerUp.Short != string.Empty || buff.Heal > 0 ? " & " : string.Empty)}dispel" : string.Empty)}";
+        $"{(buff.Heal > 0 ? $"{(buff.PowerUp.Short != string.Empty ? " & " : string.Empty)}{buff.Heal}HP{(buff.BuffType != UnitBuffType.OneShot ? "/s" : string.Empty)}" : string.Empty)}" +
+        $"{(buff.Dispel ? $"{(buff.PowerUp.Short != string.Empty || buff.Heal > 0 ? " & " : string.Empty)}dispel" : string.Empty)}" +
+        $"{(buff.HealthLink != 0f ? $"{(buff.PowerUp.Short != string.Empty || buff.Dispel || buff.Heal > 0 ? " & " : string.Empty)}add a {Mathf.RoundToInt(buff.HealthLink * 100f)}% health link" : string.Empty)}";
 
     public override bool VfxLoop => buff.BuffType == UnitBuffType.Aura;
 
@@ -41,7 +43,7 @@ public class AoeBuffModule : AoeUnitModule
             targets.Add(target);
             if (buff.BuffType != UnitBuffType.Aura)
                 owner.StartCoroutine(RemoveBlacklist(target));
-            target.AddBuff(buff, buff.Duration, owner.Owner);
+            target.AddBuff(buff.Clone(), buff.Duration, owner.Owner);
         }
     }
 
@@ -59,7 +61,7 @@ public class AoeBuffModule : AoeUnitModule
 
     protected override List<UnitWithoutState> PreApplyChecks(List<UnitWithoutState> minions, MinionCombat owner)
     {
-        targets.RemoveAll(t => t == null && t.Dead);
+        targets.RemoveAll(t => t == null || t.Dead);
         switch (buff.BuffType)
         {
             case UnitBuffType.Aura:
@@ -78,7 +80,7 @@ public class AoeBuffModule : AoeUnitModule
                 }
                 break;
             case UnitBuffType.Temporary:
-            case UnitBuffType.Refreshable:
+            //case UnitBuffType.Refreshable:
                 minions.RemoveAll(m => m.Buffs.Count(b => b.SourceId == buff.SourceId) >= buff.MaxStack); // Remove already buffed targets
                 break;
             case UnitBuffType.Stackable:

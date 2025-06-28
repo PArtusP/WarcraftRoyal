@@ -9,13 +9,43 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9e55978e6f73aa044b3ecc27af034b96, type: 3}
-  m_Name: Knight - Personal Offense
+  m_Script: {fileID: 11500000, guid: 8cedb2030692a4c4680aae9d83ff901c, type: 3}
+  m_Name: Priest - Empath - MOD AOE Buff
   m_EditorClassIdentifier: 
-  ID: 9
-  perkName: Personal Offense
+  ID: 10
+  triggers: 
+  onTargetVfx:
+    effects: []
+    gameObjects: []
+    particles: []
+    renderers: []
+    animations: []
+    sounds: []
+  onSelfVfx:
+    effects: []
+    gameObjects: []
+    particles: []
+    renderers: []
+    animations: []
+    sounds: []
+  cooldown: 6
+  delay: 0
+  radius: 8
+  picking:
+    maxTarget: 1
+    sameTeam: 0
+    orders:
+    - field: 2
+      ascending: 1
+    filters:
+    - field: 10
   buff:
-    buffType: 2
+    buffType: 0
+    filters:
+      targetTeam: 0
+      filters:
+      - field: 10
+    triggers: []
     duration: 0
     maxStack: 1
     canBeDispelled: 0
@@ -29,6 +59,8 @@ MonoBehaviour:
         hitRadius: 0
         armorRange: 0
         armorMelee: 0
+        healModifier: 0
+        ignoreArmor: 0
       multStats:
         health: 1
         damage: 1
@@ -38,12 +70,8 @@ MonoBehaviour:
         hitRadius: 1
         armorRange: 1
         armorMelee: 1
+        healModifier: 1
+        ignoreArmor: 1
     heal: 0
     dispel: 0
-  modules:
-  - {fileID: 11400000, guid: 002e850de6dc86d4b8a97b010f3e0f0d, type: 2}
-  cost: 3
-  description: Taunt foes around
-  target:
-  - {fileID: 1982330210055623403, guid: 2e850bb20ed10df4f9a1ecf90130ea83, type: 3}
-  image: {fileID: -1431334621, guid: 5b01f6ffc7d8783479c995daa9331b72, type: 3}
+    healthLink: 0.5

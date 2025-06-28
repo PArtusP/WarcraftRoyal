@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Battle Priest - Range attack
   m_EditorClassIdentifier: 
   ID: 3
+  replacedAction: {fileID: 0}
+  triggers: 
   vfx:
     effects: []
     gameObjects: []
@@ -21,5 +23,7 @@ MonoBehaviour:
     animations: []
     sounds: []
   radius: 5
-  bonusMultiplier: 4
+  cooldown: 0
+  statuses: []
+  bonusMultiplier: 2
   bonusAgainst: 0

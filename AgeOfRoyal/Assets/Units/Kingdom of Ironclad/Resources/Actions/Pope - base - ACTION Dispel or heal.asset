@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Pope - base - ACTION Dispel or heal
   m_EditorClassIdentifier: 
   ID: 11
+  replacedAction: {fileID: 0}
+  triggers: 
   vfx:
     effects:
     - instanciate: 1
@@ -30,3 +32,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 971047356bc1e0549b5266168188ad0c, type: 2}
   maxTargetTotal: 2
   priority: 1
+  countEachModuleTarget: 1

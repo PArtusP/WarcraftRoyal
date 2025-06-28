@@ -126,7 +126,7 @@ abstract public class TriggerEffect<T> : TriggerEffectBase
         if (value && instanciate)
             InstanciateInternal(position, rotation, owner);
 
-        if(value) instance.AddComponent<TriggerSFVXItem>().Id = id;
+        //if(value) instance.AddComponent<TriggerSFVXItem>().Id = id;
 
         SetInternal(value);
         if (!value && instanciate) UnityEngine.Object.Destroy(instance);

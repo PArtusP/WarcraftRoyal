@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
- 
+
 [CreateAssetMenu(fileName = "___ - Module Action", menuName = "Unit Actions/Module Action", order = 2)]
 public class ModulesAction : UnitAction
 {
@@ -9,6 +9,7 @@ public class ModulesAction : UnitAction
     [SerializeField] protected List<UnitModule> modules;
     [SerializeField] protected int maxTargetTotal = 1;
     [SerializeField] private int priority;
+    [SerializeField] private bool countEachModuleTarget = false;
 
     override public string AnimationTrigger => animationTrigger;
 
@@ -22,15 +23,18 @@ public class ModulesAction : UnitAction
 
     public override bool Use(UnitWithoutState owner)
     {
-        var targetCount = 0;
+        var targetCount = 0; 
 
         foreach (var module in modules)
         {
-            if (targetCount >= maxTargetTotal) break;
-            targetCount += module.Use(owner.Combat, maxTargetTotal - targetCount);
-        }
+            if (!countEachModuleTarget)
+                if (targetCount >= maxTargetTotal) break;
+
+            targetCount += module.Use(owner.Combat, countEachModuleTarget ? maxTargetTotal : maxTargetTotal - targetCount);
+        } 
         return targetCount > 0; // Return true if at least one module was used
-    }    public override UnitAction Clone()
+    }
+    public override UnitAction Clone()
     {
         var clone = Instantiate(this);
         clone.Modules = new List<UnitModule>(this.modules.Select(m => m.Clone())); // Or deep clone if needed

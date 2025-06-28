@@ -10,25 +10,39 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9e55978e6f73aa044b3ecc27af034b96, type: 3}
-  m_Name: Crossbowman - Arbalest Rite
+  m_Name: Knight - Last stand
   m_EditorClassIdentifier: 
-  ID: 1
-  perkName: Arbalest Rite
+  ID: 9
+  perkName: Last stand
+  cost: 5
+  descriptionOverride:
+    description: 
+    icon: {fileID: 0}
+  descriptionLines: []
+  target:
+  - {fileID: 485292257721796262, guid: 2e850bb20ed10df4f9a1ecf90130ea83, type: 3}
+  image: {fileID: 21300000, guid: cf39ee714db43f94abc2e510f484da24, type: 3}
   buff:
     buffType: 2
+    filters:
+      targetTeam: 2
+      filters: []
+    triggers: []
     duration: 0
-    maxStack: 1
+    maxStack: 0
     canBeDispelled: 0
     powerup:
       addStats:
         health: 0
-        damage: 2
+        damage: 0
         speed: 0
         cooldown: 0
         sightRadius: 0
         hitRadius: 0
         armorRange: 0
         armorMelee: 0
+        healModifier: 0
+        ignoreArmor: 0
       multStats:
         health: 1
         damage: 1
@@ -38,11 +52,12 @@ MonoBehaviour:
         hitRadius: 1
         armorRange: 1
         armorMelee: 1
+        healModifier: 1
+        ignoreArmor: 1
     heal: 0
     dispel: 0
-  modules: []
-  cost: 2
-  description: 
-  target:
-  - {fileID: 1982330210055623403, guid: b49aa7bc639280c4e9acb8e6f663dd53, type: 3}
-  image: {fileID: 353367016, guid: 5b01f6ffc7d8783479c995daa9331b72, type: 3}
+    healthLink: 0
+  modules:
+  - {fileID: 11400000, guid: 2a86d873caea0f943944895136f3abc8, type: 2}
+  actions: []
+  triggers: []

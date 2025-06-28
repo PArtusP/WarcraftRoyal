@@ -14,8 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 10
   perkName: Indictment
+  cost: 5
+  descriptionOverride:
+    description: 
+    icon: {fileID: 0}
+  descriptionLines: []
+  target:
+  - {fileID: 1169530070287653294, guid: 57b21c42df44a29408839ca6eee3c143, type: 3}
+  image: {fileID: -290280925, guid: 5b01f6ffc7d8783479c995daa9331b72, type: 3}
   buff:
     buffType: 2
+    filters:
+      targetTeam: 2
+      filters: []
+    triggers: []
     duration: 0
     maxStack: 1
     canBeDispelled: 0
@@ -29,6 +41,8 @@ MonoBehaviour:
         hitRadius: 0
         armorRange: 0
         armorMelee: 0
+        healModifier: 0
+        ignoreArmor: 0
       multStats:
         health: 1
         damage: 1
@@ -38,12 +52,12 @@ MonoBehaviour:
         hitRadius: 1
         armorRange: 1
         armorMelee: 1
+        healModifier: 1
+        ignoreArmor: 1
     heal: 0
     dispel: 0
+    healthLink: 0
   modules:
   - {fileID: 11400000, guid: 46f4bf12294f9b245a13e1d405e099dd, type: 2}
-  cost: 5
-  description: Reduce foes attack rate by 10% within 8m radius
-  target:
-  - {fileID: 1169530070287653294, guid: 57b21c42df44a29408839ca6eee3c143, type: 3}
-  image: {fileID: -290280925, guid: 5b01f6ffc7d8783479c995daa9331b72, type: 3}
+  actions: []
+  triggers: []

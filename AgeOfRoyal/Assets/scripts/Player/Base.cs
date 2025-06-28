@@ -109,21 +109,21 @@ public class Base : NetworkBehaviour
             unit.Home = this;
             unit.OnDieEvent.AddListener(delegate { CheckEndRound(unit); });
         } 
-        var buffs = upgrades.Where(u => !u.Buff.PowerUp.Equals(UnitPowerUp.Identity) && u.Buff.Heal != 0 && u.Buff.Dispel != false).Select(u => u.Buff).ToList();
+        var buffs = upgrades.Where(u => !u.Buff.isNull).Select(u => u.Buff.Clone()).ToList();
         if (buffs.Any())
         {
             buffs.ForEach(p => unit.AddBuff(p));
             Debug.Log($"Applying power-up to {unit.name}: (Total: {unit.Stats})");
         }
 
-        var modules = upgrades.SelectMany(u => u.Modules).ToList();
+        var modules = upgrades.SelectMany(u => u.Modules.Select(m => m.Clone())).ToList();
         if (modules.Any())
         {
             unit.AddModules(modules);
             Debug.Log($"Adding modules to {unit.name}:  Total: {modules.Count})");
         }
 
-        var actions = upgrades.SelectMany(u => u.Actions).ToList();
+        var actions = upgrades.SelectMany(u => u.Actions.Select(m => m.Clone())).ToList();
         if (actions.Any())
         {
             unit.AddActions(actions);

@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Inquisitor - base - ACTION Dispel or -rate
   m_EditorClassIdentifier: 
   ID: 5
+  replacedAction: {fileID: 0}
+  triggers: 
   vfx:
     effects:
     - instanciate: 1
@@ -30,3 +32,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 46f4bf12294f9b245a13e1d405e099dd, type: 2}
   maxTargetTotal: 1
   priority: 1
+  countEachModuleTarget: 1

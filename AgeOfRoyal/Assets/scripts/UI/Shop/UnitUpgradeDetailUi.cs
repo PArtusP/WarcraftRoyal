@@ -46,20 +46,34 @@ public class UnitUpgradeDetailUi : MonoBehaviour
     {
         set => value.ForEach(v => AddModuleLine(v.Description, v.Icon));
     }
+    private List<UnitAction> Actions
+    {
+        set => value.ForEach(v => AddModuleLine(v.ToString()));
+    }
     private List<UpgradeDescription> Descriptions
     {
         set => value.ForEach(v => AddModuleLine(v.description, v.icon));
+    }
+    private UpgradeDescription Description
+    {
+        set => AddModuleLine(value.description, value.icon);
     }
     internal void Display(UnitUpgradeButton button)
     {
         gameObject.SetActive(true);
         ClearChildren();
-        Name = button.Name;
-        Image = button.Image;
-        PowerUp = button.Buff.PowerUp;
-        Triggers = button.Buff.Triggers;
-        Descriptions = button.Descriptions;
-        Modules = button.Modules;
+        Name = button.Upgrade.Name;
+        Image = button.Upgrade.Image;
+
+        if (button.Upgrade.DescriptionOverride.description != string.Empty) 
+            Description = button.Upgrade.DescriptionOverride;
+        else
+        {
+            Descriptions = button.Upgrade.Descriptions;
+            Actions = button.Upgrade.Actions;
+            Modules = button.Upgrade.Modules;
+            PowerUp = button.Upgrade.Buff.PowerUp;
+        }
     }
     internal void Display(UnitWithoutState unit) => Display(unit, null);
     internal void Display(UnitWithoutState unit, UnitPowerUp buffs, bool inGame = false)
@@ -99,6 +113,11 @@ public class UnitUpgradeDetailUi : MonoBehaviour
             buffs != null ? buffs.addStats.armorRange : 0,
             buffs != null ? buffs.multStats.armorRange : 1);
 
+
+        AddStatLine("Ignore DEF", unit.Stats.ignoreArmor,
+            buffs != null ? buffs.addStats.ignoreArmor : 0,
+            buffs != null ? buffs.multStats.ignoreArmor : 1);
+
         Modules = unit.Modules;
     }
     public UnityEvent<UnitWithoutState> OnUpdateEvent { get; internal set; } = new UnityEvent<UnitWithoutState>();
@@ -125,34 +144,7 @@ public class UnitUpgradeDetailUi : MonoBehaviour
             if (value.multStats.armorMelee != 1) AddStatLineMult("melee DEF", value.multStats.armorMelee);
             if (value.multStats.armorMelee != 1) AddStatLineMult("heal MOD", value.multStats.healModifier);
         }
-    }
-
-    public List<BuffApplyTrigger> Triggers
-    {
-        set
-        {
-            value.ForEach(v =>
-            {
-                if (v.ActionBuff.PowerUp.addStats.health != 0) AddStatLineAdd($"On {v.Type}: HP", v.ActionBuff.PowerUp.addStats.health);
-                if (v.ActionBuff.PowerUp.addStats.damage != 0) AddStatLineAdd($"On {v.Type}: damage", v.ActionBuff.PowerUp.addStats.damage);
-                if (v.ActionBuff.PowerUp.addStats.speed != 0) AddStatLineAdd($"On {v.Type}: speed", v.ActionBuff.PowerUp.addStats.speed);
-                if (v.ActionBuff.PowerUp.addStats.cooldown != 0) AddStatLineAdd($"On {v.Type}: rate", 1f / v.ActionBuff.PowerUp.addStats.cooldown); // @TODO hmm
-                if (v.ActionBuff.PowerUp.addStats.hitRadius != 0) AddStatLineAdd($"On {v.Type}: range", v.ActionBuff.PowerUp.addStats.hitRadius);
-                if (v.ActionBuff.PowerUp.addStats.armorRange != 0) AddStatLineAdd($"On {v.Type}: range DEF", v.ActionBuff.PowerUp.addStats.armorRange);
-                if (v.ActionBuff.PowerUp.addStats.armorMelee != 0) AddStatLineAdd($"On {v.Type}: melee DEF", v.ActionBuff.PowerUp.addStats.armorMelee);
-                if (v.ActionBuff.PowerUp.addStats.armorMelee != 0) AddStatLineAdd($"On {v.Type}: heal MOD", v.ActionBuff.PowerUp.addStats.healModifier);
-
-                if (v.ActionBuff.PowerUp.multStats.health != 1) AddStatLineMult($"On {v.Type}: HP", v.ActionBuff.PowerUp.multStats.health);
-                if (v.ActionBuff.PowerUp.multStats.damage != 1) AddStatLineMult($"On {v.Type}: damage", v.ActionBuff.PowerUp.multStats.damage);
-                if (v.ActionBuff.PowerUp.multStats.speed != 1) AddStatLineMult($"On {v.Type}: speed", v.ActionBuff.PowerUp.multStats.speed);
-                if (v.ActionBuff.PowerUp.multStats.cooldown != 1) AddStatLineMult($"On {v.Type}: rate", 2f - v.ActionBuff.PowerUp.multStats.cooldown); // @TODO hmm
-                if (v.ActionBuff.PowerUp.multStats.hitRadius != 1) AddStatLineMult($"On {v.Type}: range", v.ActionBuff.PowerUp.multStats.hitRadius);
-                if (v.ActionBuff.PowerUp.multStats.armorRange != 1) AddStatLineMult($"On {v.Type}: range DEF", v.ActionBuff.PowerUp.multStats.armorRange);
-                if (v.ActionBuff.PowerUp.multStats.armorMelee != 1) AddStatLineMult($"On {v.Type}: melee DEF", v.ActionBuff.PowerUp.multStats.armorMelee);
-                if (v.ActionBuff.PowerUp.multStats.armorMelee != 1) AddStatLineMult($"On {v.Type}: heal MOD", v.ActionBuff.PowerUp.multStats.healModifier);
-            });
-        }
-    }
+    } 
 
     private void AddStatLineAdd(string label, float value) => Instantiate(statelinePrefab, statsContainer).SetLineAdd(null, label, value);
     private void AddStatLineMult(string label, float value) => Instantiate(statelinePrefab, statsContainer).SetLineMult(null, label, value);

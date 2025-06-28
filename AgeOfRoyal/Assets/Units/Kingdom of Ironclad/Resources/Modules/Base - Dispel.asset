@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: Base - Dispel
   m_EditorClassIdentifier: 
   ID: 2
+  triggers: 
   onTargetVfx:
     effects:
     - instanciate: 1
       asChild: 1
-      timer: 2
+      timer: 1
       effect: {fileID: 7868308634086037558, guid: eeb22ae599cd5b24a9dc2beb3ef0e022, type: 3}
     gameObjects: []
     particles: []
@@ -47,7 +48,7 @@ MonoBehaviour:
     filters:
       targetTeam: 2
       filters: []
-    triggers: []
+    triggers: 
     duration: 0
     maxStack: 1
     canBeDispelled: 0
@@ -62,6 +63,7 @@ MonoBehaviour:
         armorRange: 0
         armorMelee: 0
         healModifier: 0
+        ignoreArmor: 0
       multStats:
         health: 1
         damage: 1
@@ -72,5 +74,7 @@ MonoBehaviour:
         armorRange: 1
         armorMelee: 1
         healModifier: 1
+        ignoreArmor: 1
     heal: 0
     dispel: 1
+    healthLink: 0

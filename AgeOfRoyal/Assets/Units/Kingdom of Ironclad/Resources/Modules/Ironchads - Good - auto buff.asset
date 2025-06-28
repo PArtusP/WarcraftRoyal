@@ -9,20 +9,40 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9e55978e6f73aa044b3ecc27af034b96, type: 3}
-  m_Name: Knight - Paladin
+  m_Script: {fileID: 11500000, guid: 15905f5d6d470044eb4c5b0212b03a15, type: 3}
+  m_Name: Ironchads - Good - auto buff
   m_EditorClassIdentifier: 
-  ID: 9
-  perkName: Paladin
+  ID: 11
+  triggers: 00000000
+  onTargetVfx:
+    effects:
+    - instanciate: 1
+      asChild: 1
+      timer: 5
+      effect: {fileID: 7868308634086037558, guid: d465cb5b4c3db6b47a92da359e50ee5a, type: 3}
+    gameObjects: []
+    particles: []
+    renderers: []
+    animations: []
+    sounds: []
+  onSelfVfx:
+    effects: []
+    gameObjects: []
+    particles: []
+    renderers: []
+    animations: []
+    sounds: []
+  delay: 0
+  cooldown: 5
   buff:
-    buffType: 2
+    buffType: 5
     filters:
       targetTeam: 2
       filters: []
-    triggers: []
-    duration: 0
-    maxStack: 1
-    canBeDispelled: 0
+    triggers: 
+    duration: 5
+    maxStack: 3
+    canBeDispelled: 1
     powerup:
       addStats:
         health: 0
@@ -34,9 +54,10 @@ MonoBehaviour:
         armorRange: 0
         armorMelee: 0
         healModifier: 0
+        ignoreArmor: 0
       multStats:
         health: 1
-        damage: 1
+        damage: 1.2
         speed: 1
         cooldown: 1
         sightRadius: 1
@@ -44,13 +65,7 @@ MonoBehaviour:
         armorRange: 1
         armorMelee: 1
         healModifier: 1
+        ignoreArmor: 1
     heal: 0
     dispel: 0
-  modules:
-  - {fileID: 11400000, guid: 002e850de6dc86d4b8a97b010f3e0f0d, type: 2}
-  actions: []
-  cost: 3
-  descriptions: []
-  target:
-  - {fileID: 1982330210055623403, guid: 2e850bb20ed10df4f9a1ecf90130ea83, type: 3}
-  image: {fileID: -1431334621, guid: 5b01f6ffc7d8783479c995daa9331b72, type: 3}
+    healthLink: 0

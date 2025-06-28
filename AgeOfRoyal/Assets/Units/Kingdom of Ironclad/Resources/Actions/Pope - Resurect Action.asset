@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Pope - Resurect Action
   m_EditorClassIdentifier: 
   ID: 8
+  replacedAction: {fileID: 0}
+  triggers: 
   vfx:
     effects: []
     gameObjects: []
@@ -25,3 +27,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 30706d3eeb793f640a06010b980f8a44, type: 2}
   maxTargetTotal: 1
   priority: 1
+  countEachModuleTarget: 1

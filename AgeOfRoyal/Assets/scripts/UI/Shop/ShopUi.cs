@@ -63,7 +63,7 @@ public class ShopUi : MonoBehaviour
         {
             button.PointerEnter = () =>
             {
-                player.MinionPowerUps.TryGetValue(button.Prefab.ID, out var value);
+                var value = player.Upgrades.Where(u => u.Targets.Any(t => t.ID == button.Prefab.ID)).Select(u => u.Buff).ToList();
                 detailUi.Display(button.Prefab, value == null ?
                     null :
                     value.Select(v => v.PowerUp).Any(v => v != null && !UnitPowerUp.Identity.Equals(v)) ?

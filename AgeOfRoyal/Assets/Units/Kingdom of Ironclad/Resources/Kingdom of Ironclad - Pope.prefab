@@ -179,8 +179,6 @@ MonoBehaviour:
   actions:
   - {fileID: 11400000, guid: 34e66abeff971444794a3f7bc178278a, type: 2}
   - {fileID: 11400000, guid: ee63b29d064b5824ebb8bef0cee0a8f4, type: 2}
-  - {fileID: 11400000, guid: d32948772767eff4b9cace3ae5442cf2, type: 2}
-  target: {fileID: 0}
   fsm:
     currentState:
       type: 0

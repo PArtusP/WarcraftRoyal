@@ -9,6 +9,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using static Unity.VisualScripting.Member;
 using static UnityEngine.GraphicsBuffer;
+using static UnityEngine.InputSystem.Controls.AxisControl;
 using static UnityEngine.UI.CanvasScaler;
 
 public enum MinionState
@@ -29,6 +30,13 @@ public class SerializedMinion
     public int ID = -1;
     public float Health = 0;
 }
+
+public class CachedPowerUp
+{
+    public float lastUpdate = 0f;
+    public UnitPowerUp value = UnitPowerUp.Identity;
+}
+
 abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 {
 
@@ -60,14 +68,16 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 
 
     // Trigger system
-    private UnitTriggers unitTriggers = new UnitTriggers();
-    private Dictionary<Trigger, List<UnitBuff>> triggerBuffs = new Dictionary<Trigger, List<UnitBuff>>();
-    private Dictionary<Trigger, List<UnitModule>> triggerModules = new Dictionary<Trigger, List<UnitModule>>();
-    private Dictionary<Trigger, List<UnitAction>> triggerActions = new Dictionary<Trigger, List<UnitAction>>();
+    private UnitTriggers unitTriggers = new UnitTriggers(); 
     protected Dictionary<UnitAction, float> nextAttackDict = new Dictionary<UnitAction, float>();
+    private CachedPowerUp _cachedBuff = new CachedPowerUp();
 
     // System
     protected Hitable target;
+    protected float clampedMaxSpeed = Mathf.Infinity;
+     
+     private HealthLink sourceHealthLink = null;
+     private HealthLink targetHealthLink = null;
 
     #region Properties
     public bool IsAsset { get; set; } = true;
@@ -77,10 +87,23 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     List<UnitBuff> StatBuffs => buffs.Where(b => !UnitPowerUp.Identity.Equals(b.PowerUp) && b.PowerUp.IsBuff).ToList();
     List<UnitBuff> StatDebuffs => buffs.Where(b => !UnitPowerUp.Identity.Equals(b.PowerUp) && !b.PowerUp.IsBuff).ToList();
     public UnitPowerUp TotalBuffNoFilter => buffs.Select(b => b.PowerUp).SumPowerUps();
-    public UnitPowerUp TotalBuff =>
-        buffs.Where(b => (b.Filters == null || (unitManager && b.Filters.ApplyFilter(unitManager, this)))
-        && !b.PowerUp.Equals(UnitPowerUp.Identity))
-        .Select(b => b.PowerUp).SumPowerUps();
+    public UnitPowerUp TotalBuff
+    {
+        get
+        {
+            if (_cachedBuff.lastUpdate < Time.time)
+            {
+                _cachedBuff.lastUpdate = Time.time;
+                _cachedBuff.value = buffs
+                    .Where(b => (b.Filters == null || (unitManager && b.Filters.ApplyFilter(unitManager, this)))
+                             && !b.PowerUp.Equals(UnitPowerUp.Identity))
+                    .Select(b => b.PowerUp)
+                    .SumPowerUps();
+            }
+
+            return _cachedBuff.value;
+        }
+    }
     public List<UnitModule> Modules => combat.Modules;
     public List<UnitModule> AllModules
     {
@@ -117,6 +140,10 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     public List<UnitAction> Actions { get => actions; set => actions = value; }
     public List<TriggerSVFX> ClientVfxs { get; private set; } = new List<TriggerSVFX>();
     public MinionController Controller => controller;
+
+    public CachedPowerUp CachedBuff { get => _cachedBuff; set => _cachedBuff = value; }
+    internal HealthLink SourceHealthLink { get => sourceHealthLink; set => sourceHealthLink = value; }
+    internal HealthLink TargetHealthLink { get => targetHealthLink; set => targetHealthLink = value; }
     #endregion
 
     override protected void AwakeInternal()
@@ -132,34 +159,25 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
         IsAsset = false;
         combat.Init(this);
         ApplyStatsAndStatus();
-        OnDieEvent.AddListener(delegate {unitTriggers.OnDieEvent.Invoke()});
 
-        foreach (Trigger trigger in Enum.GetValues(typeof(Trigger)))
-            triggerBuffs[trigger] = new List<UnitBuff>();
-        foreach (var key in triggerBuffs.Keys)
+        foreach (Trigger key in Enum.GetValues(typeof(Trigger)))  
         {
-            switch (key)
+            unitTriggers.GetEvent(key).AddListener(delegate
             {
-                case Trigger.Heal:
-                    unitTriggers.OnHealEvent.AddListener(delegate
-                    {
-                        triggerBuffs[key].ForEach(b => AddBuff(b));
-                        combat.Modules.Where(m => m.Triggers != null && m.Triggers.Contains(t => t == key)).ForEach(m => m.Use(combat));
-                        combat.Actions.Where(m => m.Triggers != null && m.Triggers.Contains(t => t == key)).ForEach(m => m.Use(this));
-                    });
-                    break; 
-                case Trigger.Die:
-                    unitTriggers.OnDieEvent.AddListener(delegate
-                    {
-                        triggerBuffs[key].ForEach(b => AddBuff(b));
-                        combat.Modules.Where(m => m.Triggers != null && m.Triggers.Contains(t => t == key)).ForEach(m => m.Use(combat));
-                        combat.Actions.Where(m => m.Triggers != null && m.Triggers.Contains(t => t == key)).ForEach(m => m.Use(this));
-                    });
-                    break;
-            }
+                PlayTrigger(key);
+            });
         }
+        OnDieEvent.AddListener(unitTriggers.OnDieEvent.Invoke);
 
     }
+
+    private void PlayTrigger(Trigger key)
+    { 
+        Buffs.Where(b => b.Triggers != null && b.Triggers.Any(t => t == key)).ToList().ForEach(b => AddBuff(b.Clone()));
+        combat.Modules.Where(m => m.Triggers != null && m.Triggers.Any(t => t == key)).ToList().ForEach(m => m.Use(combat));
+        Actions.Where(m => m.Triggers != null && m.Triggers.Any(t => t == key)).ToList().ForEach(m => m.Use(this));
+    }
+
     private void Update()
     {
         var toDelete = buffs.Where(b => b.IsExpired()).ToList();
@@ -175,6 +193,8 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
             OnDisplayToUpdate.Invoke(this as UnitWithoutState); // Notify UI to update stats display
         }
         if (!IsServer) return;
+
+        ComputeEffectDamages(); // @TODO Need to replicate shader on client
 
 
         var sumHeal = buffs.Sum(b => b.Heal);
@@ -212,9 +232,32 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     {
         if (opponent is UnitWithoutState m)
         {
-            if (m.Type == Class.Mage) damage -= Stats.armorRange;
-            if (m.Type == Class.Range) damage -= Stats.armorRange;
-            if (m.Type == Class.Melee) damage -= Stats.armorMelee;
+            var armor = 0f;
+            switch (m.Type)
+            {
+                case Class.Melee:
+                    armor = Stats.armorMelee;
+                    break;
+                case Class.Range:
+                case Class.Mage:
+                    armor = Stats.armorMelee;
+                    break;
+            }
+            damage += -armor + MathF.Max(armor, Stats.ignoreArmor);
+        }
+        if (targetHealthLink != null)
+        {
+            var linkDamage = Mathf.Min(targetHealthLink.source.Health - 1f, targetHealthLink.value * damage);
+            targetHealthLink.source.GetHit(linkDamage, opponent);
+            damage -= targetHealthLink.value * damage;
+
+            if (targetHealthLink.source.Health <= 1f)
+            {
+                targetHealthLink.source.ClearSourceHealthLink();
+                //targetHealthLink = null; targethealthlink is clear in the method above
+
+                // @TODO once SFX are here, stop it there
+            }
         }
         return base.GetHit(damage <= 0 ? 1f : damage, opponent);
     }
@@ -235,15 +278,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 
         if ((unitBuff.BuffType == UnitBuffType.Stackable && buffs.Count(b => b.SourceId == unitBuff.SourceId && b.Source == unitBuff.Source) >= unitBuff.MaxStack)
             || (unitBuff.BuffType != UnitBuffType.Stackable && buffs.Count(b => b.SourceId == unitBuff.SourceId) >= unitBuff.MaxStack))
-            return;
-
-        if (unitBuff.Triggers != null && unitBuff.Triggers.Any())
-        {
-            unitBuff.Triggers.ForEach(t =>
-            {
-                triggerBuffs[t.Type].Add(t.ActionBuff);
-            });
-        }
+            return;  
 
         if (unitBuff.BuffType == UnitBuffType.OneShot)
         { // Add other OneShot effect here, like dispel, heal, etc.
@@ -251,22 +286,50 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
                 Heal(unitBuff.Heal);
             if (unitBuff.Dispel)
                 Dispel(Home == source.Home);
+            if (unitBuff.HealthLink > 0 && source.Health > 1f)
+            {
+                if (targetHealthLink != null)
+                    targetHealthLink.source.ClearSourceHealthLink();
+
+                (source as UnitWithoutState).SetSourceHealthLink(this, unitBuff.HealthLink);
+                targetHealthLink = new HealthLink() { source = source as UnitWithoutState, value = unitBuff.HealthLink };
+            }
         }
-        else if (!UnitPowerUp.Identity.Equals(unitBuff.PowerUp) || unitBuff.Heal != 0)
+        else if (!unitBuff.isNull)
         {
             var old = Stats;
             buffs.Add(unitBuff);
 
-            // TODO : add heal
-
             UpdateStatsEffects(old);
             OnDisplayToUpdate.Invoke(this as UnitWithoutState); // Notify UI to update stats display
 
-            if (IsServer)
+            if (IsServer) // todo
                 AddBuffClientRpc(unitBuff, duration, unitBuff.Source.NetworkObjectId);
         }
         unitBuff.Apply();
 
+    }
+
+    private void SetSourceHealthLink(UnitWithoutState unitWithoutState, float healthLink)
+    {
+        ClearSourceHealthLink();
+        sourceHealthLink = new HealthLink() { source = unitWithoutState, value = healthLink };
+    }
+
+    private void ClearSourceHealthLink()
+    {
+        if (sourceHealthLink == null) return;
+        var oldSource = sourceHealthLink.source;
+        sourceHealthLink = null;
+        oldSource.ClearTargetHealthLink();
+    }
+
+    private void ClearTargetHealthLink()
+    {
+        if (targetHealthLink == null) return;
+        var oldSource = targetHealthLink.source;
+        targetHealthLink = null;
+        oldSource.ClearSourceHealthLink(); //@ No, it is the last one called/. edit: hmm maybe yes
     }
 
     private void UpdateStatsEffects(UnitStats old)
@@ -292,7 +355,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     {
         if (IsHost) return;
         Debug.Log("Adding buff: '" + buff + "' to " + name + " from source: " + source);
-        AddBuff(buff, duration, GetNetworkObject(source).GetComponent<Hitable>());
+        AddBuff(buff.Clone(), duration, GetNetworkObject(source).GetComponent<Hitable>());
     }
 
     internal void RemoveBuff(UnitBuff unitBuff)
@@ -325,16 +388,8 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
     internal void AddModules(List<UnitModule> modules)
     {
         // @TODO check if exiting same modules, compare, take best stats 
-        
-        combat.Modules.AddRange(modules.Where(m => !M.Triggers.Any()));
-        if (unitBuff.Triggers != null && unitBuff.Triggers.Any())
-        {
-            unitBuff.Triggers.ForEach(t =>
-            {
-                triggerBuffs[t.Type].Add(t.ActionBuff);
-            });
-        }
-        combat.Modules.AddRange(modules.Where(m => !M.Triggers.Any()));
+
+        combat.Modules.AddRange(modules);
         modules.ForEach(m => AddModuleClientRpc(m.ID)); // @TODO pas opti
     }
     [ClientRpc]
@@ -362,7 +417,7 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 
     protected virtual void AddActionsInternal(List<UnitAction> actions)
     {
-        if(actions.Any(a => a is UnitAttack))
+        if (actions.Any(a => a is UnitAttack))
         {
             nextAttackDict.Remove(Actions[0]);
             Actions[0] = actions.First(a => a is UnitAttack);
@@ -370,7 +425,18 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
             nextAttackDict.Add(Actions[0], 0f);
             return;
         }
-        actions.ForEach(a => nextAttackDict.Add(a, 0f));
+        actions.ForEach(a =>
+        {
+            if (a.replacedAction != null && Actions.Any(ac => ac.ID == a.replacedAction.ID))
+            {
+                var toReplace = Actions.First(ac => ac.ID == a.replacedAction.ID);
+                Actions[Actions.IndexOf(toReplace)] = a;
+            }
+            else Actions.Add(a);
+
+            if (!nextAttackDict.TryGetValue(a, out var v))
+                nextAttackDict.Add(a, 0f);
+        });
     }
 
     protected abstract void ResetAttackCondition();
@@ -458,12 +524,42 @@ abstract public class UnitWithoutState : Hitable, IPointerEnterHandler
 
     internal abstract void StartFSM();
 
+
+    override internal void ReduceMaxSpeedTemporary(float percentValue, float delay)
+    {
+        CancelInvoke("ResetMaxSpeed");
+        controller.SetSpeed(percentValue * Stats.speed);
+        Invoke("ResetMaxSpeed", delay);
+    }
+    private void ResetMaxSpeed() => controller.SetSpeed(Stats.speed);
+
+    internal override void SetAnimatorSpeedTemporary(float v, float t)
+    {
+        CancelInvoke("ResetAnimatorSpeed");
+        //if(v == 0f) anim.
+        Debug.Log($"Set speed {v}, for {t}s");
+        animator.SetAnimatorSpeedTemporary(v, t);
+    }
+
 }
 
 internal class UnitTriggers
 {
     public UnityEvent OnHealEvent { get; internal set; } = new UnityEvent();
     public UnityEvent OnDieEvent { get; internal set; } = new UnityEvent();
+
+    internal UnityEvent GetEvent(Trigger key)
+    {
+        switch (key)
+        {
+            case Trigger.Heal:
+                return OnHealEvent;
+            case Trigger.Die:
+                return OnDieEvent;
+            default:
+                throw new Exception("euuuh ?");
+        }
+    }
 }
 
 abstract public class UnitBase<T> : UnitWithoutState where T : Enum
@@ -539,7 +635,7 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
     }
     protected override void ResetAttackCondition()
     {
-        conditons[0].action = Actions[0]; 
+        conditons[0].action = Actions[0];
     }
 
     protected abstract void SetUpConditionInternal(List<AttackConditions<T>> conditons);
@@ -565,7 +661,7 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
             new State<T>(Follow,
             () => {
                 if (target == null)
-                    return Walk; 
+                    return Walk;
 
                 AttackConditions<T> success = conditons.OrderBy(c => c.priority).Where(c => TryCondition(c)).FirstOrDefault();
                 if (success != null)
@@ -588,7 +684,7 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
             ),
             new State<T>(InCombat,
                     () => {
-                        if (target == null)
+                        if (target == null || target.Dead)
                             return Walk;
                         return InCombat;
                     },
@@ -605,8 +701,8 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
     protected override void AddActionsInternal(List<UnitAction> actions)
     {
         base.AddActionsInternal(actions);
-        if (actions.Any(a => a is UnitAttack)) 
-            return; 
+        if (actions.Any(a => a is UnitAttack))
+            return;
 
         var startTime = Time.time;
         var moduleActions = actions.Select(m => m as ModulesAction).ToList();
@@ -644,7 +740,7 @@ abstract public class UnitBase<T> : UnitWithoutState where T : Enum
     protected bool TryCondition(AttackConditions<T> c)
     {
         try
-        { 
+        {
 
             return (transform.position - Target.transform.position).magnitude <= c.Condition.outRadius
                     && (transform.position - Target.transform.position).magnitude >= c.Condition.inRadius
@@ -753,9 +849,10 @@ public class Minion : UnitBase<MinionState>
 
     public override MinionState InCombat => MinionState.Combat;
 
+
     protected override void SetUpConditionInternal(List<AttackConditions<MinionState>> conditons)
     {
-    } 
+    }
 }
 [Serializable]
 public class RendererToColor

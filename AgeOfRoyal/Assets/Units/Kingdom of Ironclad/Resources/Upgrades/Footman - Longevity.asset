@@ -13,9 +13,21 @@ MonoBehaviour:
   m_Name: Footman - Longevity
   m_EditorClassIdentifier: 
   ID: 5
-  perkName: Longevity
+  perkName: Buffet
+  cost: 3
+  descriptionOverride:
+    description: 
+    icon: {fileID: 0}
+  descriptionLines: []
+  target:
+  - {fileID: 1982330210055623403, guid: 1a9c831d0b102624aa1a7b613e42256b, type: 3}
+  image: {fileID: 21300000, guid: c73822892f5b2eb4ab75d75181b5c032, type: 3}
   buff:
     buffType: 2
+    filters:
+      targetTeam: 2
+      filters: []
+    triggers: []
     duration: 0
     maxStack: 1
     canBeDispelled: 0
@@ -29,6 +41,8 @@ MonoBehaviour:
         hitRadius: 0
         armorRange: 0
         armorMelee: 0
+        healModifier: 0
+        ignoreArmor: 0
       multStats:
         health: 1
         damage: 1
@@ -38,11 +52,11 @@ MonoBehaviour:
         hitRadius: 1
         armorRange: 1
         armorMelee: 1
+        healModifier: 1
+        ignoreArmor: 1
     heal: 0
     dispel: 0
+    healthLink: 0
   modules: []
-  cost: 3
-  description: 
-  target:
-  - {fileID: 1982330210055623403, guid: 1a9c831d0b102624aa1a7b613e42256b, type: 3}
-  image: {fileID: -1431334621, guid: 5b01f6ffc7d8783479c995daa9331b72, type: 3}
+  actions: []
+  triggers: []

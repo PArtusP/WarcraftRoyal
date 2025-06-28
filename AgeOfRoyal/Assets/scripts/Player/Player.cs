@@ -49,6 +49,8 @@ public class Player : NetworkBehaviour
     public PlayerExperience Xp { get => xp; set => xp = value; }
     public PlayerInterest Interest => interest;
 
+    public List<UnitUpgrade> Upgrades { get => upgrades; set => upgrades = value; }
+
     #region Init & Awake
     private void Awake()
     {
@@ -70,7 +72,7 @@ public class Player : NetworkBehaviour
         Home = GetNetworkObject(objId).GetComponent<Base>();
         if (IsOwner)
         {
-            Home.OnDieEvent.AddListener(OnDieEvent.Invoke);
+            //Home.OnDieEvent.AddListener(OnDieEvent.Invoke);  @TODO we need to trigger when the player lost
             wallet.OnChange.AddListener(walletUi.Set);
             wallet.OnChange.AddListener(SyncWalletServerRpc);
             walletUi.Set(wallet.Value);
@@ -130,10 +132,10 @@ public class Player : NetworkBehaviour
                 }
                 return false;
             case UnitUpgradeButton unitUpgrade:
-                if (!unitUpgrade.IsOwned && wallet.Spend(unitUpgrade.Cost))
+                if (!unitUpgrade.IsOwned && wallet.Spend(unitUpgrade.Upgrade.Cost))
                 {
-                    upgrades.Add(DbResolver.GetUpgradeById(unitUpgrade.ID)); 
-                    AddMinionUpgradeServerRpc(unitUpgrade.ID);
+                    upgrades.Add(DbResolver.GetUpgradeById(unitUpgrade.Upgrade.ID)); 
+                    AddMinionUpgradeServerRpc(unitUpgrade.Upgrade.ID);
                     return true;
                 }
                 return false;
@@ -157,9 +159,9 @@ public class Player : NetworkBehaviour
             case UnitUpgradeButton unitUpgrade:
                 if (unitUpgrade.IsOwned)
                 {
-                    wallet.Earn(unitUpgrade.Cost);
-                    upgrades.Remove(DbResolver.GetUpgradeById(unitUpgrade.ID)); 
-                    RemoveMinionUpgradeServerRpc(unitUpgrade.ID);
+                    wallet.Earn(unitUpgrade.Upgrade.Cost);
+                    upgrades.Remove(DbResolver.GetUpgradeById(unitUpgrade.Upgrade.ID)); 
+                    RemoveMinionUpgradeServerRpc(unitUpgrade.Upgrade.ID);
                     return true;
                 }
                 return false;

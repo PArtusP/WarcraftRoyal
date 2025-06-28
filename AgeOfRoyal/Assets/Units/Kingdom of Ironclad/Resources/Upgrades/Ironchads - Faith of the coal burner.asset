@@ -14,11 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 14
   perkName: Faith of the coal burner
+  cost: 3
+  descriptionOverride:
+    description: 
+    icon: {fileID: 0}
+  descriptionLines: []
+  target:
+  - {fileID: 485292257721796262, guid: 2e850bb20ed10df4f9a1ecf90130ea83, type: 3}
+  - {fileID: 1982330210055623403, guid: 523657598c0b0024abd97964af12f025, type: 3}
+  - {fileID: 1982330210055623403, guid: 1a9c831d0b102624aa1a7b613e42256b, type: 3}
+  image: {fileID: 21300000, guid: 6591a9e61bfe2aa46b7ed2c39e320e17, type: 3}
   buff:
     buffType: 2
     filters:
       targetTeam: 2
       filters: []
+    triggers: []
     duration: 0
     maxStack: 1
     canBeDispelled: 0
@@ -33,6 +44,7 @@ MonoBehaviour:
         armorRange: 0
         armorMelee: 0
         healModifier: 0
+        ignoreArmor: 0
       multStats:
         health: 1
         damage: 1
@@ -43,15 +55,10 @@ MonoBehaviour:
         armorRange: 1
         armorMelee: 1
         healModifier: 1.1
+        ignoreArmor: 1
     heal: 0
     dispel: 0
+    healthLink: 0
   modules: []
-  cost: 3
-  descriptions:
-  - description: Apply to every melee units
-    icon: {fileID: 21300000, guid: e134422b7b183694482d60ecfb70518e, type: 3}
-  target:
-  - {fileID: 485292257721796262, guid: 2e850bb20ed10df4f9a1ecf90130ea83, type: 3}
-  - {fileID: 1982330210055623403, guid: 523657598c0b0024abd97964af12f025, type: 3}
-  - {fileID: 1982330210055623403, guid: 1a9c831d0b102624aa1a7b613e42256b, type: 3}
-  image: {fileID: 21300000, guid: 6591a9e61bfe2aa46b7ed2c39e320e17, type: 3}
+  actions: []
+  triggers: []

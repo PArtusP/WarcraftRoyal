@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
+using static UnityEngine.GraphicsBuffer;
 
 public class MinionCombat : NetworkBehaviour
 {
@@ -29,7 +31,7 @@ public class MinionCombat : NetworkBehaviour
     }
     private void Update()
     {
-        modules.ForEach(m => m.Use(this));
+        modules.Where(m => !m.Triggers.Any()).ToList().ForEach(m => m.Use(this));
     }
 
     internal void StartAction(Hitable target, UnitAction action)
@@ -46,16 +48,8 @@ public class MinionCombat : NetworkBehaviour
     public void Action()
     {
         if (!IsServer) return;
-        try
-        {
-            if (!owner.IsStopped && action.Use(owner))
-                owner.Target = null;
-        }
-        catch (System.Exception)
-        {
-
-            throw;
-        }
+        if (!owner.IsStopped && action.Use(owner))
+            owner.Target = null;
         if (action.Vfx != null)
         {
             PlayAttackVfx();

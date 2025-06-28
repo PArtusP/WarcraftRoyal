@@ -41,6 +41,12 @@ public class UnitsManager : NetworkBehaviour
       this.units.AddRange(units);
         this.units.ForEach(u => u.OnDieEvent.AddListener(delegate () { StoreAsDead(u); }));
     }
+
+    internal void Add(UnitWithoutState unit)
+    {
+        units.Add(unit);
+        unit.OnDieEvent.AddListener(delegate () { StoreAsDead(unit); });
+    }
     public void Clean(bool deleteAlive) 
     {
         deads.Where(u => u != null).ToList().ForEach(u => { if (u.IsSpawned) u.NetworkObject.Despawn(); });

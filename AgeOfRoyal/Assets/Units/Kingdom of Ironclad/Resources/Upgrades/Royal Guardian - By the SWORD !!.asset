@@ -14,8 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 8
   perkName: By the SWORD !!
+  cost: 5
+  descriptionOverride:
+    description: 
+    icon: {fileID: 0}
+  descriptionLines: []
+  target:
+  - {fileID: 1982330210055623403, guid: 523657598c0b0024abd97964af12f025, type: 3}
+  image: {fileID: -1431334621, guid: 5b01f6ffc7d8783479c995daa9331b72, type: 3}
   buff:
     buffType: 2
+    filters:
+      targetTeam: 2
+      filters: []
+    triggers: []
     duration: 0
     maxStack: 1
     canBeDispelled: 0
@@ -29,6 +41,8 @@ MonoBehaviour:
         hitRadius: 0
         armorRange: 0
         armorMelee: 0
+        healModifier: 0
+        ignoreArmor: 0
       multStats:
         health: 1
         damage: 1
@@ -38,11 +52,11 @@ MonoBehaviour:
         hitRadius: 1
         armorRange: 1.3
         armorMelee: 1
+        healModifier: 1
+        ignoreArmor: 1
     heal: 0
     dispel: 0
+    healthLink: 0
   modules: []
-  cost: 5
-  description: Upgrade range armor
-  target:
-  - {fileID: 1982330210055623403, guid: 523657598c0b0024abd97964af12f025, type: 3}
-  image: {fileID: -1431334621, guid: 5b01f6ffc7d8783479c995daa9331b72, type: 3}
+  actions: []
+  triggers: []
