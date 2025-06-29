@@ -13,17 +13,21 @@ MonoBehaviour:
   m_Name: Armored Footman - Melee attack
   m_EditorClassIdentifier: 
   ID: 1
+  replacedAction: {fileID: 0}
+  triggers: 
   vfx:
     effects:
-    - effect: {fileID: 997303349635725295, guid: a96b08105ce7e0342863e5b34ad538fe, type: 3}
-      instanciate: 1
+    - instanciate: 1
       asChild: 1
-      timer: 1
+      timer: 2
+      effect: {fileID: 997303349635725295, guid: a96b08105ce7e0342863e5b34ad538fe, type: 3}
     gameObjects: []
     particles: []
     renderers: []
     animations: []
     sounds: []
   radius: 2
+  cooldown: 0
+  statuses: []
   bonusMultiplier: 2
   bonusAgainst: 1
