@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
-[CreateAssetMenu(fileName = "___ - Range Piercing Attack", menuName = "Unit Actions/Unit Attacks/Range Piercing Attack", order = 4)]
+[CreateAssetMenu(fileName = "___ - Range Piercing Attack", menuName = "Unit Actions/Unit Attacks/Range Piercing Attack", order = 6)]
 public class RangePiercingAttack : UnitAttack
 {
     [SerializeField] protected float touchUnitMultiplier = 0.66f;

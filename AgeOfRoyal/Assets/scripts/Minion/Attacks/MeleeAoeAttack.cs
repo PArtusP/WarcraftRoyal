@@ -2,17 +2,17 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "___ - Range AOE attack", menuName = "Unit Actions/Unit Attacks/Range AOE Attack", order = 5)]
-public class RangeAoeAttack : UnitAttack
-{ 
-    [SerializeField] protected float radius = 3f;
+[CreateAssetMenu(fileName = "___ - Melee aoe attack", menuName = "Unit Actions/Unit Attacks/Melee Aoe Attack", order = 2)]
+public class MeleeAoeAttack : UnitAttack
+{
+    [SerializeField] protected float aoeRadius = 3f;
     override public bool Use(UnitWithoutState owner)
     {
         if (owner.Target == null) return false;
-        owner.Combat.PlayShootVfx(owner.Target);
-        owner.Combat.PlayShootVfxClientRpc(owner.Target.NetworkObjectId);
 
-        var cols = Physics.OverlapSphere(owner.Target.transform.position, radius, owner.HitableLayer);
+        if ((owner.Combat.HitPoint.position - owner.Target.transform.position).magnitude > owner.Stats.hitRadius) return false;
+
+        var cols = Physics.OverlapSphere(owner.Combat.HitPoint.position, aoeRadius, owner.HitableLayer);
 
         var totalDamage = 0f;
 

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "___ - Range attack", menuName = "Unit Actions/Unit Attacks/Range Attack", order = 2)]
+[CreateAssetMenu(fileName = "___ - Range attack", menuName = "Unit Actions/Unit Attacks/Range Attack", order = 4)]
 public class RangeAttack : UnitAttack
 {
 

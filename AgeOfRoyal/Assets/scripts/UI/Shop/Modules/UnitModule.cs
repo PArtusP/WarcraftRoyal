@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Unity.Netcode;
 using UnityEngine;
-using static Unity.VisualScripting.Member;
-using static UnityEngine.GraphicsBuffer;
 
 [System.Serializable]
 abstract public class UnitModule : ScriptableObject
@@ -11,14 +8,14 @@ abstract public class UnitModule : ScriptableObject
     [Header("Global")]
     public int ID = -1;
     private Sprite icon;
-    
+
     [Header("Triggers")]
     [SerializeField] List<Trigger> triggers;
 
     [Header("SVFX")]
     [SerializeField] TriggerSVFX onTargetVfx;
     [SerializeField] TriggerSVFX onSelfVfx;
-    
+
     abstract public float Radius { get; }
     abstract public float Cooldown { get; }
     abstract public float Delay { get; }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "___ - Charge attack", menuName = "Unit Actions/Unit Attacks/Charge Attack", order = 5)]
+[CreateAssetMenu(fileName = "___ - Charge attack", menuName = "Unit Actions/Unit Attacks/Charge Attack", order = 3)]
 public class ChargeAttack : UnitAttack
 {
     [SerializeField] private TargetPicking targetPicking;
