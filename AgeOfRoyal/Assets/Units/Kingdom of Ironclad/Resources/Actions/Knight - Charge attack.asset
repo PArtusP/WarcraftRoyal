@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Knight - Charge attack
   m_EditorClassIdentifier: 
   ID: 9
+  replacedAction: {fileID: 0}
+  triggers: 
   vfx:
     effects: []
     gameObjects: []
@@ -21,6 +23,8 @@ MonoBehaviour:
     animations: []
     sounds: []
   radius: 12
+  cooldown: 0
+  statuses: []
   bonusMultiplier: 1
   bonusAgainst: 1
   targetPicking:
@@ -32,9 +36,9 @@ MonoBehaviour:
     - field: 6
       ascending: 0
     filters: []
-  onHitModules:
-  - {fileID: 11400000, guid: 05adaf380837cf14da7ec0a7c201b677, type: 2}
+  onHitModules: []
   chargeSpeed: 12
+  chargeAcceleration: 7
   damage: 20
   stopDistance: 1.5
-  minRadius: 4
+  minRadius: 6
