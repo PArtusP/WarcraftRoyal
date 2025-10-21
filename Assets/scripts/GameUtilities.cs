@@ -6,6 +6,26 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.VFX;
 
+
+static public class DbResolver
+{
+    static List<Minion> minions = null; 
+    public static List<Minion> Minions
+    {
+        get
+        {
+            if (minions == null)
+                minions = Resources.LoadAll<Minion>("").ToList();
+            return minions;
+        }
+    } 
+
+    public static Minion GetMinionById(int id)
+        => Minions.FirstOrDefault(m => m.ID == id) ?? throw new Exception($"Minion with ID {id} not found in resources.");
+}
+
+
+
 public static class Utils
 {
     public static bool IsSubclassOfRawGeneric(Type generic, Type toCheck)

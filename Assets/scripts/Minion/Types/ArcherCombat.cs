@@ -3,23 +3,21 @@ using UnityEngine;
 
 public class ArcherCombat : MinionCombat
 {
-    [SerializeField] private float bonusMultiplier = 2f;
-    [SerializeField] private ProjectileMove vfx;
+    [SerializeField] private float bonusMultiplier = 2f; 
 
-    protected override void AttackInternal()
+    protected override bool AttackInternal()
     { 
-        if (minion.Target == null) return;
+        if (minion.Target == null) return false;
 
-        var fx = Instantiate(vfx, hitPoint.transform.position, hitPoint.transform.rotation, null);
-        fx.Target = minion.Target.aimPoint;
+        PlayVfx(minion.Target);
+        PlayVfxClientRpc(minion.Target.NetworkObjectId);
 
-        if ((hitPoint.position - minion.Target.transform.position).magnitude > Owner.Stats.hitRadius) return;
+        if ((hitPoint.position - minion.Target.transform.position).magnitude > Owner.Stats.hitRadius) return false;
 
         var finalDamage = Owner.Stats.damage;
         if (minion.Target.GetComponent<MageCombat>() != null)
             finalDamage *= bonusMultiplier;
 
-        if (minion.Target.GetHit(finalDamage, minion))
-            minion.Target = null;
+        return minion.Target.GetHit(finalDamage, minion);
     }
 }

@@ -5,11 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Unity.Multiplayer.Playmode;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class ConnectionManager : MonoBehaviour
@@ -28,12 +26,13 @@ public class ConnectionManager : MonoBehaviour
     {
         get
         {
-            var co = new ConnectionString { Id = new Guid(), Name = PlayerSettings.Name, CharacterId = PlayerSettings.CharacterId, Licensed = true};
+            //var co = new ConnectionString { Id = new Guid(), Name = PlayerSettings.Name, CharacterId = PlayerSettings.CharacterId, Licensed = true };
+            var co = new ConnectionString { Id = new Guid(), Name = "toto", CharacterId = PlayerSettings.CharacterId, Licensed = true };
             Debug.Log("Connection string: " + (JsonUtility.ToJson(co)));
             return co;
         }
     }
-    [SerializeField] private GameObject playerPrefab; 
+    [SerializeField] private GameObject playerPrefab;
     [SerializeField] private UnityTransport transport;
     [SerializeField] internal bool startServerAuto = false;
     [SerializeField] internal bool startHostAuto = false;
@@ -47,7 +46,8 @@ public class ConnectionManager : MonoBehaviour
     [SerializeField] private bool localTest = false;
 
 
-    Dictionary<ulong, NetworkObject> dict = new Dictionary<ulong, NetworkObject>();
+    Dictionary<ulong, NetworkObject> clientToPlayerDict = new Dictionary<ulong, NetworkObject>();
+    Dictionary<ulong, int> clientToCharacterDict = new Dictionary<ulong, int>();
 
     public int Ping
     {
@@ -64,24 +64,18 @@ public class ConnectionManager : MonoBehaviour
     public MatchManager MatchManager { get { if (matchManager == null) matchManager = FindFirstObjectByType<MatchManager>(); return matchManager; } set => matchManager = value; }
 
     private void Start()
-    { 
-        ip_address.onSubmit.AddListener(delegate {
-            NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(ip_address.text, (ushort)7777); ; });
-
-#if UNITY_EDITOR
-        Debug.unityLogger.logEnabled = true;
-#else
-  Debug.unityLogger.logEnabled = false;
-#endif
-
-
+    {
+        ip_address.onSubmit.AddListener(delegate
+        {
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(ip_address.text, (ushort)7777); ;
+        });
         button_Host.onClick.AddListener(Host);
         button_Server.onClick.AddListener(Server);
         button_Client.onClick.AddListener(Client);
 
         NetworkManager.Singleton.OnServerStarted += HandleServerStarted;
         NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnected;
-        NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;  
+        NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
         PlayerSettings.CharacterId = -1;
     }
     void OnGUI()
@@ -95,33 +89,35 @@ public class ConnectionManager : MonoBehaviour
 
     async void TryConnectToAgonesAsync()
     {
-
+        Debug.Log(("ConnectionManager, TryConnectToAgonesAsync : Start"));
         agones = GetComponent<Agones.AgonesAlphaSdk>();
         agones.enabled = true;
         bool ok = await agones.Connect();
         if (ok)
         {
-            Debug.Log(("Server - Connected"));
+            Debug.Log(("ConnectionManager, TryConnectToAgonesAsync : Server - Connected"));
         }
         else
         {
-            Debug.Log(("Server - Failed to connect, exiting"));
+            Debug.Log(("ConnectionManager, TryConnectToAgonesAsync : Server - Failed to connect, exiting"));
             Application.Quit(1);
         }
-        try{
+        try
+        {
 
             ok = await agones.Ready();
             if (ok)
             {
-                Debug.Log($"Server - Ready");
+                Debug.Log($"ConnectionManager, TryConnectToAgonesAsync : Server - Ready");
                 //agones.SetPlayerCapacity(2);
             }
             else
             {
-                Debug.Log($"Server - Ready failed");
+                Debug.Log($"ConnectionManager, TryConnectToAgonesAsync : Server - Ready failed");
             }
         }
-        catch{
+        catch
+        {
 
         }
     }
@@ -160,8 +156,11 @@ public class ConnectionManager : MonoBehaviour
     }
     internal void Server()
     {
+#if UNITY_EDITOR
+#else
         TryConnectToAgonesAsync();
-
+#endif
+        Debug.Log("ConnectionManager, Server : start server");
         //if (inputName.text == "") return;
         // Hook up password approval check
         NetworkManager.Singleton.ConnectionApprovalCallback += ApprovalCheck;
@@ -176,7 +175,7 @@ public class ConnectionManager : MonoBehaviour
         {
             // Set password ready to send to the server to validate
 
-            NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData("127.0.0.1", (ushort)7777);
+            //NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData("127.0.0.1", (ushort)7777);
 
             NetworkManager.Singleton.NetworkConfig.ConnectionData = Encoding.ASCII.GetBytes(JsonUtility.ToJson(ConnectionString));
             NetworkManager.Singleton.StartClient();
@@ -205,17 +204,48 @@ public class ConnectionManager : MonoBehaviour
 
         Debug.Log(gs);
 
-        NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(gs.ip, (ushort)gs.port); 
+        NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(gs.ip, (ushort)gs.port);
 
         NetworkManager.Singleton.NetworkConfig.ConnectionData = Encoding.ASCII.GetBytes(JsonUtility.ToJson(ConnectionString));
         NetworkManager.Singleton.StartClient();
     }
-
+    private NetworkObject GetPlayerNetworkObject(ulong clientId)
+    {
+        //if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
+        if (clientToPlayerDict.TryGetValue(clientId, out var player))
+        {
+            return player; // Retourne l'objet NetworkObject du joueur
+        }
+        else
+        {
+            Debug.LogWarning($"ClientId {clientId} non trouvé dans ConnectedClients.");
+            return null;
+        }
+    }
     private void HandleClientConnected(ulong clientId)
     {
+        Debug.Log($"ConnectionManager, HandleClientConnected : clientId {clientId}");
         if (NetworkManager.Singleton.IsServer || NetworkManager.Singleton.IsHost)
         {
             _ = AddPlayerAndAllocate(clientId);
+
+            clientToCharacterDict.TryGetValue(clientId, out int characterId);
+            var character = characterSelector.Prefabs[characterId];
+            GameObject go = Instantiate(character, Vector3.zero, Quaternion.identity);
+            var networkObject = go.GetComponent<NetworkObject>();
+            networkObject.SpawnWithOwnership(clientId, false);
+
+
+            var player = go.GetComponent<Player>();
+            PlayerManager.AddPlayer(player);
+
+            var home = FindObjectsByType<Base>(FindObjectsSortMode.None).OrderBy(b => b.name).ToArray
+            ()[2 - PlayerManager.Players.Count];
+
+            player.Home = home;
+            player.InitPlayerClientRpc(home.NetworkObjectId);
+
+            clientToPlayerDict.Add(clientId, networkObject);
         }
         else
             characterSelector.gameObject.SetActive(false);
@@ -264,6 +294,7 @@ public class ConnectionManager : MonoBehaviour
 
     private void HandleServerStarted()
     {
+        Debug.Log(("ConnectionManager, HandleServerStarted"));
         canvas.SetActive(false);
         // Temporary workaround to treat host as client
         if (NetworkManager.Singleton.IsHost)
@@ -274,6 +305,7 @@ public class ConnectionManager : MonoBehaviour
 
     private void ApprovalCheck(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
     {
+        Debug.Log(("ConnectionManager, ApprovalCheck"));
         // The client identifier to be authenticated
         var clientId = request.ClientNetworkId;
 
@@ -286,6 +318,7 @@ public class ConnectionManager : MonoBehaviour
 
         // Your approval logic determines the following values
         response.Approved = gameReturnStatus == ConnectStatus.Success ? true : false;
+        Debug.Log($"ConnectionManager, ApprovalCheck : Approved {response.Approved}");
 
         response.CreatePlayerObject = false;
 
@@ -304,20 +337,8 @@ public class ConnectionManager : MonoBehaviour
         // once it transitions from true to false the connection approval response will be processed.
         response.Pending = false;
         if (response.Approved)
-        { 
-            characterSelector.gameObject.SetActive(false);
-            var character = characterSelector.Prefabs[connectionString.CharacterId];
-            GameObject go = Instantiate(character, Vector3.zero, Quaternion.identity);
-            var networkObject = go.GetComponent<NetworkObject>();
-            networkObject.SpawnWithOwnership(clientId, false);
-
-            var player = go.GetComponent<Player>();
-            PlayerManager.AddPlayer(player); 
-            var home = FindObjectsByType<Base>(FindObjectsSortMode.None).OrderBy(b => b.name).ToArray
-                ()[PlayerManager.Players.Count];
-            player.SetHomeClientRpc(home.NetworkObjectId);
-             
-            dict.Add(clientId, networkObject); 
+        {
+            clientToCharacterDict.Add(clientId, connectionString.CharacterId);
         }
     }
     public async Task ShutdownServer()
@@ -326,7 +347,7 @@ public class ConnectionManager : MonoBehaviour
 
         foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
         {
-            dict.TryGetValue(client.ClientId, out NetworkObject obj);
+            clientToPlayerDict.TryGetValue(client.ClientId, out NetworkObject obj);
             obj.Despawn();
             NetworkManager.Singleton.DisconnectClient(client.ClientId);
         }
@@ -349,14 +370,14 @@ public class ConnectionManager : MonoBehaviour
     }
     ConnectStatus GetConnectStatus(ConnectionString connectionPayload)
     {
-        if (NetworkManager.Singleton.ConnectedClientsIds.Count >= 2)
+        /*if (NetworkManager.Singleton.ConnectedClientsIds.Count >= 2)
         {
             return ConnectStatus.ServerFull;
         }
         if (!connectionPayload.Licensed)
             return ConnectStatus.IncompatibleBuildType;
 
-        /*if (connectionPayload.isDebug != Debug.isDebugBuild)
+        if (connectionPayload.isDebug != Debug.isDebugBuild)
         {
             return ConnectStatus.IncompatibleBuildType;
         }*/

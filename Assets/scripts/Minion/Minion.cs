@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 
 enum MinionState
@@ -9,45 +11,55 @@ enum MinionState
     Combat,
     Stop
 }
+public class SerializedMinion
+{
+    public int ID = -1;
+    public float Health = 0;
+}
 public class Minion : Hitable
 {
+    [Header("Shop attributes")]
+    [SerializeField] public int ID = -1;
+    [SerializeField] internal int cost;
+
+    [Header("Visuals")]
+    [SerializeField] public List<RendererToColor> rendererToColor = new List<RendererToColor>(); 
     MinionController controller;
     MinionCombat combat;
+
+    [Header("Stats")]
     [SerializeField] private MinionCombatStats baseStats;
     [SerializeField] private MinionCombatStats powerUp;
     [SerializeField] float sightRadius;
-    MinionState state;
-
     [SerializeField] private LayerMask hitableLayer;
-    private Hitable target;
-    private bool isAsset = true;
-    private float health;
 
-    public override float Health { get => health; set => health = value; }
+    Hitable target;
+
+    MinionState State { get; set; } = MinionState.Stop;
+    public bool IsAsset { get; set; } = true; 
+    public bool IsStopped => State == MinionState.Stop; 
+
     public LayerMask HitableLayer { get => hitableLayer; set => hitableLayer = value; }
     public Hitable Target
     {
         get => target; set
-        {
+        { 
             target = value;
             if (target == null)
-            {
-                state = MinionState.Walk;
+            { 
+                SetState(MinionState.Walk);
                 controller.SetDestination(new Vector3(home.transform.position.x, home.transform.position.y, -home.transform.position.z));
             }
         }
-    }
-
-    public bool IsAsset => isAsset;
-
-    public MinionCombatStats Stats => baseStats + powerUp;
-
+    } 
+    public MinionCombatStats Stats => baseStats + powerUp; 
     public MinionCombatStats PowerUp { get => powerUp; set => powerUp = value; }
     public Minion SourcePrefab { get; internal set; } = null;
+    public SerializedMinion Serialized => new SerializedMinion() { ID = ID, Health = Health }; // Serialized data for saving/loading purposes
 
     override protected void AwakeInternal()
     {
-        isAsset = false;
+        IsAsset = false;
         controller = GetComponent<MinionController>();
         ApplyStatsAndStatus();
         combat = GetComponent<MinionCombat>();
@@ -56,7 +68,8 @@ public class Minion : Hitable
 
     private void Update()
     {
-        switch (state)
+        if (!IsServer) return;
+        switch (State)
         {
             case MinionState.Walk:
                 CheckForTarget();
@@ -68,7 +81,7 @@ public class Minion : Hitable
                     controller.SetDestination(target.transform.position);
                 else if ((transform.position - controller.Destination).magnitude < Stats.hitRadius)
                 {
-                    state = MinionState.Combat;
+                    SetState(MinionState.Combat);
                     controller.SetDestination(target.transform.position);
                     controller.Stop(true);
                 }
@@ -77,13 +90,15 @@ public class Minion : Hitable
                 if (target == null)
                     Target = null;
                 if ((transform.position - controller.Destination).magnitude > Stats.hitRadius)
-                    state = MinionState.Follow;
+                    SetState(MinionState.Follow);
                 else
                 {
                     transform.LookAt(target.transform, Vector3.up);
                     combat.TryAttack(target);
                 }
                 break;
+            case MinionState.Stop:
+                Debug.Log($"Stopped: {gameObject.name}"); break;
             default:
                 break;
         }
@@ -106,14 +121,14 @@ public class Minion : Hitable
 
                 Target = targets.First();
                 controller.SetDestination(target.transform.position);
-                state = MinionState.Follow;
+                SetState(MinionState.Follow);
             }
         }
     }
 
     private void OnDrawGizmos()
     {
-        switch (state)
+        switch (State)
         {
             case MinionState.Walk:
                 Gizmos.color = Color.green;
@@ -134,11 +149,12 @@ public class Minion : Hitable
 
     internal void SetState(MinionState state)
     {
-        switch (this.state)
+        Debug.Log($"Minion, SetState: {gameObject.name} to {state}");
+        switch (this.State)
         {
         }
-        this.state = state;
-        switch (this.state)
+        this.State = state;
+        switch (this.State)
         {
             case MinionState.Stop:
                 controller.Stop(true);
@@ -153,9 +169,8 @@ public class Minion : Hitable
     internal void ApplyStatsAndStatus()
     {
         controller.SetSpeed(Stats.speed);
-        Health = Stats.health;
         healthbar.SetMaxHealth(Stats.health);
-        healthbar.SetHealth(Health);
+        Health = Stats.health; 
     }
 
     internal void SetPowerUp(MinionCombatStats powerUp)
@@ -175,4 +190,10 @@ public class Minion : Hitable
                 Health = percentHealth * Stats.health;
         }
     }
+}
+[Serializable]
+public class RendererToColor
+{
+    public int id = 0;
+    public Renderer renderer;
 }

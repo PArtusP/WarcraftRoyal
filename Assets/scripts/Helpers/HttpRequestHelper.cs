@@ -1,16 +1,14 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.Networking;
-using System.Collections.Generic;
-using System;
 
 public class HttpRequestHelper : MonoBehaviour
 {
-    const string API_URL = "https://swingball-mmapp.azurewebsites.net/api/findserver";
+    const string API_URL = "https://ageofroyal-mmapi.azurewebsites.net/api/findserver";
 
 
     public IEnumerator GetServer(PlayerGameInfo playerGameInfo)
-    {    
+    {
         // Serialize the playerGameInfo object to JSON
         string jsonBody = JsonUtility.ToJson(playerGameInfo);
 

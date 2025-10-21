@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -27,22 +26,28 @@ public class PlayerExperience
     public int Level => level;
 
     public UnityEvent<int> LevelUpEvent { get; } = new UnityEvent<int>();
-    public static int NbLevel => thresholds.Length;
+    public static int NbLevel => thresholds.Length - 1;
 
     public void AddExperience(float value)
     {
         if (level == thresholds.Length - 1) return;
         currentXp += value;
+        Debug.Log($"XP, AddExperience : add {value}, level {level}, max {thresholds.Length - 1}");
 
         while (level < thresholds.Length - 1 && currentXp >= GetThreshold(level))
         {
+            Debug.Log($"XP, AddExperience : level up '{level + 1}'");
             level++;
             currentXp -= GetThreshold(level);
             currentLevel.text = romanLevel[level];
             nextLevel.text = level + 1 < thresholds.Length ? romanLevel[level + 1] : string.Empty;
             LevelUpEvent.Invoke(level);
 
-            if (level == thresholds.Length - 1) currentXp = GetThreshold(level);
+            if (level == thresholds.Length - 1)
+            {
+                Debug.Log($"XP, AddExperience : max level reached");
+                currentXp = GetThreshold(level);
+            }
         }
         healthBar.SetHealth(currentXp / GetThreshold(level) * 100f);
     }

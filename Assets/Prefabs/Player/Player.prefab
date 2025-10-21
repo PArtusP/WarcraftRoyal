@@ -2240,7 +2240,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  home: {fileID: 0}
   startButton: {fileID: 1001534675927920949}
   xp:
     healthBar: {fileID: 6600038501319819379}

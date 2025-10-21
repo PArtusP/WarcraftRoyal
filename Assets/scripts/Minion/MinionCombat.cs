@@ -1,10 +1,8 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-abstract public class MinionCombat : MonoBehaviour
-{ 
+abstract public class MinionCombat : NetworkBehaviour
+{
     protected float nextAttack = 0f;
 
     [Header("Components")]
@@ -12,6 +10,9 @@ abstract public class MinionCombat : MonoBehaviour
     [SerializeField] protected Transform hitPoint;
     protected MinionAnimator animator;
     protected Minion minion;
+
+    [Header("Range specific")]
+    [SerializeField] private ProjectileMove vfx;
 
     public Minion Owner { get; private set; }
 
@@ -33,11 +34,33 @@ abstract public class MinionCombat : MonoBehaviour
 
     public void Attack()
     {
-        attackFx.PlayBase(true, this);
-        AttackInternal();
+        if(AttackInternal() && !minion.IsStopped)
+            minion.Target = null;
+        PlayAttackVfx();
+        PlayAttackVfxClientRpc();
     }
-    abstract protected void AttackInternal();
+
+    private void PlayAttackVfx() => attackFx.PlayBase(true, this);
+    [ClientRpc]
+    private void PlayAttackVfxClientRpc()
+    {
+        if (IsHost) return;
+        PlayAttackVfx();
+    }
+
+    abstract protected bool AttackInternal();
 
     internal void Init(Minion owner) => Owner = owner;
+    protected void PlayVfx(Hitable hitable)
+    {
+        var fx = Instantiate(vfx, hitPoint.transform.position, hitPoint.transform.rotation, null);
+        fx.Target = hitable.aimPoint;
+    }
+    [ClientRpc]
+    protected void PlayVfxClientRpc(ulong targetId)
+    {
+        if (IsHost) return;
+        PlayVfx(GetNetworkObject(targetId).GetComponent<Hitable>());
+    }
 }
 

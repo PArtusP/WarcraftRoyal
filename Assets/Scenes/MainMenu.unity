@@ -2076,7 +2076,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 613506436}
-    PlayerPrefab: {fileID: 3678103632357136259, guid: e5b077a296b41ba449bd05b1a707efaa, type: 3}
+    PlayerPrefab: {fileID: 3920597796656497987, guid: acad517f03c8c9d47afea3e82d3ab0ed, type: 3}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: 691915c5bd16ebe4ba4d0c45086c3bc3, type: 2}
@@ -2122,11 +2122,11 @@ MonoBehaviour:
   m_HeartbeatTimeoutMS: 500
   m_ConnectTimeoutMS: 1000
   m_MaxConnectAttempts: 60
-  m_DisconnectTimeoutMS: 30000
+  m_DisconnectTimeoutMS: 10000
   ConnectionData:
     Address: 127.0.0.1
     Port: 7777
-    ServerListenAddress: 127.0.0.1
+    ServerListenAddress: 0.0.0.0
   DebugSimulator:
     PacketDelayMS: 0
     PacketJitterMS: 0
@@ -2463,7 +2463,7 @@ MonoBehaviour:
   startServerAuto: 1
   startHostAuto: 1
   characterSelector: {fileID: 741625698}
-  localTest: 1
+  localTest: 0
 --- !u!4 &646777878
 Transform:
   m_ObjectHideFlags: 0
@@ -2493,7 +2493,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healthIntervalSecond: 5
   healthEnabled: 1
-  logEnabled: 0
+  logEnabled: 1
 --- !u!1 &661525551
 GameObject:
   m_ObjectHideFlags: 0

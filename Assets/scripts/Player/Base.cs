@@ -1,18 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class Base : Hitable
 {
+    private const int HealthBase = 100;
     [SerializeField] List<Minion> spawnList;
     [SerializeField] Material material;
     private List<Minion> spawnedUnits = new List<Minion>();
-    private float health;
 
     public Vector3 direction { get; private set; }
     public UnityEvent EndOfRoundEvent { get; private set; } = new UnityEvent();
-    public override float Health { get => health; set => health = value; }
+    public List<Minion> SpawnList { get => spawnList; set => spawnList = value; }
 
     // Start is called before the first frame update
     override protected void AwakeInternal()
@@ -22,8 +23,11 @@ public class Base : Hitable
         bases.Remove(this);
 
         direction = (bases[0].transform.position - this.transform.position).normalized;
+        healthbar.SetMaxHealth(HealthBase);
+        Health = HealthBase;
     }
-    public void SpawnMinion(Dictionary<Minion, MinionCombatStats> minionPowerUps)
+    #region Spawn minions
+    public void SpawnMinion(Dictionary<int, MinionCombatStats> minionPowerUps)
     {
         float laneSpacing = 1.5f;
         float rowSpacing = 1.5f;
@@ -49,7 +53,7 @@ public class Base : Hitable
         spawnList.Clear();
     }
 
-    int SpawnLine(List<Minion> units, Vector3 basePos, float zOffset, float laneSpacing, Dictionary<Minion, MinionCombatStats> minionPowerUps)
+    int SpawnLine(List<Minion> units, Vector3 basePos, float zOffset, float laneSpacing, Dictionary<int, MinionCombatStats> minionPowerUps)
     {
         const int maxPerRow = 10;
         float rowSpacing = 1.5f;
@@ -83,13 +87,15 @@ public class Base : Hitable
             else
             {
                 unit = Instantiate(units[i], spawnPos, Quaternion.LookRotation(direction, Vector3.up), transform);
+                unit.NetworkObject.Spawn();
                 unit.ApplyStatsAndStatus();
                 unit.SourcePrefab = units[i];
-                unit.GetComponentInChildren<SkinnedMeshRenderer>().sharedMaterial = material;
+                ColoredUnit(unit);
+                ColoredUnitClientRpc(unit.NetworkObjectId);
                 unit.Home = this;
                 unit.OnDieEvent.AddListener(delegate { CheckEndRound(unit); });
             }
-            if (minionPowerUps.TryGetValue(unit.SourcePrefab, out MinionCombatStats powerUp))
+            if (minionPowerUps.TryGetValue(unit.ID, out MinionCombatStats powerUp))
             {
                 unit.SetPowerUp(powerUp);
                 Debug.Log($"Applying power-up to {unit.name}: {powerUp} (Total: {unit.Stats})");
@@ -102,15 +108,22 @@ public class Base : Hitable
 
         return totalRows;
     }
+    #endregion
+
+    #region Color unit
+    private void ColoredUnit(Minion unit) => unit.rendererToColor.ForEach(v => v.renderer.sharedMaterials[v.id] = material);
+
+    [ClientRpc]
+    private void ColoredUnitClientRpc(ulong unitId) => ColoredUnit(GetNetworkObject(unitId).GetComponent<Minion>());
+    #endregion  
 
 
-    public void CheckEndRound(Minion unit)
-    {
-        if (unit) spawnedUnits.Remove(unit);
-        if (!spawnedUnits.Any()) EndOfRoundEvent.Invoke();
-    }
-
+    #region Minion management
     internal void AddMinion(Minion prefab) => spawnList.Add(prefab);
+    [ServerRpc(RequireOwnership = false)]
+    internal void AddMinionServerRpc(int id) => spawnList.Add(DbResolver.GetMinionById(id));
+    [ServerRpc(RequireOwnership = false)]
+    internal void RemoveMinionServerRpc(int id) => spawnList.Remove(spawnList.FirstOrDefault(s => s.ID == id));
 
     internal bool RemoveMinion(Minion prefab)
     {
@@ -126,9 +139,19 @@ public class Base : Hitable
     {
         if (spawnedUnits.Any())
         {
-            spawnedUnits.ForEach(u => u.SetState(MinionState.Stop));
+            if (IsServer)
+            {
+                Debug.Log($"ResetForNextRound: Stopping {spawnedUnits.Count} mobs");
+                spawnedUnits.ForEach(u => u.SetState(MinionState.Stop));
+            }
             spawnList.AddRange(spawnedUnits);
         }
         spawnedUnits.Clear();
     }
+    public void CheckEndRound(Minion unit)
+    {
+        if (unit) spawnedUnits.Remove(unit);
+        if (!spawnedUnits.Any()) EndOfRoundEvent.Invoke();
+    }
+    #endregion
 }

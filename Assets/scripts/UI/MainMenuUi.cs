@@ -1,15 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using System.Linq;
+using Unity.Multiplayer.Playmode;
+using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
-using UnityEngine.UI;
-using UnityEngine.Events;
-using System;
 using UnityEngine.SceneManagement;
-using Unity.Netcode;
-using Unity.Multiplayer.Playmode;
+using UnityEngine.UI;
 
 public class MainMenuUi : MonoBehaviour
 {
@@ -40,28 +38,57 @@ public class MainMenuUi : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
         var mppmTag = CurrentPlayer.ReadOnlyTags();
+
+#if SERVER_BUILD || HOST_BUILD 
+        Destroy(GetComponent<NetworkManager>());
+        Debug.Log("MainMenuUi, Start : Server load scene: GameScene");
+        SceneManager.sceneLoaded += ServerLoadGameScene;
+        SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+#else
+    #if UNITY_EDITOR 
         if (mppmTag.Contains("Server") || mppmTag.Contains("Host"))
         {
-            var co = FindFirstObjectByType<ConnectionManager>();
             Destroy(GetComponent<NetworkManager>());
             SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
-            if (mppmTag.Contains("Server") && co.startServerAuto) co.Server();
-            if (mppmTag.Contains("Host") && co.startHostAuto) co.Host();
-        }
-        else
-        {
-            MoveToOpeningMenu();
-            // Main menu
-            PlayMenuButton.onClick.AddListener(MoveToPlayMenu);
-            SettingsButton.onClick.AddListener(MoveToSettingsMenu);
-            ExitGameButton.onClick.AddListener(Application.Quit);
-            // Play menu
-            QuickGameButton.onClick.AddListener(MoveToQuickMenu);
-            // Settings menu
-            Settings_Back.onClick.AddListener(Back);
+            SceneManager.sceneLoaded += ServerLoadGameScene; 
+        } else
+    #endif 
+        BehaveAsClient(); 
+#endif
+    }
 
-            OnlineInputManager.Controls.Menu.Back.performed += _ => Back();
-        }
+    public void BehaveAsClient()
+    {
+        MoveToOpeningMenu();
+        // Main menu
+        PlayMenuButton.onClick.AddListener(MoveToPlayMenu);
+        SettingsButton.onClick.AddListener(MoveToSettingsMenu);
+        ExitGameButton.onClick.AddListener(Application.Quit);
+        // Play menu
+        QuickGameButton.onClick.AddListener(MoveToQuickMenu);
+        // Settings menu
+        Settings_Back.onClick.AddListener(Back);
+
+        OnlineInputManager.Controls.Menu.Back.performed += _ => Back();
+    }
+
+    private void ServerLoadGameScene(Scene scene, LoadSceneMode mode)
+    {
+        SceneManager.sceneLoaded -= ServerLoadGameScene;
+        Debug.Log($"MainMenuUi, ServerLoadGameScene : Server scene loaded: {scene.name}");
+        var co = FindFirstObjectByType<ConnectionManager>();
+#if SERVER_BUILD
+        if (co.startServerAuto) co.Server();
+        //Debug.unityLogger.logEnabled = false;
+#elif HOST_BUILD
+        if (co.startHostAuto) co.Host();
+        Debug.unityLogger.logEnabled = false;
+#elif UNITY_EDITOR
+        Debug.unityLogger.logEnabled = true;
+        var mppmTag = CurrentPlayer.ReadOnlyTags();
+        if ((mppmTag.Contains("Server")) && co.startServerAuto) co.Server();
+        if ((mppmTag.Contains("Host")) && co.startHostAuto) co.Host();
+#endif
     }
 
     private void Back()

@@ -1,20 +1,18 @@
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class PlayerManager : NetworkBehaviour
 {
 
     [Header("Player")]
-    [SerializeField] List<Player> players = new List<Player>(); 
+    [SerializeField] List<Player> players = new List<Player>();
 
     [Header("UI - Life stock")]
     [SerializeField] int[] lifestocks = new int[2];
     [SerializeField] LifestockUi[] lifestockUis = new LifestockUi[2];
 
-    public List<Player> Players { get => players; set => players = value; } 
+    public List<Player> Players { get => players; set => players = value; }
     public int[] Lifestocks { get => lifestocks; set => lifestocks = value; }
 
 
@@ -24,7 +22,7 @@ public class PlayerManager : NetworkBehaviour
     public void AddPlayer(Player player)
     {
         if (players.Count >= MaxPlayer) return;
-         
+
         players.Add(player);
 
         if (players.Count == MaxPlayer)
@@ -34,10 +32,10 @@ public class PlayerManager : NetworkBehaviour
     public void RestarWholeGame()
     {
         SubmitResetLifeClientRpc();
-        ResetLifeStocks(); 
+        ResetLifeStocks();
     }
-     
-     
+
+
     [ClientRpc]
     public void SubmitLifeLostClientRpc(int i, int value)
     {
@@ -74,5 +72,5 @@ public class PlayerManager : NetworkBehaviour
             }
         }
     }
-     
+
 }

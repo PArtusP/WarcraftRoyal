@@ -3139,7 +3139,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3741111133
+  GlobalObjectIdHash: 2602477950
   InScenePlacedSourceGlobalObjectIdHash: 2602477950
   DeferredDespawnTick: 0
   Ownership: 1
@@ -3165,11 +3165,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  lifeStockCanvas: {fileID: 3985922456894705592}
   restartCanvas: {fileID: 3985922456778119621}
   countDownUi: {fileID: 3985922457996010814}
   playerManager: {fileID: 3974790452115796425}
-  isTraining: 0
 --- !u!114 &3974790452115796425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3565,11 +3563,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: {fileID: 3985922456154218284}
   source: {fileID: 3985922457996010810}
-  clips:
-  - {fileID: 8300000, guid: 13c3ef6eae69d55478f9d03e87c30d63, type: 3}
-  - {fileID: 8300000, guid: 6bc59388659d1ad4da341967c412d4fe, type: 3}
-  - {fileID: 8300000, guid: 6bc59388659d1ad4da341967c412d4fe, type: 3}
-  - {fileID: 8300000, guid: 6bc59388659d1ad4da341967c412d4fe, type: 3}
+  clipEnd: {fileID: 8300000, guid: 13c3ef6eae69d55478f9d03e87c30d63, type: 3}
+  clipCount: {fileID: 8300000, guid: 6bc59388659d1ad4da341967c412d4fe, type: 3}
 --- !u!82 &3985922457996010810
 AudioSource:
   m_ObjectHideFlags: 0

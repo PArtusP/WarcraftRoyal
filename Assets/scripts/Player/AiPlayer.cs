@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -41,7 +41,7 @@ public class AiPlayer : MonoBehaviour
                     {
                         budget -= prefab.cost;
                         picks.Add(prefab);
-                        home.AddMinion(prefab);
+                        home.AddMinion(prefab); 
                         boughtSomething = true;
                         break; // buy only one per pass to balance distribution
                     }
@@ -69,3 +69,4 @@ public class AiPlayer : MonoBehaviour
         }
     }
 }
+*/

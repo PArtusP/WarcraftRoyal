@@ -1,32 +1,28 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
 
+public enum Phase
+{
+    Preparation,
+    Combat,
+}
 public class MatchManager : NetworkBehaviour
 {
+    private const int preparationTime = 20;
     [Header("UI")]
-    [SerializeField] Canvas lifeStockCanvas;
     [SerializeField] Canvas restartCanvas;
     [SerializeField] CountDownUi countDownUi;
+    ShopUi shopUi;
+    int roundCount = 0;
+    Phase phase = Phase.Preparation;
 
     [Header("Players")]
     [SerializeField] PlayerManager playerManager;
-    [Header("Settings")]
-    [SerializeField] bool isTraining = false;
 
-    public List<Player> Players { get => playerManager.Players; }
-    public bool IsTraining { get => isTraining; set => isTraining = value; }
-
-    #region Set game up
-    /*private void Awake()
-    {
-        playerManager.Ready.AddListener(delegate { AskSetUpGameServerRpc(); });
-    }*/
-
-    //[ServerRpc(RequireOwnership = false)]
+    #region Set game up 
     public void AskSetUpGame()
     {
         StartCoroutine(SetUpGame());
@@ -42,16 +38,32 @@ public class MatchManager : NetworkBehaviour
             Debug.Log("SetUpGame : i = " + i);
             var player = players[i];
             player.OnDieEvent.AddListener(delegate { ProcessDeath(player.NetworkObjectId); });
-            SetUpPlayerClientRpc(i, players[i].NetworkObjectId, isTraining);
+            player.Home.EndOfRoundEvent.AddListener(EndOfCombatRound);
+            player.IsReadyForBattle.OnValueChanged += MarkPlayerReady(player);
+            SetUpPlayerClientRpc(i, players[i].NetworkObjectId);
         }
 
         SetUi();
         SetUpUiClientRpc();
 
         yield return new WaitForSeconds(1f);
-        StartPreparationPhase();
+        StartCoroutine(PreparationPhase());
     }
 
+    private NetworkVariable<bool>.OnValueChangedDelegate MarkPlayerReady(Player player) =>
+        new NetworkVariable<bool>.OnValueChangedDelegate((previousValue, newValue) =>
+        {
+            if (newValue)
+            {
+                if (!playerManager.Players.Any(p => !p.IsReadyForBattle.Value))
+                    CombatPhase();
+            }
+        });
+
+
+    #endregion
+
+    #region Set up UI
     [ClientRpc]
     private void SetUpUiClientRpc()
     {
@@ -66,23 +78,23 @@ public class MatchManager : NetworkBehaviour
             if (playerManager.Players.Count <= nb)
                 while (playerManager.Players.Count <= nb)
                     playerManager.Players.Add(null);
+            var player = GetNetworkObject(networkObjectId).GetComponent<Player>();
 
-            playerManager.Players[nb] = GetNetworkObject(networkObjectId).GetComponent<Player>();
+            playerManager.Players[nb] = player;
+            if (player.IsOwner)
+                countDownUi.EndCountDownEvent.AddListener(delegate () { EndPreparationCooldown(player); });
         }
     }
 
     private void SetUiServer()
     {
-        lifeStockCanvas.gameObject.SetActive(true);
         for (int i = 0; i < playerManager.Players.Count; i++)
         {
-            //playerManager.Players[i].SetHealthBar(healthbars[i]);
         }
     }
     private void SetUiClient()
     {
         Debug.Log("Start SetUiClient");
-        lifeStockCanvas.gameObject.SetActive(true);
         foreach (var pl in playerManager.Players)
         {
             if (pl.IsOwner)
@@ -105,28 +117,53 @@ public class MatchManager : NetworkBehaviour
     }
 
     #endregion
-    #region Countdown 
+
+    #region Game loop
+
+    private void EndOfCombatRound()
+    {
+        if (phase == Phase.Preparation) return;
+        phase = Phase.Preparation;
+        StartCoroutine(PreparationPhase());
+    }
+    #region Game loop - Preparation phase
+    private IEnumerator PreparationPhase()
+    {
+        yield return new WaitForSeconds(1f);
+        playerManager.Players.ForEach(p => p.Home.ResetForNextRound());
+        PreparationPhase_ResetPlayerClientRpc();
+        StartCoroutine(countDownUi.CountDown(preparationTime));
+        roundCount++;
+    }
     [ClientRpc]
-    private void StartCountdownClientRpc()
+    private void PreparationPhase_ResetPlayerClientRpc()
     {
-        StartCoroutine(CountDown());
+        StartCoroutine(countDownUi.CountDown(preparationTime));
+        playerManager.Players.ForEach(p =>
+        {
+            if (p.IsOwner)
+            {
+                p.StartPreparationPhase(5 + roundCount * 2);
+                roundCount++;
+            }
+        });
     }
-    private IEnumerator CountDown()
-    {
-        countDownUi.gameObject.SetActive(true);
 
-        countDownUi.SetCount(3);
-        yield return new WaitForSeconds(1f);
-        countDownUi.SetCount(2);
-        yield return new WaitForSeconds(1f);
-        countDownUi.SetCount(1);
-        yield return new WaitForSeconds(1f);
-        countDownUi.SetCount(0);
-        yield return new WaitForSeconds(1f);
-
-        countDownUi.gameObject.SetActive(false);
-    }
+    private void EndPreparationCooldown(Player p) => StartCoroutine(p.WaitToStartRound());
     #endregion
+
+    #region Game loop - Combat phase
+    private void CombatPhase()
+    {
+        if (phase == Phase.Combat) return;
+        phase = Phase.Combat;
+        playerManager.Players.ForEach(p => p.StartNewCombatRound());
+    }
+
+    #endregion
+
+    #endregion 
+
     #region Death
     private void ProcessDeath(ulong objectId)
     {
@@ -144,13 +181,14 @@ public class MatchManager : NetworkBehaviour
         if (playerManager.Lifestocks[nb] == 0)
             GameOver(nb);
         else
-            StartPreparationPhase();
+            StartCoroutine(PreparationPhase());
 
         playerManager.SubmitLifeLostClientRpc(nb, playerManager.Lifestocks[nb]);
     }
 
 
     #endregion
+
     #region Gameover & restart
 
     private void GameOver(int loserNb)
@@ -158,10 +196,6 @@ public class MatchManager : NetworkBehaviour
         var winnerId = loserNb == 0 ? 1 : 0;
 
         _ = FindFirstObjectByType<ConnectionManager>().ShutdownServer();
-    }
-    private void StartPreparationPhase()
-    {
-        throw new NotImplementedException();
     }
     #endregion
 }

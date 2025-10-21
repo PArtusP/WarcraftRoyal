@@ -17,10 +17,7 @@ public class ShopUi : MonoBehaviour
     [SerializeField] List<UnitButton> unitButtons = new List<UnitButton>();
     [SerializeField] List<ListWrapper<UnitUpgradeButton>> unitUpradeButtons = new List<ListWrapper<UnitUpgradeButton>>();
 
-    internal void Reset()
-    {
-        unitButtons.ForEach(b => b.Reset());
-    }
+    internal void Reset() => unitButtons.ForEach(b => b.Reset());  
 
     private void Awake()
     {

@@ -1,10 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class MinionController : MonoBehaviour
+public class MinionController : NetworkBehaviour
 {
     NavMeshAgent agent;
     MinionAnimator animator;
@@ -25,12 +26,13 @@ public class MinionController : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
     }
     private void Update()
-    {
-        animator.SetSpeed(agent.velocity);
-    }
+    { 
+        if(IsServer) animator.SetSpeed(agent.velocity); 
+    }  
+
     public void SetDestination(Vector3 destination)
     {
-        if (!agent.isOnNavMesh) return;
+        if (!agent.isOnNavMesh || !enabled) return;
         if (agent.isStopped) agent.isStopped = false;
         if (!agent.SetDestination(destination))
         {
@@ -39,8 +41,8 @@ public class MinionController : MonoBehaviour
     }
     public void Stop(bool v)
     {
-        if (!agent.isOnNavMesh) return;
-        agent.isStopped = v;
+        if (agent.isOnNavMesh) 
+            agent.isStopped = v; 
     }
 
     private void OnDrawGizmos()

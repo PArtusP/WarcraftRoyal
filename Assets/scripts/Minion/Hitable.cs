@@ -6,34 +6,34 @@ using UnityEngine;
 using UnityEngine.Events;
 
 abstract public class Hitable : NetworkBehaviour
-{
-    [Header("Team")]
-    protected Base home;
-
-    [Header("Stats")]
-    [SerializeField] internal int cost;
-    abstract public float Health { get; set; }
-
+{ 
+    protected Base home; 
     protected HealthBar healthbar;
     public Transform aimPoint;
 
+    [SerializeField] protected NetworkVariable<float> health { get; } = new NetworkVariable<float>(
+            0f, 
+            NetworkVariableReadPermission.Everyone, 
+            NetworkVariableWritePermission.Server);
+    public float Health { get => health.Value; set => health.Value = value; } 
     public Base Home { get => home; set => home = value; }
     public UnityEvent OnDieEvent { get; internal set; } = new UnityEvent();
 
     private void Awake()
     {
         healthbar = GetComponentInChildren<HealthBar>();
-        healthbar.SetMaxHealth(Health);
-        healthbar.SetHealth(Health);
-        AwakeInternal();
+        health.OnValueChanged += UpdateHealthBar;
+        AwakeInternal(); 
     }
+
+    private void UpdateHealthBar(float previousValue, float newValue) 
+        => healthbar.SetHealth(newValue);
 
     abstract protected void AwakeInternal();
 
     virtual public bool GetHit(float damage, Hitable opponent)
     {
         Health = Mathf.Max(0f, Health - damage);
-        healthbar.SetHealth(Health);
         if (Health == 0f)
         {
             Die();
@@ -44,7 +44,7 @@ abstract public class Hitable : NetworkBehaviour
 
     virtual public void Die()
     {
-        Destroy(gameObject);
         OnDieEvent.Invoke();
+        Destroy(gameObject);
     }
 }
